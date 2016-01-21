@@ -27,7 +27,7 @@
   "scripts": {
     "build": "babel src --out-dir lib",
     "lint": "eslint -c ./.eslintrc src/**",
-    "test": "npm run test_node",
+    "test": "npm run test_node && npm run lint",
     "test_node": "mocha",
     "dev_browser": "cd test/browser && webpack-dev-server",
     "prepublish": "npm run build"

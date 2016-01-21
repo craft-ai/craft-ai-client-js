@@ -1,11 +1,12 @@
 require('./helper');
 
-require('../test_createInstance');
+require('../test_bindInstance');
 require('../test_createAgent');
+require('../test_createInstance');
 require('../test_errors');
 require('../test_getAgentKnowledge');
-require('../test_update');
 require('../test_getInstanceKnowledge');
+require('../test_update');
 
 if (window.initMochaPhantomJS) {
   window.initMochaPhantomJS();
