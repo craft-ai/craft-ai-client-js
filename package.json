@@ -14,6 +14,8 @@
   },
   "main": "lib/index.js",
   "browser": {
+    "body-parser": false,
+    "express": false,
     "ws": false
   },
   "repository": {
@@ -49,8 +51,10 @@
     "webpack-dev-server": "1.14.0"
   },
   "dependencies": {
+    "body-parser": "1.14.2",
     "debug": "2.2.0",
     "es6-promise": "3.0.2",
+    "express": "4.13.3",
     "inherits": "2.0.1",
     "isomorphic-fetch": "2.2.0",
     "lodash": "3.10.1",

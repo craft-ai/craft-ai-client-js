@@ -1,5 +1,8 @@
 import _ from 'lodash';
+import { IN_BROWSER } from './constants';
+import { Router } from 'express';
 import * as errors from './errors';
+import bodyParser from 'body-parser';
 import Debug from 'debug';
 import DEFAULTS from './defaults';
 import onExit from './onExit';
@@ -128,6 +131,10 @@ export default function instance(cfg, status) {
       this.status = STATUS.destroyed;
     },
     registerAction: function(name, start, cancel = () => undefined) {
+      debug('Using deprecated `instance.registerAction`, please use `instance.registerWebsocketAction`.');
+      return this.registerWebsocketAction(name, start, cancel);
+    },
+    registerWebsocketAction: function(name, start, cancel = () => undefined) {
       if (_.isUndefined(ws)) {
         initWs(this);
       }
@@ -145,6 +152,54 @@ export default function instance(cfg, status) {
           start: start,
           cancel: cancel
         };
+      });
+    },
+    registerWebhookAction: IN_BROWSER ? undefined : function(rootUrl, name, start, cancel = () => undefined) {
+      return request({
+        method: 'PUT',
+        path: '/' + this.id + '/actions',
+        body: {
+          name: name,
+          url: rootUrl + '/' + name + '/'
+        }
+      }, this)
+      .then(() => {
+        let router = Router();
+        router.post(`/${this.id}/${name}/start`, bodyParser.json(), (req, res) => {
+          const p = _.defaults(req.body, {
+            input: {},
+            requestId: null,
+            agentId: null
+          });
+          const msg = `Starting '${name}' request #${p.requestId} on agent #${p.agentId}`;
+          start(
+            p.requestId,
+            p.agentId,
+            p.input,
+            output => actionSuccess(this, p.requestId, output),
+            output => actionFailure(this, p.requestId, output)
+          );
+          res.send({
+            message: msg
+          });
+        });
+
+        router.post(`/${this.id}/${name}/cancel`, bodyParser.json(), (req, res) => {
+          const p = _.defaults(req.body, {
+            requestId: null
+          });
+          const msg = `Cancelling '${name}' request #${p.requestId}`;
+          cancel(
+            p.requestId,
+            p.agentId,
+            () => actionCancelation(this, p.requestId)
+          );
+          res.send({
+            message: msg
+          });
+        });
+
+        return router;
       });
     },
     createAgent: function(behavior, knowledge = {}) {

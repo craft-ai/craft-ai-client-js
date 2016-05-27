@@ -72,11 +72,16 @@ If `true`, instance information will also be cleaned up when the instance is des
 
 ### 2. Register actions ###
 
-> The current version of the client only supports actions registered using
-WebSocket callbacks from the server.
+#### via Websocket (Browser and Nodes.js environments) ####
+
+The most universal way of registering an action is via Websockets, you can use
+the method `registerWebsocketAction`.
+
+> the previous method `registerAction` is now deprecated, and is equivalent to
+`registerWebsocketAction`.
 
 ````js
-instance.registerAction(
+instance.registerWebsocketAction(
   '<action_name>',
   (requestId, agentId, input, success, failure) => {
     // Implement what needs to be done here using:
@@ -102,6 +107,53 @@ instance.registerAction(
   }
 )
 .then(function() {
+  // Continue work on the instance here
+})
+.catch(function(error) {
+  // Catch errors here
+})
+````
+
+#### via Webhook (Nodes.js environment) ####
+
+It is possible to register an action using a Webhook HTTP callbacks using the
+method `registerWebsocketAction` which returns an [express.js
+router](http://expressjs.com/en/4x/api.html#router).
+
+````js
+var app = express();
+
+app.listen(8080);
+
+instance.registerWebsocketAction(
+  'http://<public_host>:8080',
+  '<action_name>',
+  (requestId, agentId, input, success, failure) => {
+    // Implement what needs to be done here using:
+    // - requestId, the unique identifier for this action request (ie this call),
+    // - agentId, the identifier of the agent on which this reques is executed,
+    // - input, a javascript object containing the action input provided in the Behavior Tree
+    if (/* everything is good */) {
+      success({
+        output1: '<output1_value>',
+        output2: '<output2_value>'
+      })
+    }
+    else {
+      failure({
+        output1: '<output1_value>',
+        output2: '<output2_value>'
+      })
+    }
+  },
+  (requestId, agentId, canceled) => {
+    // This parameter is optional, it is the function called to cancel the action
+    canceled();
+  }
+)
+.then(function(router) {
+  // Mount the action router in the express app.
+  app.use(router);
   // Continue work on the instance here
 })
 .catch(function(error) {

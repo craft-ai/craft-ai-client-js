@@ -48,7 +48,7 @@ describe('instance.update()', function() {
       // Calling success
       sCb();
     }
-    return instance.registerAction('Test', testStartCb)
+    return instance.registerWebsocketAction('Test', testStartCb)
       .then(() => {
         expect(testStartCbCallCount).to.be.equal(0);
       })

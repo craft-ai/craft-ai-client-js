@@ -13,6 +13,8 @@ module.exports = {
       filename: 'bundle.js'
     },
     externals: {
+      "body-parser": false,
+      "express": false,
       "ws": false
     },
     plugins: [
