@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import EventSource from 'eventsource';
 import * as errors from './errors';
 import Debug from 'debug';
 import DEFAULTS from './defaults';
@@ -6,6 +7,7 @@ import onExit from './onExit';
 import request from './request';
 import STATUS from './status';
 import WebSocket from './ws';
+
 
 const START_SUFFIX = '#s';
 const CANCEL_SUFFIX = '#c'; // START_SUFFIX.length === CANCEL_SUFFIX.length
@@ -29,6 +31,7 @@ export default function instance(cfg, status) {
 
   // Private attributes
   let actions = {};
+  let sse;
   let ws;
   let onDestroy = () => undefined;
 
@@ -86,6 +89,43 @@ export default function instance(cfg, status) {
     };
   };
 
+  sse = new EventSource(cfg.httpApiUrl + '/' + cfg.owner + '/' + cfg.name + '/' + cfg.version + '/' + cfg.id +'/actions/sse' + '?x-craft-ai-app-id=' + cfg.appId + '&x-craft-ai-app-secret=' + cfg.appSecret, {withCredentials: true});
+  sse.addEventListener('message', function(e) {
+    const data = JSON.parse(e.data);
+    const actionName = data.call.substring(0, data.call.length - START_SUFFIX.length);
+    if (_.endsWith(data.call, CANCEL_SUFFIX)) {
+      actions[actionName].cancel(
+        data.requestId,
+        data.agentId,
+        () => request({
+          method: 'POST',
+          path: '/' + cfg.id + '/actions/' + data.requestId + '/cancelation'
+        }, cfg)
+      );
+    }
+    else if (_.endsWith(data.call, START_SUFFIX)) {
+      actions[actionName].start(
+        data.requestId,
+        data.agentId,
+        data.input,
+        (output) => request({
+          method: 'POST',
+          path: '/' + cfg.id + '/actions/' + data.requestId + '/success',
+          body: output
+        }, cfg),
+        (output) => request({
+          method: 'POST',
+          path: '/' + cfg.id + '/actions/' + data.requestId + '/failure',
+          body: output
+        }, cfg)
+      );
+    }      
+  });
+  sse.onerror = function(err) {
+    debug(`SSE Error on Instance '${cfg.id}'`,err);
+    status = STATUS.destroyed; // Should cleanly call destroy instead
+  };
+
   // 'Public' attributes & methods
   let instance = _.defaults(_.clone(cfg), DEFAULTS, {
     cfg: cfg,
@@ -108,6 +148,7 @@ export default function instance(cfg, status) {
       .then(() => {
         debug(`Instance '${this.id}' destroyed`);
         onDestroy();
+        sse.close();
         this.status = STATUS.destroyed;
       })
       .catch(err => {
@@ -125,6 +166,7 @@ export default function instance(cfg, status) {
       }, this);
       debug(`Instance '${this.id}' destroyed`);
       onDestroy();
+      sse.close();
       this.status = STATUS.destroyed;
     },
     registerAction: function(name, start, cancel = () => undefined) {
@@ -137,7 +179,8 @@ export default function instance(cfg, status) {
         body: {
           name: name,
           start: name + START_SUFFIX,
-          cancel: name + CANCEL_SUFFIX
+          cancel: name + CANCEL_SUFFIX,
+          protocol: 'SSE'
         }
       }, this)
       .then(() => {

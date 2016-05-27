@@ -51,6 +51,7 @@
   "dependencies": {
     "debug": "2.2.0",
     "es6-promise": "3.0.2",
+    "eventsource": "^0.2.1",
     "inherits": "2.0.1",
     "isomorphic-fetch": "2.2.0",
     "lodash": "3.10.1",
