@@ -3,3 +3,5 @@ node_modules
 *.log
 lib
 test/browser/bundle.js
+dist
+gh-pages
