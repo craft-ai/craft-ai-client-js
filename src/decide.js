@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import parse from './parse';
 import context from './context';
+import { CraftAiInternalError } from './errors';
 
 let operators = {
   'continuous.equal'              : (context, value) => context  * 1 === value,
@@ -48,10 +49,18 @@ function decideRecursion( node, context ) {
     child => operators[child.predicate.op](propertyValue, child.predicate.value));
 
   if (_.isUndefined(matchingChild)) {
-    throw new Error( 'Unable to take decision, no matching child found.' );
+    const valuesList = _.join(_.uniq(_.map(node.children, child => `'${child.predicate.value}'`)), ', ');
+    throw new CraftAiInternalError({
+      message: `Unable to take decision: "${propertyValue}" not found amongst "${property}" values`,
+      metadata: {
+        property: property,
+        value: propertyValue,
+        expectedValues: valuesList
+      }
+    });
   }
 
-  // matching child found: recurse !
+  // matching child found: recurse!
   const result = decideRecursion( matchingChild, context );
   return {
     value: result.value,
