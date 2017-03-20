@@ -34,6 +34,18 @@ describe('errors', function() {
       expect(e).to.have.property('message', 'Network issue, see err.more for details');
     });
   });
+  describe('.CraftAiDecisionError', function() {
+    const e = new errors.CraftAiDecisionError();
+    it('specializes Error', function() {
+      expect(e).to.be.an.instanceof(Error);
+    });
+    it('specializes errors.CraftAiError', function() {
+      expect(e).to.be.an.instanceof(errors.CraftAiError);
+    });
+    it('has a default "message" property', function() {
+      expect(e).to.have.property('message', 'Error while taking a decision, see err.metadata for details');
+    });
+  });
   describe('.CraftAiCredentialsError', function() {
     const e = new errors.CraftAiCredentialsError();
     it('specializes Error', function() {
