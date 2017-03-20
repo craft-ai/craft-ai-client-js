@@ -63,9 +63,15 @@ let CraftAiBadRequestError = createCustomError(
   'Bad Request, see err.more for details'
 );
 
+let CraftAiDecisionError = createCustomError(
+  'CraftAiDecisionError',
+  'Error while taking a decision, see err.metadata for details'
+);
+
 export {
   CraftAiBadRequestError,
   CraftAiCredentialsError,
+  CraftAiDecisionError,
   CraftAiError,
   CraftAiInternalError,
   CraftAiNetworkError,

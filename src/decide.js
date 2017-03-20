@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import parse from './parse';
 import context from './context';
-import { CraftAiInternalError } from './errors';
+import { CraftAiDecisionError } from './errors';
 
 let operators = {
   'continuous.equal'              : (context, value) => context  * 1 === value,
@@ -39,7 +39,12 @@ function decideRecursion( node, context ) {
   // Regular node
   const property = node.predicate_property;
   if ( _.isUndefined(context[property]) ) {
-    throw new Error( `Unable to take decision, property "${property}" is not defined in the given context.` );
+    throw new CraftAiDecisionError({
+      message: `Unable to take decision, property '${property}' is missing from the given context.`,
+      metadata: {
+        expectedProperties: _.keys(context)
+      }
+    });
   }
 
   const propertyValue = context[property];
@@ -49,9 +54,9 @@ function decideRecursion( node, context ) {
     child => operators[child.predicate.op](propertyValue, child.predicate.value));
 
   if (_.isUndefined(matchingChild)) {
-    const valuesList = _.join(_.uniq(_.map(node.children, child => `'${child.predicate.value}'`)), ', ');
-    throw new CraftAiInternalError({
-      message: `Unable to take decision: "${propertyValue}" not found amongst "${property}" values`,
+    const valuesList =_.uniq(_.map(_.values(node.children), child => child.predicate.value));
+    throw new CraftAiDecisionError({
+      message: `Unable to take decision: '${propertyValue}' not found amongst '${property}' values`,
       metadata: {
         property: property,
         value: propertyValue,
