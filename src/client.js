@@ -164,9 +164,8 @@ export default function createClient(tokenOrCfg) {
         Promise.resolve())
       .then(() => {
         const message = `Successfully added ${operations.length} operation(s) to the agent ${cfg.owner}/${cfg.project}/${agentId} context.`;
-        return {
-          message: message
-        };
+        debug(message);
+        return { message };
       });
     },
     getAgentContextOperations: function(agentId) {
