@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/npm/v/craft-ai.svg?style=flat-square)](https://npmjs.org/package/craft-ai) [![Build](https://img.shields.io/travis/craft-ai/craft-ai-client-js/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-client-js) [![License](https://img.shields.io/badge/license-BSD--3--Clause-42358A.svg?style=flat-square)](LICENSE) [![Dependencies](https://img.shields.io/david/craft-ai/craft-ai-client-js.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-client-js) [![Dev Dependencies](https://img.shields.io/david/dev/craft-ai/craft-ai-client-js.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-client-js#info=devDependencies)
 
-[**craft ai** _AI-as-a-service_](http://craft.ai) enables developers to create Apps and Things that adapt to each user. To go beyond useless dashboards and spammy notifications, **craft ai** learns how users behave to automate recurring tasks, make personalized recommendations, or detect anomalies.
+[**craft ai** _AI-as-a-service_](http://craft.ai) enables your services to learn every day: provide a personalized experience to each user and automate complex tasks.
 
 ## Get Started! ##
 
@@ -10,11 +10,9 @@
 
 If you're reading this you are probably already registered with **craft ai**, if not, head to [`https://beta.craft.ai/signup`](https://beta.craft.ai/signup).
 
-> :construction: **craft ai** is currently in private beta, as such we validate accounts, this step should be quick.
-
 ### 1 - Create a project ###
 
-Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/settings), and press **Create a project**. 
+Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/projects), and press **Create a project**. 
 
 Once it's done, you can click on your newly created project to retrieve its tokens. There are two types of tokens: **read** and **write**. You'll need the **write** token to create, update and delete your agent.
 
@@ -71,9 +69,7 @@ let client = craftai({
   // Mandatory, the token
   token: '{token}',
   // Optional, default value is 500
-  operationsChunksSize: {max_number_of_operations_sent_at_once},
-  // Optional, default value is 60
-  operationsAdditionWait: {time_in_seconds_waited_before_flushing_operations_cache}
+  operationsChunksSize: {max_number_of_operations_sent_at_once}
 });
 ```
 
@@ -223,7 +219,10 @@ client.deleteAgent(AGENT_ID)
         }
       }
     ]
-  );
+  )
+  .then(function() {
+    return agent;
+  });
 })
 .then(function(agent) {
   console.log('Successfully added initial operations to agent ' + agent.id + '.');
@@ -253,7 +252,10 @@ client.deleteAgent(AGENT_ID)
 })
 .then(function(agent) {
   console.log('Agent ' + agent.id + ' successfully created!');
-  return client.addAgentContextOperations(AGENT_ID, /*...*/);
+  return client.addAgentContextOperations(AGENT_ID, /*...*/)
+  .then(function() {
+    return agent;
+  });
 })
 .then(function(agent) {
   console.log('Successfully added initial operations to agent ' + agent.id + '.');
@@ -285,7 +287,10 @@ client.deleteAgent(AGENT_ID)
 })
 .then(function(agent) {
   console.log('Agent ' + agent.id + ' successfully created!');
-  return client.addAgentContextOperations(AGENT_ID, /*...*/);
+  return client.addAgentContextOperations(AGENT_ID, /*...*/)
+  .then(function() {
+    return agent;
+  });
 })
 .then(function(agent) {
   console.log('Successfully added initial operations to agent ' + agent.id + '.');
@@ -677,9 +682,6 @@ client.deleteSharedAgentInspectorUrl(
 
 #### Add operations ####
 
-By default, this method adds the given operations to a cache that is flushed at
-least once every `cfg.operationsAdditionWait`.
-
 ```js
 client.addAgentContextOperations(
   'impervious_kraken', // The agent id
@@ -735,45 +737,13 @@ client.addAgentContextOperations(
         peopleCount: 0
       }
     }
-  ],
-  false // Flush immediately the given operations, default is false
+  ]
 )
 .then(function() {
-  // The operations where successfully added to the cache
-  // OR (if specified)
   // The operations where successfully added to agent context on the server side
 })
 .catch(function(error) {
   // Catch errors here
-})
-```
-
-##### Error handling #####
-
-When an addition is cached, subsequent method calls related to this agent will
-force a flush before proceeding. For example:
-
-```js
-// Adding a first bunch of context operations
-client.addAgentContextOperations('impervious_kraken', [ /* ... */ ])
-.then(function() {
-  // Adding a second bunch of context operations
-  client.addAgentContextOperations('impervious_kraken', [ /* ... */ ])
-})
-.catch(function(error) {
-  // You won't catch anything there
-})
-.then(function() {
-  // The operations where successfully added to the cache, we don't know **yet**
-  // if the additions actually failed or not
-  return client.getAgentContext('impervious_kraken', 1469473600);
-})
-.then(function(context) {
-  // Work on context
-})
-.catch(function(error) {
-  // Catch errors related to the previous calls to
-  // `client.addAgentContextOperations` as well as `client.getAgentContext`
 })
 ```
 
