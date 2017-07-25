@@ -50,68 +50,6 @@ export default function createClient(tokenOrCfg) {
 
   debug(`Creating a client instance for project '${cfg.owner}/${cfg.project}' on '${cfg.url}'.`);
 
-  // The cache of operations to send.
-  let agentsOperations = {};
-
-  // The promise that actually flush the context operations for one agent.
-  let flushAgentContextOperationsPromise = agentId => {
-    // Extract the operations to flush
-    const operationsToFlush = agentsOperations[agentId] || [];
-    agentsOperations[agentId] = [];
-
-    if (operationsToFlush.length === 0) {
-      // Nothing to flush
-      return new Promise(resolve => resolve());
-    }
-    else {
-      // Something to flush, in chunks !
-      return _(operationsToFlush)
-      .orderBy('timestamp')
-      .chunk(cfg.operationsChunksSize)
-      .reduce((p, chunk) => p.then(
-          () => request({
-            method: 'POST',
-            path: `/agents/${agentId}/context`,
-            body: chunk
-          }, cfg)
-        ),
-        new Promise(resolve => resolve())
-      )
-      .then(() => {
-        debug(`Successfully added ${operationsToFlush.length} operations to the agent ${cfg.owner}/${cfg.project}/${agentId} context.`);
-      });
-    }
-  };
-
-  // This is the only flush operation that will occur in this client, ever.
-  let currentFlushOperation = new Promise(resolve => resolve());
-
-  // To execute when an immediate flush is needed.
-  let flushAgentContextOperations = agentId => {
-    currentFlushOperation = currentFlushOperation
-      .then(() => flushAgentContextOperationsPromise(agentId));
-    return currentFlushOperation
-      .catch(err => {
-        // If an error is caught during this immediate flush, we break the
-        // Promise chain to avoid 'contaminating' future flush operations.
-        currentFlushOperation = new Promise(resolve => resolve());
-        return Promise.reject(err);
-      });
-  };
-
-  // To execute when an eventual flush is needed.
-  let throttledFlushAgentContextOperations = _.throttle(
-    agentId => {
-      currentFlushOperation = currentFlushOperation
-        .then(() => flushAgentContextOperationsPromise(agentId));
-      return currentFlushOperation;
-    },
-    cfg.operationsAdditionWait * 1000,
-    {
-      leading: true
-    }
-  );
-
   // 'Public' attributes & methods
   let instance = _.defaults(_.clone(cfg), DEFAULTS, {
     cfg: cfg,
@@ -138,11 +76,10 @@ export default function createClient(tokenOrCfg) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get the agent with no agentId provided.'));
       }
 
-      return flushAgentContextOperations(agentId)
-      .then(() => request({
+      return request({
         method: 'GET',
         path: `/agents/${agentId}`
-      }, this));
+      }, this);
     },
     listAgents: function(agentId) {
       return request({
@@ -155,8 +92,6 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to delete an agent with no agentId provided.'));
       }
-
-      agentsOperations[agentId] = [];
 
       return request({
         method: 'DELETE',
@@ -171,8 +106,6 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to delete an agent with no agentId provided.'));
       }
-
-      agentsOperations[agentId] = [];
 
       return request({
         method: 'DELETE',
@@ -193,16 +126,15 @@ export default function createClient(tokenOrCfg) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get the agent context with an invalid timestamp provided.'));
       }
 
-      return flushAgentContextOperations(agentId)
-      .then(() => request({
+      return request({
         method: 'GET',
         path: `/agents/${agentId}/context/state`,
         query: {
           t: posixTimestamp
         }
-      }, this));
+      }, this);
     },
-    addAgentContextOperations: function(agentId, operations, flush = false) {
+    addAgentContextOperations: function(agentId, operations) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to add agent context operations with no agentId provided.'));
       }
@@ -215,29 +147,37 @@ export default function createClient(tokenOrCfg) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to add agent context operations with no or invalid operations provided.'));
       }
 
-      agentsOperations[agentId] = (agentsOperations[agentId] || []).concat(
-        _.map(operations, o => _.extend(o, {
-          timestamp: Time(o.timestamp).timestamp
-        }))
-      );
-      if (flush) {
-        return flushAgentContextOperations(agentId);
-      }
-      else {
-        throttledFlushAgentContextOperations(agentId);
-        return new Promise(resolve => resolve());
-      }
+      return _(operations)
+      .map(({ timestamp, context }) => ({
+        context: context,
+        timestamp: Time(timestamp).timestamp
+      }))
+      .orderBy('timestamp')
+      .chunk(cfg.operationsChunksSize)
+      .reduce((p, chunk) => p.then(
+          () => request({
+            method: 'POST',
+            path: `/agents/${agentId}/context`,
+            body: chunk
+          }, cfg)
+        ),
+        Promise.resolve())
+      .then(() => {
+        const message = `Successfully added ${operations.length} operation(s) to the agent ${cfg.owner}/${cfg.project}/${agentId} context.`;
+        return {
+          message: message
+        };
+      });
     },
     getAgentContextOperations: function(agentId) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent context operations with no agentId provided.'));
       }
 
-      return flushAgentContextOperations(agentId)
-      .then(() => request({
+      return request({
         method: 'GET',
         path: `/agents/${agentId}/context`
-      }, this));
+      }, this);
     },
     getAgentInspectorUrl: function(agentId, t = undefined) {
       console.warn('WARNING: \'getAgentInspectorUrl\' method of craft ai client is deprecated. It will be removed in the future, use \'getSharedAgentInspectorUrl\' instead. Refer to https://beta.craft.ai/doc/js.');
@@ -277,14 +217,13 @@ export default function createClient(tokenOrCfg) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to retrieve an agent decision tree with an invalid timestamp provided.'));
       }
 
-      return flushAgentContextOperations(agentId)
-      .then(() => request({
+      return request({
         method: 'GET',
         path: `/agents/${agentId}/decision/tree`,
         query: {
           t: posixTimestamp
         }
-      }, this));
+      }, this);
     },
     computeAgentDecision: function(agentId, t, ...contexts) {
       if (_.isUndefined(agentId)) {
@@ -298,14 +237,13 @@ export default function createClient(tokenOrCfg) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to compute an agent decision with no context provided.'));
       }
 
-      return flushAgentContextOperations(agentId)
-      .then(() => request({
+      return request({
         method: 'GET',
         path: `/agents/${agentId}/decision/tree`,
         query: {
           t: posixTimestamp
         }
-      }, this))
+      }, this)
       .then(tree => {
         let decision = decide(tree, ...contexts);
         decision.timestamp = posixTimestamp;

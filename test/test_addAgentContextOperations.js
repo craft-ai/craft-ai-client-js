@@ -183,10 +183,10 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
         ]);
       });
   });
-  it('should fail when using out of order operations with immediate flush', function() {
-    return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1, true)
+  it('should fail when using out of order operations', function() {
+    return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1)
       .then(() => {
-        return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1[0], true);
+        return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1[0]);
       })
       .catch(err => {
         expect(err).to.be.an.instanceof(errors.CraftAiError);
@@ -200,18 +200,18 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       });
   });
   it('should fail when sending invalid operations or no operation at all', function() {
-    return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1, true)
-      .then(() => client.addAgentContextOperations(agents[0].id, [], true))
+    return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1)
+      .then(() => client.addAgentContextOperations(agents[0].id, []))
       .catch(err => {
         expect(err).to.be.an.instanceof(errors.CraftAiError);
         expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
       })
-      .then(() => client.addAgentContextOperations(agents[0].id, undefined, true))
+      .then(() => client.addAgentContextOperations(agents[0].id, undefined))
       .catch(err => {
         expect(err).to.be.an.instanceof(errors.CraftAiError);
         expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
       })
-      .then(() => client.addAgentContextOperations(agents[0].id, [undefined, undefined], true))
+      .then(() => client.addAgentContextOperations(agents[0].id, [undefined, undefined]))
       .catch(err => {
         expect(err).to.be.an.instanceof(errors.CraftAiError);
         expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
@@ -246,20 +246,6 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       })
       .then(retrievedOperations => {
         expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
-      });
-  });
-  it('should succeed with a very large number of simultaneous calls', function() {
-    return Promise.all(
-      _(CONFIGURATION_1_OPERATIONS_2)
-        .chunk(5)
-        .map(operationsChunk => client.addAgentContextOperations(agents[0].id, operationsChunk))
-        .value()
-      )
-      .then(() => {
-        return client.getAgentContextOperations(agents[0].id);
-      })
-      .then(retrievedOperations => {
-        expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_2);
       });
   });
   it('should succeed with a very large payload', function() {
