@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.6.0...HEAD) ##
 ### Added ###
 - Finally adding a changelog file (yes this one).
+- Adding a helper script to maintain the changelog.
 
 ## [1.6.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.5.2...v1.6.0) - 2017-07-25 ##
 ### Removed ###

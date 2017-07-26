@@ -42,7 +42,8 @@
   $ git reset --hard origin/master
   ```
 
-3. Updade the readme from **craft ai** internal _"CMS"_.
+3. Update `README.md` from **craft ai** documentation found
+   at <https://beta.craft.ai/doc/js>.
 
   ```console
   $ npm run update_readme
@@ -50,22 +51,24 @@
 
   > This will create a git commit.
 
-4. Increment the version.
+4. Increment the version in `package.json` and move _Unreleased_ section
+   of `CHANGELOG.md` to a newly created section for this version.
 
   ```console
-  $ npm version patch
+  $ npm run version_increment_patch
   ```
 
-  `npm version minor` and `npm version major` are also available - see
-  [semver](http://semver.org) for a guideline on when to use which.
+  `npm run version_increment_minor` and `npm run version_increment_major` are
+  also available - see [semver](http://semver.org) for a guideline on when to
+  use which.
 
-  > This will create a git commit and a git tag
+  > This will create a git commit and a git tag.
 
-5. Push everything
+5. Push everything.
 
   ```console
   $ git push origin master
   $ git push --tags
   ```
 
-  > This will trigger the publishing of this new version to [npm](https://www.npmjs.com/package/craft-ai) by [travis](https://travis-ci.org/craft-ai/craft-ai-client-js)
+  > This will trigger the publishing of this new version to [npm](https://www.npmjs.com/package/craft-ai) by [travis](https://travis-ci.org/craft-ai/craft-ai-client-js).
