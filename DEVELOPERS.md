@@ -55,10 +55,10 @@
    of `CHANGELOG.md` to a newly created section for this version.
 
   ```console
-  $ npm run version_increment_patch
+  $ ./scripts/update_version.sh patch
   ```
 
-  `npm run version_increment_minor` and `npm run version_increment_major` are
+  `./scripts/update_version.sh minor` and `./scripts/update_version.sh major` are
   also available - see [semver](http://semver.org) for a guideline on when to
   use which.
 
