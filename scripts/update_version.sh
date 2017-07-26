@@ -1,12 +1,23 @@
 #!/bin/bash
-set -e
-# Any subsequent(*) commands which fail will cause the shell script to exit immediately
 
 AVAILABLE_INCREMENTS=(major minor patch)
 PACKAGE_JSON_FILE="./package.json"
 CHANGELOG_MD_FILE="./CHANGELOG.md"
 GH_ORG="craft-ai"
 GH_REPO="craft-ai-client-js"
+
+# Let's check if we have GNU sed or BSD sed
+sed --help >/dev/null 2>&1
+if [ $? -eq 0 ]; then
+  # There is a '--help' option, it is GNU BSD
+  NL="\\n"
+else
+  NL="\\
+"
+fi
+
+set -e
+# Any subsequent(*) commands which fail will cause the shell script to exit immediately
 
 usage ()
 {
@@ -15,16 +26,16 @@ usage ()
 
 array_contains ()
 {
-    local array="$1[@]"
-    local seeking=$2
-    local in=1
-    for element in "${!array}"; do
-        if [[ $element == $seeking ]]; then
-            in=0
-            break
-        fi
-    done
-    echo $in
+  local array="$1[@]"
+  local seeking=$2
+  local in=1
+  for element in "${!array}"; do
+    if [[ $element == $seeking ]]; then
+      in=0
+      break
+    fi
+  done
+  echo $in
 }
 
 function join_by { local IFS="$1"; shift; echo "$*"; }
@@ -92,9 +103,7 @@ TODAY=`date +%Y-%m-%d`
 
 commands=(
   "sed -i.bak 's/\"version\": \"$current_major.$current_minor.$current_patch/\"version\": \"$next_major.$next_minor.$next_patch/g' $PACKAGE_JSON_FILE"
-  "sed -i.bak 's/.*[[Unreleased]].*/## [Unreleased](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$next_major.$next_minor.$next_patch...HEAD) ##\\
-\\
-## [$next_major.$next_minor.$next_patch](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$current_major.$current_minor.$current_patch...v$next_major.$next_minor.$next_patch) - $TODAY ##/g' $CHANGELOG_MD_FILE"
+  "sed -i.bak 's/.*[[Unreleased]].*/## [Unreleased](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$next_major.$next_minor.$next_patch...HEAD) ##$NL$NL## [$next_major.$next_minor.$next_patch](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$current_major.$current_minor.$current_patch...v$next_major.$next_minor.$next_patch) - $TODAY ##/g' $CHANGELOG_MD_FILE"
   "git add $PACKAGE_JSON_FILE $CHANGELOG_MD_FILE"
   "git commit --quiet -m 'Bumping from v$current_major.$current_minor.$current_patch to v$next_major.$next_minor.$next_patch'"
   "git tag -a v$next_major.$next_minor.$next_patch -m v$next_major.$next_minor.$next_patch")
