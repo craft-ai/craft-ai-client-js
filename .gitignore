@@ -5,3 +5,6 @@ lib
 test/browser/bundle.js
 dist
 gh-pages
+
+# Packaging scripts artifacts
+*.bak
