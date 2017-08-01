@@ -15,7 +15,7 @@ import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.js
 describe('client.addAgentContextOperations(<agentId>, <operations>)', function() {
   let client;
   let agents;
-  const agentsId = [`add_agent_context_operations_${RUN_ID}_1`, `add_agent_context_operations_${RUN_ID}_2`];
+  const agentsId = [`addAgentContextOps_${RUN_ID}_1`, `addAgentContextOps_${RUN_ID}_2`];
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
