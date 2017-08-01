@@ -5,6 +5,7 @@ import DEFAULTS from './defaults';
 import jwtDecode from 'jwt-decode';
 import request from './request';
 import Time from './time';
+import { AGENT_ID_ALLOWED_REGEXP, AGENT_ID_MAX_LENGTH } from './constants';
 import { CraftAiBadRequestError, CraftAiCredentialsError } from './errors';
 
 let debug = Debug('craft-ai:client');
@@ -58,6 +59,10 @@ export default function createClient(tokenOrCfg) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to create an agent with no or invalid configuration provided.'));
       }
 
+      if (!_.isUndefined(id) && !AGENT_ID_ALLOWED_REGEXP.test(id)) {
+        return Promise.reject(new CraftAiBadRequestError(`Bad Request, unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`));
+      }
+
       return request({
         method: 'POST',
         path: '/agents',
@@ -72,8 +77,8 @@ export default function createClient(tokenOrCfg) {
       });
     },
     getAgent: function(agentId) {
-      if (_.isUndefined(agentId)) {
-        return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get the agent with no agentId provided.'));
+      if (!AGENT_ID_ALLOWED_REGEXP.test(agentId)) {
+        return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and cannot be the empty string.'));
       }
 
       return request({
@@ -104,7 +109,7 @@ export default function createClient(tokenOrCfg) {
     },
     destroyAgent: function(agentId) {
       if (_.isUndefined(agentId)) {
-        return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to delete an agent with no agentId provided.'));
+        return Promise.reject(new CraftAiBadRequestError(`Bad Request, unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`));
       }
 
       return request({

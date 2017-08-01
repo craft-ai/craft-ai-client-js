@@ -5,10 +5,12 @@ import INVALID_CONFIGURATION_1 from './data/invalid_configuration_1.json';
 
 describe('client.createAgent(<configuration>, [id])', function() {
   let client;
+
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
   });
+
   it('should succeed when using a valid configuration and generated id', function() {
     return client.createAgent(CONFIGURATION_1)
       .then(agent => {
@@ -21,6 +23,7 @@ describe('client.createAgent(<configuration>, [id])', function() {
           });
       });
   });
+
   it('should succeed when using a valid configuration and specified id', function() {
     const agentId = `unspeakable_dermatologist_${RUN_ID}`;
     return client.deleteAgent(agentId) // Destroy any preexisting agent with this id.
@@ -37,6 +40,7 @@ describe('client.createAgent(<configuration>, [id])', function() {
           });
       });
   });
+
   it('should fail when trying to use the same id twice', function() {
     const agentId = `aphasic_parrot_${RUN_ID}`;
     return client.deleteAgent(agentId) // Delete any preexisting agent with this id.
@@ -54,6 +58,16 @@ describe('client.createAgent(<configuration>, [id])', function() {
         return client.deleteAgent(agentId);
       });
   });
+
+  it('should fail when using invalid id', function() {
+    const agentId = `aphasic/parrot_${RUN_ID}`;
+    return client.createAgent(CONFIGURATION_1, agentId)
+      .catch(err => {
+        expect(err).to.be.an.instanceof(errors.CraftAiError);
+        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
+      });
+  });
+
   it('should fail when using an undefined configuration', function() {
     return client.createAgent(undefined)
       .catch(err => {
@@ -61,6 +75,7 @@ describe('client.createAgent(<configuration>, [id])', function() {
         expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
       });
   });
+
   it('should fail when using an invalid configuration', function() {
     return client.createAgent(INVALID_CONFIGURATION_1)
       .catch(err => {
