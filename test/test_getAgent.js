@@ -6,10 +6,12 @@ describe('client.getAgent(<agentId>)', function() {
   let client;
   let agent;
   const agentId = `get_agent_${RUN_ID}`;
+
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
   });
+
   beforeEach(function() {
     return client.deleteAgent(agentId) // Delete any preexisting agent with this id.
       .then(() => client.createAgent(CONFIGURATION_1, agentId))
@@ -18,9 +20,11 @@ describe('client.getAgent(<agentId>)', function() {
         agent = createdAgent;
       });
   });
+
   afterEach(function() {
     return client.deleteAgent(agentId);
   });
+
   it('should return no first/last timestamps on "empty" agents', function() {
     return client.getAgent(agent.id)
       .then(retrievedAgent => {
@@ -28,9 +32,18 @@ describe('client.getAgent(<agentId>)', function() {
         expect(retrievedAgent.lastTimestamp).to.be.undefined;
       });
   });
+
   it('should fail on non-existing agent', function() {
     return client.deleteAgent(agentId)
       .then(() => client.getAgent(agent.id))
+      .catch(err => {
+        expect(err).to.be.an.instanceof(errors.CraftAiError);
+        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
+      });
+  });
+
+  it('should fail on bad agent id', function() {
+    return client.getAgent('foo@bar/toto')
       .catch(err => {
         expect(err).to.be.an.instanceof(errors.CraftAiError);
         expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);

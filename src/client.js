@@ -77,7 +77,7 @@ export default function createClient(tokenOrCfg) {
       });
     },
     getAgent: function(agentId) {
-      if (!agentId || !AGENT_ID_ALLOWED_REGEXP.test(agentId)) {
+      if (!AGENT_ID_ALLOWED_REGEXP.test(agentId)) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and cannot be the empty string.'));
       }
 
@@ -109,7 +109,7 @@ export default function createClient(tokenOrCfg) {
     },
     destroyAgent: function(agentId) {
       if (_.isUndefined(agentId)) {
-        return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to delete an agent with no agentId provided.'));
+        return Promise.reject(new CraftAiBadRequestError(`Bad Request, unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`));
       }
 
       return request({
