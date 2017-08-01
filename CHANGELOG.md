@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added ###
 - Finally adding a changelog file (yes this one).
 - Adding a helper script to maintain the changelog.
-- Checking agent name at the agent creation to prevent erroneous behavior with the api route
+- Checking agent name at the agent creation to prevent erroneous behavior with the api route.
 
 
 ## [1.6.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.5.2...v1.6.0) - 2017-07-25 ##
