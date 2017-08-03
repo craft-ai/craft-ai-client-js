@@ -45,6 +45,12 @@ describe('Time(...)', function() {
       expect(Time(230536800).timestamp).to.be.equal(230536800);
     });
 
+    it('works with a timestamp as a float', function() {
+      expect(Time(1465496929.3).timestamp).to.be.equal(1465496929);
+      expect(Time(1465496867.9).timestamp).to.be.equal(1465496867);
+      expect(Time(230536800.0).timestamp).to.be.equal(230536800);
+    });
+
     it('works with a timestamp and specified positive timezone', function() {
       expect(Time(1465496929, '+02:00')).to.be.deep.equal({
         utc: '2016-06-09T18:28:49.000Z',
