@@ -32,8 +32,9 @@ export default function Time(t = undefined, tz = undefined) {
     // t is an instance of moment
     m = t;
   }
-  else if (_.isInteger(t)) {
+  else if (_.isNumber(t)) {
     // t is a posix timestamp
+    // it might be a float as retrieved by Date.now() / 1000
     m = moment.unix(t);
   }
   else if (_.isString(t) && t.match(OFFSET_REGEX)) {
