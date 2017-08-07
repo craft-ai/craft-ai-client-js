@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.7.0...HEAD) ##
 ### Fixed ###
 - `Time` are now properly created from floating point timestamp (e.g. from `Date.now() / 1000`)
+- `client.addAgentContextOperations` with no operations no longer triggers a request to craft ai and resolves with a message
 
 ## [1.7.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.6.0...v1.7.0) - 2017-08-02 ##
 ### Added ###
