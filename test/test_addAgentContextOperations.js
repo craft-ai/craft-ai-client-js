@@ -199,26 +199,12 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
         expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
       });
   });
-  it('should fail when sending invalid operations or no operation at all', function() {
+  it('should succeed when sending invalid operations or no operation at all', function() {
     return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1)
       .then(() => client.addAgentContextOperations(agents[0].id, []))
-      .catch(err => {
-        expect(err).to.be.an.instanceof(errors.CraftAiError);
-        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
-      })
       .then(() => client.addAgentContextOperations(agents[0].id, undefined))
-      .catch(err => {
-        expect(err).to.be.an.instanceof(errors.CraftAiError);
-        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
-      })
       .then(() => client.addAgentContextOperations(agents[0].id, [undefined, undefined]))
-      .catch(err => {
-        expect(err).to.be.an.instanceof(errors.CraftAiError);
-        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
-      })
-      .then(() => {
-        return client.getAgentContextOperations(agents[0].id);
-      })
+      .then(() => client.getAgentContextOperations(agents[0].id))
       .then(retrievedOperations => {
         expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
       });
