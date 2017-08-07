@@ -148,8 +148,13 @@ export default function createClient(tokenOrCfg) {
         operations = [operations];
       }
       operations = _.compact(operations);
-      if (operations === []) {
-        return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to add agent context operations with no or invalid operations provided.'));
+
+      if (!operations.length) {
+        const message = `No operation to add to the agent ${cfg.owner}/${cfg.project}/${agentId} context.`;
+
+        debug(message);
+
+        return Promise.resolve({ message });
       }
 
       return _(operations)
