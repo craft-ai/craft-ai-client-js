@@ -36,17 +36,23 @@ describe('client.getAgent(<agentId>)', function() {
   it('should fail on non-existing agent', function() {
     return client.deleteAgent(agentId)
       .then(() => client.getAgent(agent.id))
-      .catch(err => {
-        expect(err).to.be.an.instanceof(errors.CraftAiError);
-        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
-      });
+      .then(
+        () => Promise.reject(new Error('Should not be reached')),
+        err => {
+          expect(err).to.be.an.instanceof(errors.CraftAiError);
+          expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
+        }
+      );
   });
 
   it('should fail on bad agent id', function() {
     return client.getAgent('foo@bar/toto')
-      .catch(err => {
-        expect(err).to.be.an.instanceof(errors.CraftAiError);
-        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
-      });
+      .then(
+        () => Promise.reject(new Error('Should not be reached')),
+        err => {
+          expect(err).to.be.an.instanceof(errors.CraftAiError);
+          expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
+        }
+      );
   });
 });
