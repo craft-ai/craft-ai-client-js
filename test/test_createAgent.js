@@ -50,10 +50,13 @@ describe('client.createAgent(<configuration>, [id])', function() {
         expect(agent.id).to.be.equal(agentId);
         return client.createAgent(CONFIGURATION_1, agentId);
       })
-      .catch(err => {
-        expect(err).to.be.an.instanceof(errors.CraftAiError);
-        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
-      })
+      .then(
+        () => Promise.reject(new Error('Should not be reached')),
+        err => {
+          expect(err).to.be.an.instanceof(errors.CraftAiError);
+          expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
+        }
+      )
       .then(() => {
         return client.deleteAgent(agentId);
       });
@@ -62,25 +65,34 @@ describe('client.createAgent(<configuration>, [id])', function() {
   it('should fail when using invalid id', function() {
     const agentId = `aphasic/parrot_${RUN_ID}`;
     return client.createAgent(CONFIGURATION_1, agentId)
-      .catch(err => {
-        expect(err).to.be.an.instanceof(errors.CraftAiError);
-        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
-      });
+      .then(
+        () => Promise.reject(new Error('Should not be reached')),
+        err => {
+          expect(err).to.be.an.instanceof(errors.CraftAiError);
+          expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
+        }
+      );
   });
 
   it('should fail when using an undefined configuration', function() {
     return client.createAgent(undefined)
-      .catch(err => {
-        expect(err).to.be.an.instanceof(errors.CraftAiError);
-        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
-      });
+      .then(
+        () => Promise.reject(new Error('Should not be reached')),
+        err => {
+          expect(err).to.be.an.instanceof(errors.CraftAiError);
+          expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
+        }
+      );
   });
 
   it('should fail when using an invalid configuration', function() {
     return client.createAgent(INVALID_CONFIGURATION_1)
-      .catch(err => {
-        expect(err).to.be.an.instanceof(errors.CraftAiError);
-        expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
-      });
+      .then(
+        () => Promise.reject(new Error('Should not be reached')),
+        err => {
+          expect(err).to.be.an.instanceof(errors.CraftAiError);
+          expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
+        }
+      );
   });
 });

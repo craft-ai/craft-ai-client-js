@@ -67,12 +67,12 @@ describe('client.sharedAgentInspectorUrl(<agentId>, <timestamp>)', function() {
 
   it('should raise an error when timestamp is invalid', function() {
     return client.getSharedAgentInspectorUrl(agentId, 'toto')
-      .then(res => {
-        expect(res).to.be.null;
-      })
-      .catch((err) => {
-        expect(err.name).to.be.equal('CraftAiTimeError');
-        expect(err.message).to.be.equal('Time error, given "toto" is invalid.');
-      });
+      .then(
+        () => Promise.reject(new Error('Should not be reached')),
+        err => {
+          expect(err.name).to.be.equal('CraftAiTimeError');
+          expect(err.message).to.be.equal('Time error, given "toto" is invalid.');
+        }
+      );
   });
 });
