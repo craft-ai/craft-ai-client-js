@@ -21,7 +21,7 @@ set -e
 
 usage ()
 {
-  echo "usage: ./update_version.sh [--dry-run] $(join_by "|" "${AVAILABLE_INCREMENTS[@]}")"
+  echo "usage: ./update_version.sh [--skip-git] $(join_by "|" "${AVAILABLE_INCREMENTS[@]}")"
 }
 
 array_contains ()
@@ -40,12 +40,12 @@ array_contains ()
 
 function join_by { local IFS="$1"; shift; echo "$*"; }
 
-apply=1
+do_git=1
 increment=""
 
 while [ "$1" != "" ]; do
   case $1 in
-    --dry-run )   apply=0
+    --skip-git )  do_git=0
                   ;;
     * )           if [ $(array_contains AVAILABLE_INCREMENTS $1) == 1 ]; then
                     echo "Invalid increment: $1"
@@ -101,21 +101,11 @@ echo "Increment version from v$current_major.$current_minor.$current_patch to v$
 
 TODAY=`date +%Y-%m-%d`
 
-commands=(
-  "sed -i.bak 's/\"version\": \"$current_major.$current_minor.$current_patch/\"version\": \"$next_major.$next_minor.$next_patch/g' $PACKAGE_JSON_FILE"
-  "sed -i.bak 's/.*[[Unreleased]].*/## [Unreleased](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$next_major.$next_minor.$next_patch...HEAD) ##$NL$NL## [$next_major.$next_minor.$next_patch](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$current_major.$current_minor.$current_patch...v$next_major.$next_minor.$next_patch) - $TODAY ##/g' $CHANGELOG_MD_FILE"
-  "git add $PACKAGE_JSON_FILE $CHANGELOG_MD_FILE"
-  "git commit --quiet -m 'Bumping from v$current_major.$current_minor.$current_patch to v$next_major.$next_minor.$next_patch'"
-  "git tag -a v$next_major.$next_minor.$next_patch -m v$next_major.$next_minor.$next_patch")
+eval "sed -i.bak 's/\"version\": \"$current_major.$current_minor.$current_patch/\"version\": \"$next_major.$next_minor.$next_patch/g' $PACKAGE_JSON_FILE"
+eval "sed -i.bak 's/.*[[Unreleased]].*/## [Unreleased](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$next_major.$next_minor.$next_patch...HEAD) ##$NL$NL## [$next_major.$next_minor.$next_patch](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$current_major.$current_minor.$current_patch...v$next_major.$next_minor.$next_patch) - $TODAY ##/g' $CHANGELOG_MD_FILE"
 
-if [ $apply == 0 ]; then
-  echo "--- THIS IS A DRY RUN ---"
-  echo "The following commands will be executed"
-  for command in "${commands[@]}"; do
-    echo "> $command"
-  done
-else
-  for command in "${commands[@]}"; do
-    eval $command
-  done
+if [ $do_git == 1 ]; then
+  eval "git add $PACKAGE_JSON_FILE $CHANGELOG_MD_FILE"
+  eval "git commit --quiet -m 'Bumping from v$current_major.$current_minor.$current_patch to v$next_major.$next_minor.$next_patch'"
+  eval "git tag -a v$next_major.$next_minor.$next_patch -m v$next_major.$next_minor.$next_patch"
 fi
