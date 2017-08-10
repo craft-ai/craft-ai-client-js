@@ -125,8 +125,7 @@ export interface Client {
   cfg: {
     token: string
     operationsChunksSize: number
-    operationsAdditionWait: number
-  },
+  }
   addAgentContextOperations<F extends Features> (agentId: string, contextOperations: ContextOperation<F>[]): Promise<Agent<F>>
   computeAgentDecision<F extends Features> (agentId: string, treeTimestamp: number, ...TimeOrContextOperation: (Partial<Context<F>> | Time)[]): Decision<F>
   createAgent<F extends Features> (configuration: Configuration<F>, agentId?: string): Promise<Agent<F>>
@@ -145,8 +144,8 @@ export interface Client {
 }
 
 export interface Time {
-  timestamp: number,
-  timezone: string,
+  timestamp: number
+  timezone: string
   time_of_day: number
   day_of_month: number
   month_of_year: number
