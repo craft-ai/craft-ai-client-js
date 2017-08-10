@@ -128,7 +128,7 @@ export interface Client {
     operationsAdditionWait: number
   },
   addAgentContextOperations<F extends Features> (agentId: string, contextOperations: ContextOperation<F>[]): Promise<Agent<F>>
-  computeAgentDecision<F extends Features> (agentId: string, timestamp: number, ...TimeOrContextOperation: (Partial<Context<F>> | Time)[]): Decision<F>
+  computeAgentDecision<F extends Features> (agentId: string, treeTimestamp: number, ...TimeOrContextOperation: (Partial<Context<F>> | Time)[]): Decision<F>
   createAgent<F extends Features> (configuration: Configuration<F>, agentId?: string): Promise<Agent<F>>
   deleteAgent<F extends Features> (agentId: string): Promise<Agent<F>>
   deleteSharedAgentInspectorUrl (agentId: string): Promise<true>
