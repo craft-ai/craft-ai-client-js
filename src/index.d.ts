@@ -127,9 +127,9 @@ export interface Client {
    *
    * First context operation must define every property of the agent configuration.
    * @param agentId Id of the agent
-   * @param contextOperations Array of context operations
+   * @param contextOperations Context operation or array of context operations
    */
-  addAgentContextOperations<P extends Properties> (agentId: string, contextOperations: ContextOperation<P>[]): Promise<Agent<P>>
+  addAgentContextOperations<P extends Properties> (agentId: string, contextOperations: ContextOperation<P> | ContextOperation<P>[]): Promise<Agent<P>>
 
   /**
    * Computes the decision for a given context with the decision tree of the provided agent id.
