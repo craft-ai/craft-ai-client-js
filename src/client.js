@@ -108,19 +108,8 @@ export default function createClient(tokenOrCfg) {
       });
     },
     destroyAgent: function(agentId) {
-      if (_.isUndefined(agentId)) {
-        return Promise.reject(new CraftAiBadRequestError(`Bad Request, unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`));
-      }
-
-      return request({
-        method: 'DELETE',
-        path: `/agents/${agentId}`
-      }, this)
-      .then(agent => {
-        console.warn('WARNING: \'destroyAgent\' method of craft ai client is deprecated. It will be removed in the future, use \'deleteAgent\' instead. Refer to https://beta.craft.ai/doc/js.');
-        debug(`Agent '${agentId}' deleted`);
-        return agent;
-      });
+      console.warn('WARNING: \'destroyAgent\' method of craft ai client is deprecated. It will be removed in the future, use \'deleteAgent\' instead. Refer to https://beta.craft.ai/doc/js.');
+      return this.deleteAgent(agentId);
     },
     getAgentContext: function(agentId, t = undefined) {
       if (_.isUndefined(agentId)) {
@@ -214,7 +203,6 @@ export default function createClient(tokenOrCfg) {
       }, this)
       .then(() => {
         debug(`Delete shared inspector link for agent "${agentId}".`);
-        return true;
       });
     },
     getAgentDecisionTree: function(agentId, t = undefined) {

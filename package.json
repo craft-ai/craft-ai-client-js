@@ -13,6 +13,7 @@
     "url": "https://github.com/craft-ai/craft-ai-client-js/issues"
   },
   "main": "lib/index.js",
+  "typings": "src/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/craft-ai/craft-ai-client-js"
@@ -30,7 +31,7 @@
     "build_browser": "npm run build_browser:production && npm run build_browser:dev",
     "build_browser:production": "cross-env NODE_ENV=production webpack",
     "build_browser:dev": "cross-env NODE_ENV=development webpack",
-    "lint": "eslint .",
+    "lint": "eslint . && tsc src/index.d.ts",
     "fix_lint": "eslint --fix .",
     "test": "npm run test_node && npm run lint",
     "test_node": "mocha",
@@ -54,6 +55,7 @@
     "mocha": "3.2.0",
     "mocha-loader": "1.1.1",
     "moment-timezone": "0.5.13",
+    "typescript": "2.4.2",
     "webpack": "2.4.1",
     "webpack-dev-server": "2.4.2"
   },

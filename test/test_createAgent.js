@@ -96,3 +96,27 @@ describe('client.createAgent(<configuration>, [id])', function() {
       );
   });
 });
+
+describe('client.destroyAgent(<id>)', function() {
+  let client;
+
+  before(function() {
+    client = craftai(CRAFT_CFG);
+    expect(client).to.be.ok;
+  });
+
+  it('should still work even though it is deprecated', function() {
+    return client.createAgent(CONFIGURATION_1)
+      .then(agent => {
+        return client.destroyAgent(agent.id)
+          .then(() => client.getAgent(agent.id))
+          .then(
+            () => Promise.reject(new Error('Should not be reached')),
+            err => {
+              expect(err).to.be.an.instanceof(errors.CraftAiError);
+              expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
+            }
+          );
+      });
+  });
+});
