@@ -271,8 +271,8 @@ export function decide<F extends Features> (tree: DecisionTree<F>, ...timeOrCont
  * Creates a client instance of craft ai.
  *
  * A client is bound to a project.
- * The configuration must include at least the write access token to a craft ai project.
- * You can create a project with your logged account on https://beta.craft.ai/projects.
+ * The configuration must include at least an access token to a craft ai project.
+ * You can create a project and get an access token with your logged account on https://beta.craft.ai/projects.
  * @param configuration Configuration of the client
  */
 export function createClient (configuration: ClientConfiguration): Client
