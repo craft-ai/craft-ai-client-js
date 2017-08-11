@@ -87,8 +87,8 @@ export interface Agent<P extends Properties> extends Versionable {
 export interface DecisionTree<P extends Properties> extends Versionable {
   configuration: Configuration<P>
   timestamp?: number
-  trees?: {
-    [output: string]: DecisionTreeLeaf | DecisionTreeNode
+  trees: {
+    [K in keyof P]: DecisionTreeLeaf | (DecisionTreeLeaf | DecisionTreeNode)[]
   }
 }
 
@@ -107,7 +107,7 @@ export interface DecisionTreeNode {
 export interface Decision<P extends Properties> extends Versionable {
   context: Context<P>
   output: {
-    [property: string]: {
+    [K in keyof P]: {
       predicted_value?: string | number
       confidence?: number
       standard_deviation?: number
