@@ -2,23 +2,23 @@ interface Versionable {
   _version?: string
 }
 
-export namespace Feature {
-  interface Feature<T> {
+export namespace Property {
+  interface Property<T> {
     type: T
     is_generated?: boolean
   }
 
-  interface GeneratedFeature<T> extends Feature<T> {
+  interface GeneratedProperty<T> extends Property<T> {
     is_generated?: true
   }
 
-  type Enum<T extends string> = [Feature<'enum'>, T]
-  type Continuous = [Feature<'continuous'>, number]
-  type Timezone = [Feature<'timezone'>, string]
-  type DayOfMonth = [GeneratedFeature<'day_of_month'>, number]
-  type DayOfWeek = [GeneratedFeature<'day_of_week'>, number]
-  type MonthOfYear = [GeneratedFeature<'month_of_year'>, number]
-  type TimeOfDay = [GeneratedFeature<'time_of_day'>, number]
+  type Enum<T extends string> = [Property<'enum'>, T]
+  type Continuous = [Property<'continuous'>, number]
+  type Timezone = [Property<'timezone'>, string]
+  type DayOfMonth = [GeneratedProperty<'day_of_month'>, number]
+  type DayOfWeek = [GeneratedProperty<'day_of_week'>, number]
+  type MonthOfYear = [GeneratedProperty<'month_of_year'>, number]
+  type TimeOfDay = [GeneratedProperty<'time_of_day'>, number]
   type Cyclic = DayOfMonth | DayOfWeek | MonthOfYear | TimeOfDay
   type Generated = DayOfMonth | DayOfWeek | MonthOfYear | TimeOfDay
   type Any = Cyclic | Enum<string> | Continuous | Timezone
@@ -49,24 +49,24 @@ export namespace DecisionRule {
   export type Any = Continuous | Enum | Cyclic
 }
 
-export interface Features {
-  [key: string]: Feature.Any
+export interface Properties {
+  [key: string]: Property.Any
 }
 
-export type Context<F extends Features> = {
-  [K in keyof F]: F[K][1]
+export type Context<P extends Properties> = {
+  [K in keyof P]: P[K][1]
 }
 
-export interface ContextOperation<F extends Features> {
+export interface ContextOperation<P extends Properties> {
   timestamp: number
-  context: Partial<Context<F>>
+  context: Partial<Context<P>>
 }
 
-export interface Configuration<F extends Features> extends Versionable {
+export interface Configuration<P extends Properties> extends Versionable {
   context: {
-    [K in keyof F]: F[K][0]
+    [K in keyof P]: P[K][0]
   }
-  output: (keyof F)[]
+  output: (keyof P)[]
   time_quantum?: number
   learning_period?: number
   operations_as_events?: boolean
@@ -74,9 +74,9 @@ export interface Configuration<F extends Features> extends Versionable {
   tree_max_depth?: number
 }
 
-export interface Agent<F extends Features> extends Versionable {
+export interface Agent<P extends Properties> extends Versionable {
   id: string
-  configuration: Configuration<F>
+  configuration: Configuration<P>
   firstTimestamp: number
   lastTimestamp: number
   creationDate: number
@@ -84,8 +84,8 @@ export interface Agent<F extends Features> extends Versionable {
   lastContextUpdate: number
 }
 
-export interface DecisionTree<F extends Features> extends Versionable {
-  configuration: Configuration<F>
+export interface DecisionTree<P extends Properties> extends Versionable {
+  configuration: Configuration<P>
   timestamp?: number
   trees?: {
     [output: string]: DecisionTreeLeaf | DecisionTreeNode
@@ -104,10 +104,10 @@ export interface DecisionTreeNode {
   children: (DecisionTreeLeaf | DecisionTreeNode)[]
 }
 
-export interface Decision<F extends Features> extends Versionable {
-  context: Context<F>
+export interface Decision<P extends Properties> extends Versionable {
+  context: Context<P>
   output: {
-    [feature: string]: {
+    [property: string]: {
       predicted_value?: string | number
       confidence?: number
       standard_deviation?: number
@@ -130,23 +130,23 @@ export interface Client {
   /**
    * Adds context operations to the given agent id.
    *
-   * First context operation must define every feature of the agent configuration.
+   * First context operation must define every property of the agent configuration.
    * @param agentId Id of the agent
    * @param contextOperations Array of context operations
    */
-  addAgentContextOperations<F extends Features> (agentId: string, contextOperations: ContextOperation<F>[]): Promise<Agent<F>>
+  addAgentContextOperations<P extends Properties> (agentId: string, contextOperations: ContextOperation<P>[]): Promise<Agent<P>>
 
   /**
    * Computes the decision for a given context with the decision tree of the provided agent id.
    *
    * The partial context operations are merged from left to right to forge a single context.
-   * The features of the right-most partial context operation overwrites the other.
-   * `Time` instance is used to generate the time-related features and considered as a partial context operation.
+   * The properties of the right-most partial context operation overwrites the other.
+   * `Time` instance is used to generate the time-related properties and considered as a partial context operation.
    * @param agentId Id of the agent
    * @param treeTimestamp Timestamp of the tree used to compute the decision
    * @param timeOrContextOperation A list of partial context operation or an instance of `Time`
    */
-  computeAgentDecision<F extends Features> (agentId: string, treeTimestamp: number, ...timeOrContextOperation: (Partial<Context<F>> | Time)[]): Decision<F>
+  computeAgentDecision<P extends Properties> (agentId: string, treeTimestamp: number, ...timeOrContextOperation: (Partial<Context<P>> | Time)[]): Decision<P>
 
   /**
    * Creates an agent in the current project.
@@ -155,14 +155,14 @@ export interface Client {
    * @param configuration Configuration of the agent
    * @param agentId Id of the agent
    */
-  createAgent<F extends Features> (configuration: Configuration<F>, agentId?: string): Promise<Agent<F>>
+  createAgent<P extends Properties> (configuration: Configuration<P>, agentId?: string): Promise<Agent<P>>
 
   /**
    * Deletes the given agent id from the current project.
    *
    * @param agentId Id of the agent
    */
-  deleteAgent<F extends Features> (agentId: string): Promise<Agent<F>>
+  deleteAgent<P extends Properties> (agentId: string): Promise<Agent<P>>
 
   /**
    * Deletes the public inspector URL for the given agent id.
@@ -176,7 +176,7 @@ export interface Client {
    *
    * @param agentId Id of the agent
    */
-  getAgent<F extends Features> (agentId: string): Promise<Agent<F>>
+  getAgent<P extends Properties> (agentId: string): Promise<Agent<P>>
 
   /**
    * Retrieves the full context of the given agent id.
@@ -185,14 +185,14 @@ export interface Client {
    * @param agentId Id of the agent
    * @param timestamp Timestamp of the full context to be retrieved
    */
-  getAgentContext<F extends Features> (agentId: string, timestamp?: number): Promise<ContextOperation<F>>
+  getAgentContext<P extends Properties> (agentId: string, timestamp?: number): Promise<ContextOperation<P>>
 
   /**
    * Retrieves every context operations pushed to the given agent id.
    *
    * @param agentId Id of the agent
    */
-  getAgentContextOperations<F extends Features> (agentId: string): Promise<ContextOperation<F>[]>
+  getAgentContextOperations<P extends Properties> (agentId: string): Promise<ContextOperation<P>[]>
 
   /**
    * Retrieves the decision tree of the given agent id.
@@ -201,7 +201,7 @@ export interface Client {
    * @param agentId Id of the agent
    * @param timestamp Timestamp of the tree to be retrieved
    */
-  getAgentDecisionTree<F extends Features> (agentId: string, timestamp?: number): Promise<DecisionTree<F>>
+  getAgentDecisionTree<P extends Properties> (agentId: string, timestamp?: number): Promise<DecisionTree<P>>
 
   /**
    * Retrieves the public inspector URL for the given agent id.
@@ -220,7 +220,7 @@ export interface Client {
   /**
    * @deprecated Replaced by `client.deleteAgent()`
    */
-  destroyAgent<F extends Features> (agentId: string): Promise<Agent<F>>
+  destroyAgent<P extends Properties> (agentId: string): Promise<Agent<P>>
 
   /**
    * @deprecated Replaced by `client.getSharedAgentInspectorUrl()`
@@ -244,7 +244,7 @@ export type ClientConfiguration = string | {
 }
 
 /**
- * Helper for time-related features generation
+ * Helper for time-related properties generation
  */
 export function Time (date: any): Time
 
@@ -254,18 +254,18 @@ export function Time (date: any): Time
  * @param tree Decision tree retrieved from craft ai (see `client.getAgentDecisionTree()`)
  * @param context Full context
  */
-export function decide<F extends Features> (tree: DecisionTree<F>, context: Context<F>): Decision<F>
+export function decide<P extends Properties> (tree: DecisionTree<P>, context: Context<P>): Decision<P>
 
 /**
  * Computes the decision for a given context with the provided decision tree.
  *
  * The partial context operations are merged from left to right to forge a single context.
- * The features of the right-most partial context operation overwrites the other.
- * `Time` instance is used to generate the time-related features and considered as a partial context operation.
+ * The properties of the right-most partial context operation overwrites the other.
+ * `Time` instance is used to generate the time-related properties and considered as a partial context operation.
  * @param tree Decision tree retrieved from craft ai (see `client.getAgentDecisionTree()`)
  * @param timeOrContextOperation A list of partial context operation or an instance of `Time`
  */
-export function decide<F extends Features> (tree: DecisionTree<F>, ...timeOrContextOperation: (Partial<Context<F>> | Time)[]): Decision<F>
+export function decide<P extends Properties> (tree: DecisionTree<P>, ...timeOrContextOperation: (Partial<Context<P>> | Time)[]): Decision<P>
 
 /**
  * Creates a client instance of craft ai.
