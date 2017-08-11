@@ -112,11 +112,6 @@ export interface Decision<P extends Properties> extends Versionable {
       confidence?: number
       standard_deviation?: number
       decision_rules: DecisionRule.Any[]
-      error?: {
-        name: 'CraftAiNullDecisionError' | 'CraftAiUnknownError'
-        message: string
-        metadata: { [key: string]: any }
-      }
     }
   }
 }
