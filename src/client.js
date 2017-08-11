@@ -203,7 +203,6 @@ export default function createClient(tokenOrCfg) {
       }, this)
       .then(() => {
         debug(`Delete shared inspector link for agent "${agentId}".`);
-        return true;
       });
     },
     getAgentDecisionTree: function(agentId, t = undefined) {

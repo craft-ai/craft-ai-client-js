@@ -169,7 +169,7 @@ export interface Client {
    *
    * @param agentId Id of the agent
    */
-  deleteSharedAgentInspectorUrl (agentId: string): Promise<true>
+  deleteSharedAgentInspectorUrl (agentId: string): Promise<void>
 
   /**
    * Retrieves the information about the given agent id.
