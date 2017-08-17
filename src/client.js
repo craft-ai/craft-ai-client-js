@@ -169,9 +169,23 @@ export default function createClient(tokenOrCfg) {
           return { message };
         });
     },
-    getAgentContextOperations: function(agentId) {
+    getAgentContextOperations: function(agentId, start = undefined, end = undefined) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent context operations with no agentId provided.'));
+      }
+      let startTimestamp;
+      if (start) {
+        startTimestamp = Time(start).timestamp;
+        if (_.isUndefined(startTimestamp)) {
+          return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent context operations with an invalid \'start\' timestamp provided.'));
+        }
+      }
+      let endTimestamp;
+      if (end) {
+        endTimestamp = Time(end).timestamp;
+        if (_.isUndefined(endTimestamp)) {
+          return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent context operations with an invalid \'end\' timestamp provided.'));
+        }
       }
 
       const requestFollowingPages = ({ operations, nextPageUrl }) => {
@@ -187,7 +201,11 @@ export default function createClient(tokenOrCfg) {
 
       return request({
         method: 'GET',
-        path: `/agents/${agentId}/context`
+        path: `/agents/${agentId}/context`,
+        query: {
+          start: startTimestamp,
+          end: endTimestamp
+        }
       }, this)
         .then(({ body, nextPageUrl }) => requestFollowingPages({
           operations: body,
