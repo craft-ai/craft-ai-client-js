@@ -106,8 +106,13 @@ export default function request(req, cfg) {
   });
 
   req.url = `${cfg.url}/api/v1/${cfg.owner}/${cfg.project}${req.path}`;
-  if (_.size(req.query) > 0) {
-    req.url = `${req.url}?${_.map(req.query, (value, key) => `${key}=${value}`).join('&')}`;
+  const queryStr = _(req.query)
+    .map((value, key) => ([key, value]))
+    .filter(([key, value]) => !_.isUndefined(value))
+    .map((keyVal) => keyVal.join('='))
+    .join('&');
+  if (queryStr.length > 0) {
+    req.url = `${req.url}?${queryStr}`;
   }
   req.headers['Authorization'] = `Bearer ${cfg.token}`;
   req.headers['Content-Type'] = 'application/json; charset=utf-8';
