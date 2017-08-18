@@ -1,6 +1,6 @@
-import craftai, { errors } from '../src';
-
 import CONFIGURATION_1 from './data/configuration_1.json';
+
+import craftai, { errors } from '../src';
 
 describe('client.getAgent(<agentId>)', function() {
   let client;
@@ -15,7 +15,7 @@ describe('client.getAgent(<agentId>)', function() {
   beforeEach(function() {
     return client.deleteAgent(agentId) // Delete any preexisting agent with this id.
       .then(() => client.createAgent(CONFIGURATION_1, agentId))
-      .then(createdAgent => {
+      .then((createdAgent) => {
         expect(createdAgent).to.be.ok;
         agent = createdAgent;
       });
@@ -27,7 +27,7 @@ describe('client.getAgent(<agentId>)', function() {
 
   it('should return no first/last timestamps on "empty" agents', function() {
     return client.getAgent(agent.id)
-      .then(retrievedAgent => {
+      .then((retrievedAgent) => {
         expect(retrievedAgent.firstTimestamp).to.be.undefined;
         expect(retrievedAgent.lastTimestamp).to.be.undefined;
       });
@@ -38,7 +38,7 @@ describe('client.getAgent(<agentId>)', function() {
       .then(() => client.getAgent(agent.id))
       .then(
         () => Promise.reject(new Error('Should not be reached')),
-        err => {
+        (err) => {
           expect(err).to.be.an.instanceof(errors.CraftAiError);
           expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
         }
@@ -49,7 +49,7 @@ describe('client.getAgent(<agentId>)', function() {
     return client.getAgent('foo@bar/toto')
       .then(
         () => Promise.reject(new Error('Should not be reached')),
-        err => {
+        (err) => {
           expect(err).to.be.an.instanceof(errors.CraftAiError);
           expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
         }

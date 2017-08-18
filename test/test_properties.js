@@ -1,5 +1,5 @@
-import { TYPES, OPERATORS, formatDecisionRule, formatProperty, reduceDecisionRule } from '../src/properties';
 import moment from 'moment';
+import { formatDecisionRule, formatProperty, OPERATORS, reduceDecisionRule, TYPES } from '../src/properties';
 
 describe('Properties', () => {
   describe('.formatProperty(<property_type>)', () => {

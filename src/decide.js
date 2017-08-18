@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import parse from './parse';
 import context from './context';
+import parse from './parse';
 import { CraftAiDecisionError, CraftAiNullDecisionError, CraftAiUnknownError } from './errors';
 
 const DECISION_FORMAT_VERSION = '1.1.0';
@@ -92,7 +92,7 @@ function decideRecursion(node, context) {
 
   if (_.isUndefined(matchingChild)) {
     // Should only happens when an unexpected value for an enum is encountered
-    const operandList = _.uniq(_.map(_.values(node.children), child => child.decision_rule.operand));
+    const operandList = _.uniq(_.map(_.values(node.children), (child) => child.decision_rule.operand));
     const property = _.head(node.children).decision_rule.property;
     return {
       predicted_value: undefined,
@@ -139,7 +139,7 @@ function checkContext(configuration) {
     };
   });
 
-  return context => {
+  return (context) => {
     const { badProperties, missingProperties } = _.reduce(
       validators,
       ({ badProperties, missingProperties }, { property, type, validator }) => {
@@ -169,7 +169,7 @@ function checkContext(configuration) {
 }
 
 export default function decide(json, ...args) {
-  const { trees, configuration } = parse(json);
+  const { configuration, trees } = parse(json);
   const ctx = configuration ? context(configuration, ...args) : _.extend({}, ...args);
   checkContext(configuration)(ctx);
   return {

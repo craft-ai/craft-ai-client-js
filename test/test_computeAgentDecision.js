@@ -1,7 +1,7 @@
-import craftai from '../src';
-
 import CONFIGURATION_1 from './data/configuration_1.json';
+
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
+import craftai from '../src';
 
 const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
 
@@ -16,7 +16,7 @@ describe('client.computeAgentDecision(<agentId>, <timestamp>, <context>)', funct
   beforeEach(function() {
     return client.deleteAgent(agentId) // Delete any preexisting agent with this id.
       .then(() => client.createAgent(CONFIGURATION_1, agentId))
-      .then(createdAgent => {
+      .then((createdAgent) => {
         expect(createdAgent).to.be.ok;
         agent = createdAgent;
         return client.addAgentContextOperations(agent.id, CONFIGURATION_1_OPERATIONS_1);
@@ -30,7 +30,7 @@ describe('client.computeAgentDecision(<agentId>, <timestamp>, <context>)', funct
       presence: 'none',
       lightIntensity: 0.1
     })
-      .then(decision => {
+      .then((decision) => {
         expect(decision).to.be.ok;
         expect(decision.output.lightbulbColor.predicted_value).to.be.equal('black');
       });
@@ -42,7 +42,7 @@ describe('client.computeAgentDecision(<agentId>, <timestamp>, <context>)', funct
     }, {
       lightIntensity: 0.1
     })
-      .then(decision => {
+      .then((decision) => {
         expect(decision).to.be.ok;
         expect(decision.output.lightbulbColor.predicted_value).to.be.equal('black');
       });

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import Debug from 'debug';
 import {
   CraftAiBadRequestError,
   CraftAiCredentialsError,
@@ -6,7 +7,6 @@ import {
   CraftAiNetworkError,
   CraftAiUnknownError
 } from './errors';
-import Debug from 'debug';
 
 const fetch = typeof window === 'undefined' && typeof fetch === 'undefined'
   ? require('node-fetch')
@@ -110,11 +110,11 @@ export default function request(req, cfg) {
   req.body = req.body && JSON.stringify(req.body);
 
   return fetch(req.url, req)
-    .catch(err => Promise.reject(new CraftAiNetworkError({
+    .catch((err) => Promise.reject(new CraftAiNetworkError({
       more: err.message
     })))
-    .then(res => res.text()
-      .catch(err => {
+    .then((res) => res.text()
+      .catch((err) => {
         debug(`Invalid response from ${req.method} ${req.path}`, err);
 
         throw new CraftAiInternalError('Internal Error, the craft ai server responded an invalid response, see err.more for details.', {
@@ -122,6 +122,6 @@ export default function request(req, cfg) {
           more: err.message
         });
       })
-      .then(resBody => parseResponse(req, res.status, resBody))
+      .then((resBody) => parseResponse(req, res.status, resBody))
     );
 }

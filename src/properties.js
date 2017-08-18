@@ -46,9 +46,9 @@ const MONTH = [
 ];
 
 const PROPERTY_FORMATTER = {
-  [TYPE_ANY]: value => value,
-  [TYPES.continuous]: number => `${Math.round(number * 100) / 100}`,
-  [TYPES.time_of_day]: time => {
+  [TYPE_ANY]: (value) => value,
+  [TYPES.continuous]: (number) => `${Math.round(number * 100) / 100}`,
+  [TYPES.time_of_day]: (time) => {
     if (_.isDate(time)) {
       const momentTime = moment(time);
       if (momentTime.seconds() < 1) {
@@ -75,7 +75,7 @@ const PROPERTY_FORMATTER = {
       }
     }
   },
-  [TYPES.day_of_week]: day => {
+  [TYPES.day_of_week]: (day) => {
     if (_.isDate(day)) {
       return DAYS[moment(day).isoWeekday() - 1];
     }
@@ -83,7 +83,7 @@ const PROPERTY_FORMATTER = {
       return DAYS[day];
     }
   },
-  [TYPES.day_of_month]: day => {
+  [TYPES.day_of_month]: (day) => {
     if (_.isDate(day)) {
       return moment(day).date();
     }
@@ -92,7 +92,7 @@ const PROPERTY_FORMATTER = {
     }
   },
   // Months are in [1; 12] thus -1 to be index month name in [0; 11]
-  [TYPES.month_of_year]: month => {
+  [TYPES.month_of_year]: (month) => {
     if (_.isDate(month)) {
       return MONTH[moment(month).month()];
     }
@@ -119,11 +119,11 @@ export const OPERATORS = {
 
 const FORMATTER_FROM_DECISION_RULE = {
   [OPERATORS.IS]: {
-    [TYPE_ANY]: ({ operandFormatter, operand }) => `is ${operandFormatter(operand)}`
+    [TYPE_ANY]: ({ operand, operandFormatter }) => `is ${operandFormatter(operand)}`
   },
   [OPERATORS.IN]: {
-    [TYPE_ANY]: ({ operandFormatter, operand }) => `[${operandFormatter(operand[0])}, ${operandFormatter(operand[1])}[`,
-    [TYPES.day_of_week]: ({ operandFormatter, operand }) => {
+    [TYPE_ANY]: ({ operand, operandFormatter }) => `[${operandFormatter(operand[0])}, ${operandFormatter(operand[1])}[`,
+    [TYPES.day_of_week]: ({ operand, operandFormatter }) => {
       const day_from = Math.floor(operand[0]);
       const day_to = Math.floor(operand[1]);
       // If there is only one day in the interval
@@ -134,8 +134,8 @@ const FORMATTER_FROM_DECISION_RULE = {
         return `${operandFormatter(day_from)} to ${operandFormatter((7 + day_to - 1) % 7)}`;
       }
     },
-    [TYPES.day_of_month]: ({ operandFormatter, operand }) => `[${operandFormatter(operand[0])} to ${operandFormatter(operand[1])}[`,
-    [TYPES.month_of_year]: ({ operandFormatter, operand }) => {
+    [TYPES.day_of_month]: ({ operand, operandFormatter }) => `[${operandFormatter(operand[0])} to ${operandFormatter(operand[1])}[`,
+    [TYPES.month_of_year]: ({ operand, operandFormatter }) => {
       const month_from = Math.floor(operand[0]);
       const month_to = Math.floor(operand[1]);
       if ((month_to - month_from == 1) || (month_from == 12 && month_to == 1)){
@@ -159,7 +159,7 @@ const FORMATTER_FROM_DECISION_RULE = {
   }
 };
 
-export function formatDecisionRule({ type, operator, operand }) {
+export function formatDecisionRule({ operand, operator, type }) {
   const operatorFormatters = FORMATTER_FROM_DECISION_RULE[operator];
   if (!operatorFormatters) {
     throw new Error(`Unable to format the given decision rule: unknown operator '${operator}'.`);
