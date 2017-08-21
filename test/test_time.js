@@ -81,12 +81,12 @@ describe('Time(...)', function() {
       // Test depends on locale
       it('works with a date having no specified timezone', function() {
         expect(Time('2010-01-01T05:06:30')).to.be.deep.equal({
-          utc: '2010-01-01T05:06:30.000Z',
-          timestamp: 1262322390,
+          utc: '2010-01-01T04:06:30.000Z',
+          timestamp: 1262318790,
           day_of_week: 4,
           day_of_month: 1,
           month_of_year: 1,
-          time_of_day: 6.108333333333333,
+          time_of_day: 5.108333333333333,
           timezone: '+01:00'
         });
       });
@@ -96,12 +96,12 @@ describe('Time(...)', function() {
       // Test depends on locale
       it('works with a date having no specified timezone and an explicit timezone', function() {
         expect(Time('2010-01-01T05:06:30', '-10:00')).to.be.deep.equal({
-          utc: '2010-01-01T05:06:30.000Z',
-          timestamp: 1262322390,
+          utc: '2010-01-01T04:06:30.000Z',
+          timestamp: 1262318790,
           day_of_week: 3,
           day_of_month: 31,
           month_of_year: 12,
-          time_of_day: 19.108333333333334,
+          time_of_day: 18.108333333333334,
           timezone: '-10:00'
         });
       });

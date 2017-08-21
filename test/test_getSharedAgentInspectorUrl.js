@@ -46,7 +46,7 @@ describe('client.sharedAgentInspectorUrl(<agentId>, <timestamp>)', function() {
       });
   });
 
-  it('should return a shared inspector url, when no timestamp is specified', function() {
+  it('should return a shared inspector url, when a timestamp is specified', function() {
     const timestamp = 1234567890987;
     return client.getSharedAgentInspectorUrl(agentId)
       .then((publicInspectorUrl) => {
