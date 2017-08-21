@@ -7,12 +7,18 @@ import {
   CraftAiNetworkError,
   CraftAiUnknownError
 } from './errors';
+import { IN_BROWSER } from './constants';
+import { version } from '../package.json';
 
-const fetch = typeof window === 'undefined' && typeof fetch === 'undefined'
+const fetch = !IN_BROWSER && typeof fetch === 'undefined'
   ? require('node-fetch')
   : window.fetch;
 
 const debug = Debug('craft-ai:client');
+
+const USER_AGENT = `craft-ai-client-js/${version} [${IN_BROWSER ? navigator.userAgent : `Node.js ${process.version}`}]`;
+
+debug(`Client user agent set to '${USER_AGENT}'`);
 
 function parseBody(req, resBody) {
   let resBodyUtf8;
@@ -106,13 +112,22 @@ export default function request(req, cfg) {
   req.headers['Authorization'] = `Bearer ${cfg.token}`;
   req.headers['Content-Type'] = 'application/json; charset=utf-8';
   req.headers['Accept'] = 'application/json';
+  if (!IN_BROWSER) {
+    // Don't set the user agent in browsers it can cause CORS issues
+    // e.g. Safari v10.1.2 (12603.3.8)
+    req.headers['User-Agent'] = USER_AGENT;
+  }
+
 
   req.body = req.body && JSON.stringify(req.body);
 
   return fetch(req.url, req)
-    .catch((err) => Promise.reject(new CraftAiNetworkError({
-      more: err.message
-    })))
+    .catch((err) => {
+      debug(`Network error while executing ${req.method} ${req.path}`, err);
+      return Promise.reject(new CraftAiNetworkError({
+        more: err.message
+      }));
+    })
     .then((res) => res.text()
       .catch((err) => {
         debug(`Invalid response from ${req.method} ${req.path}`, err);
