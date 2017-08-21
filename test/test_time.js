@@ -1,8 +1,8 @@
-import { CraftAiTimeError } from '../src/errors';
-import { expect } from 'chai';
 import moment from 'moment';
 import momentTimezone from 'moment-timezone';
 import Time from '../src/time';
+import { CraftAiTimeError } from '../src/errors';
+import { expect } from 'chai';
 
 describe('Time(...)', function() {
   it('works with no parameters', function() {

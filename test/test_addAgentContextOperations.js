@@ -1,7 +1,7 @@
-import craftai, { errors, Time } from '../src';
-
 import CONFIGURATION_1 from './data/configuration_1.json';
+
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
+import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.json';
 
 const CONFIGURATION_1_OPERATIONS_1_FROM = _.first(CONFIGURATION_1_OPERATIONS_1).timestamp;
 const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
@@ -10,7 +10,7 @@ const CONFIGURATION_1_OPERATIONS_1_LAST = _.reduce(
   (context, operation) => _.extend(context, operation),
   {});
 
-import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.json';
+import craftai, { errors, Time } from '../src';
 
 describe('client.addAgentContextOperations(<agentId>, <operations>)', function() {
   let client;
@@ -21,37 +21,37 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
     expect(client).to.be.ok;
   });
   beforeEach(function() {
-    return Promise.all(_.map(agentsId, agentId => client.deleteAgent(agentId) // Delete any preexisting agent with this id.
+    return Promise.all(_.map(agentsId, (agentId) => client.deleteAgent(agentId) // Delete any preexisting agent with this id.
       .then(() => client.createAgent(CONFIGURATION_1, agentId))
-      .then(createdAgent => {
+      .then((createdAgent) => {
         expect(createdAgent).to.be.ok;
         return createdAgent;
       })
     ))
-    .then(createdAgents => {
-      agents = createdAgents;
-    });
+      .then((createdAgents) => {
+        agents = createdAgents;
+      });
   });
   afterEach(function() {
-    return Promise.all(_.map(agents, agent => client.deleteAgent(agent.id)));
+    return Promise.all(_.map(agents, (agent) => client.deleteAgent(agent.id)));
   });
   it('should succeed when using valid operations', function() {
     return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1)
       .then(() => {
         return client.getAgentContext(agents[0].id, CONFIGURATION_1_OPERATIONS_1_TO + 100);
       })
-      .then(context => {
+      .then((context) => {
         expect(context.context).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1_LAST.context);
         expect(context.timestamp).to.equal(CONFIGURATION_1_OPERATIONS_1_TO + 100);
       })
       .then(() => {
         return client.getAgentContextOperations(agents[0].id);
       })
-      .then(retrievedOperations => {
+      .then((retrievedOperations) => {
         expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
         return client.getAgent(agents[0].id);
       })
-      .then(retrievedAgent => {
+      .then((retrievedAgent) => {
         expect(retrievedAgent.firstTimestamp).to.be.equal(CONFIGURATION_1_OPERATIONS_1_FROM);
         expect(retrievedAgent.lastTimestamp).to.be.equal(CONFIGURATION_1_OPERATIONS_1_TO);
       });
@@ -93,17 +93,17 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
         }
       ]
     )
-    .then(() => {
-      return client.getAgentContextOperations(agents[0].id);
-    })
-    .then(retrievedOperations => {
-      expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
-      return client.getAgent(agents[0].id);
-    })
-    .then(retrievedAgent => {
-      expect(retrievedAgent.firstTimestamp).to.be.equal(CONFIGURATION_1_OPERATIONS_1_FROM);
-      expect(retrievedAgent.lastTimestamp).to.be.equal(CONFIGURATION_1_OPERATIONS_1_TO);
-    });
+      .then(() => {
+        return client.getAgentContextOperations(agents[0].id);
+      })
+      .then((retrievedOperations) => {
+        expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
+        return client.getAgent(agents[0].id);
+      })
+      .then((retrievedAgent) => {
+        expect(retrievedAgent.firstTimestamp).to.be.equal(CONFIGURATION_1_OPERATIONS_1_FROM);
+        expect(retrievedAgent.lastTimestamp).to.be.equal(CONFIGURATION_1_OPERATIONS_1_TO);
+      });
   });
   it('should succeed when using operations with ISO 8601 timestamps', function() {
     return client.addAgentContextOperations(agents[0].id, [
@@ -125,7 +125,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       .then(() => {
         return client.getAgentContextOperations(agents[0].id);
       })
-      .then(operations => {
+      .then((operations) => {
         expect(operations).to.be.deep.equal([
           {
             timestamp: 893323800,
@@ -164,7 +164,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       .then(() => {
         return client.getAgentContextOperations(agents[0].id);
       })
-      .then(operations => {
+      .then((operations) => {
         expect(operations).to.be.deep.equal([
           {
             timestamp: 893323800,
@@ -189,7 +189,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       .then(() => client.addAgentContextOperations(agents[0].id, undefined))
       .then(() => client.addAgentContextOperations(agents[0].id, [undefined, undefined]))
       .then(() => client.getAgentContextOperations(agents[0].id))
-      .then(retrievedOperations => {
+      .then((retrievedOperations) => {
         expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
       });
   });
@@ -198,7 +198,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       .then(() => {
         return client.getAgentContextOperations(agents[0].id);
       })
-      .then(retrievedOperations => {
+      .then((retrievedOperations) => {
         expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
       })
       .then(() => {
@@ -206,7 +206,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       })
       .then(
         () => Promise.reject(new Error('Should not be reached')),
-        err => {
+        (err) => {
           expect(err).to.be.an.instanceof(errors.CraftAiError);
           expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError);
         }
@@ -214,18 +214,18 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
   });
   it('should succeed with a very large payload', function() {
     return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_2)
-    .then(() => {
-      return client.getAgentContextOperations(agents[0].id);
-    })
-    .then(retrievedOperations => {
-      expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_2);
-    });
+      .then(() => {
+        return client.getAgentContextOperations(agents[0].id);
+      })
+      .then((retrievedOperations) => {
+        expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_2);
+      });
   });
   it('should not fail when deleting the agent to which operations where added', function() {
     return client.addAgentContextOperations(agents[1].id, CONFIGURATION_1_OPERATIONS_1)
       .then(() => client.deleteAgent(agents[1].id))
       .then(() => client.getAgentContextOperations(agents[0].id))
-      .then(retrievedOperations => {
+      .then((retrievedOperations) => {
         expect(retrievedOperations).to.be.deep.empty;
       });
   });
@@ -235,11 +235,11 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       client.addAgentContextOperations(agents[1].id, CONFIGURATION_1_OPERATIONS_1)
     ])
       .then(() => client.getAgentContextOperations(agents[0].id))
-      .then(retrievedOperations => {
+      .then((retrievedOperations) => {
         expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_2);
       })
       .then(() => client.getAgentContextOperations(agents[1].id))
-      .then(retrievedOperations => {
+      .then((retrievedOperations) => {
         expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
       });
   });

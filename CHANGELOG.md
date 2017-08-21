@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.8.0...HEAD) ##
+### Changed ###
+- Updating the code linter rules to the latest version of [`eslint-config-craft-ai`](https://www.npmjs.com/package/eslint-config-craft-ai).
+
 ### Fixed ###
 - TypeScript type definition of the client method `addAgentContextOperations` now accepts a single context operation.
 

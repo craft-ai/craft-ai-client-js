@@ -22,7 +22,7 @@ export default function createClient(tokenOrCfg) {
     throw new CraftAiBadRequestError('Bad Request, unable to create a client with no or invalid token provided.');
   }
   try {
-    const { owner, project, platform } = jwtDecode(cfg.token);
+    const { owner, platform, project } = jwtDecode(cfg.token);
 
     // Keep the provided values
     cfg.owner = cfg.owner || owner;
@@ -71,10 +71,10 @@ export default function createClient(tokenOrCfg) {
           configuration: configuration
         }
       }, this)
-      .then(agent => {
-        debug(`Agent '${agent.id}' created.`);
-        return agent;
-      });
+        .then((agent) => {
+          debug(`Agent '${agent.id}' created.`);
+          return agent;
+        });
     },
     getAgent: function(agentId) {
       if (!AGENT_ID_ALLOWED_REGEXP.test(agentId)) {
@@ -91,7 +91,7 @@ export default function createClient(tokenOrCfg) {
         method: 'GET',
         path: '/agents'
       }, this)
-      .then(result => result.agentsList);
+        .then((result) => result.agentsList);
     },
     deleteAgent: function(agentId) {
       if (_.isUndefined(agentId)) {
@@ -102,10 +102,10 @@ export default function createClient(tokenOrCfg) {
         method: 'DELETE',
         path: `/agents/${agentId}`
       }, this)
-      .then(agent => {
-        debug(`Agent '${agentId}' deleted`);
-        return agent;
-      });
+        .then((agent) => {
+          debug(`Agent '${agentId}' deleted`);
+          return agent;
+        });
     },
     destroyAgent: function(agentId) {
       console.warn('WARNING: \'destroyAgent\' method of craft ai client is deprecated. It will be removed in the future, use \'deleteAgent\' instead. Refer to https://beta.craft.ai/doc/js.');
@@ -147,13 +147,13 @@ export default function createClient(tokenOrCfg) {
       }
 
       return _(operations)
-      .map(({ timestamp, context }) => ({
-        context: context,
-        timestamp: Time(timestamp).timestamp
-      }))
-      .orderBy('timestamp')
-      .chunk(cfg.operationsChunksSize)
-      .reduce((p, chunk) => p.then(
+        .map(({ context, timestamp }) => ({
+          context: context,
+          timestamp: Time(timestamp).timestamp
+        }))
+        .orderBy('timestamp')
+        .chunk(cfg.operationsChunksSize)
+        .reduce((p, chunk) => p.then(
           () => request({
             method: 'POST',
             path: `/agents/${agentId}/context`,
@@ -161,11 +161,11 @@ export default function createClient(tokenOrCfg) {
           }, cfg)
         ),
         Promise.resolve())
-      .then(() => {
-        const message = `Successfully added ${operations.length} operation(s) to the agent ${cfg.owner}/${cfg.project}/${agentId} context.`;
-        debug(message);
-        return { message };
-      });
+        .then(() => {
+          const message = `Successfully added ${operations.length} operation(s) to the agent ${cfg.owner}/${cfg.project}/${agentId} context.`;
+          debug(message);
+          return { message };
+        });
     },
     getAgentContextOperations: function(agentId) {
       if (_.isUndefined(agentId)) {
@@ -186,24 +186,24 @@ export default function createClient(tokenOrCfg) {
         method: 'GET',
         path: `/agents/${agentId}/shared`
       }, this)
-      .then((url) => {
-        if (_.isUndefined(t)) {
-          return url.shortUrl;
-        }
-        else {
-          let posixTimestamp = Time(t).timestamp;
-          return `${url.shortUrl}?t=${posixTimestamp}`;
-        }
-      });
+        .then((url) => {
+          if (_.isUndefined(t)) {
+            return url.shortUrl;
+          }
+          else {
+            let posixTimestamp = Time(t).timestamp;
+            return `${url.shortUrl}?t=${posixTimestamp}`;
+          }
+        });
     },
     deleteSharedAgentInspectorUrl: function(agentId) {
       return request({
         method: 'DELETE',
         path: `/agents/${agentId}/shared`
       }, this)
-      .then(() => {
-        debug(`Delete shared inspector link for agent "${agentId}".`);
-      });
+        .then(() => {
+          debug(`Delete shared inspector link for agent "${agentId}".`);
+        });
     },
     getAgentDecisionTree: function(agentId, t = undefined) {
       if (_.isUndefined(agentId)) {
@@ -241,11 +241,11 @@ export default function createClient(tokenOrCfg) {
           t: posixTimestamp
         }
       }, this)
-      .then(tree => {
-        let decision = decide(tree, ...contexts);
-        decision.timestamp = posixTimestamp;
-        return decision;
-      });
+        .then((tree) => {
+          let decision = decide(tree, ...contexts);
+          decision.timestamp = posixTimestamp;
+          return decision;
+        });
     }
   });
 

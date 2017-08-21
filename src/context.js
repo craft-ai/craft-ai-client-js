@@ -10,7 +10,7 @@ export default function createContext(configuration, ...args) {
 
   return _.reduce(args, (context, arg) => {
     if (arg instanceof Time) {
-      const { day_of_week, time_of_day, day_of_month, month_of_year, timezone } = arg;
+      const { day_of_month, day_of_week, month_of_year, time_of_day, timezone } = arg;
 
       return _.mapValues(inputContext, (v, k) => {
         if (v.type === 'day_of_week' && (_.isUndefined(v.is_generated) || v.is_generated)) {

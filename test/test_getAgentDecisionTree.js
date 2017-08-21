@@ -1,8 +1,8 @@
-import craftai from '../src';
-import parse from '../src/parse';
-
 import CONFIGURATION_1 from './data/configuration_1.json';
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
+
+import craftai from '../src';
+import parse from '../src/parse';
 
 const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
 
@@ -17,7 +17,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
   beforeEach(function() {
     return client.deleteAgent(agentId) // Delete any preexisting agent with this id.
       .then(() => client.createAgent(CONFIGURATION_1, agentId))
-      .then(createdAgent => {
+      .then((createdAgent) => {
         expect(createdAgent).to.be.ok;
         agent = createdAgent;
         return client.addAgentContextOperations(agent.id, CONFIGURATION_1_OPERATIONS_1);
@@ -28,9 +28,9 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
   });
   it('should succeed when using valid parameters', function() {
     return client.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO + 200)
-      .then(treeJson => {
+      .then((treeJson) => {
         expect(treeJson).to.be.ok;
-        const { trees, configuration, _version } = parse(treeJson);
+        const { _version, configuration, trees } = parse(treeJson);
         expect(trees).to.be.ok;
         expect(_version).to.be.ok;
         expect(configuration).to.be.deep.equal(configuration);

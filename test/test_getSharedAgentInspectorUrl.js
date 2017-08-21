@@ -1,6 +1,6 @@
-import craftai from '../src';
-
 import CONFIGURATION_1 from './data/configuration_1.json';
+
+import craftai from '../src';
 
 describe('client.sharedAgentInspectorUrl(<agentId>, <timestamp>)', function() {
   let client;
@@ -20,7 +20,7 @@ describe('client.sharedAgentInspectorUrl(<agentId>, <timestamp>)', function() {
   it('should return a shared inspector url', function() {
     const timestamp = 1234567890987;
     return client.getSharedAgentInspectorUrl(agentId, timestamp)
-      .then(publicInspectorUrl => {
+      .then((publicInspectorUrl) => {
         expect(publicInspectorUrl).to.not.be.equal('');
         const splittedPublicInspectorUrl = publicInspectorUrl.split('?');
         expect(splittedPublicInspectorUrl.length).to.be.equal(2);
@@ -34,22 +34,22 @@ describe('client.sharedAgentInspectorUrl(<agentId>, <timestamp>)', function() {
 
   it('should return a new shared inspector url, after the deletion of the previous one', function() {
     return client.getSharedAgentInspectorUrl(agentId)
-      .then(publicInspectorUrl => {
+      .then((publicInspectorUrl) => {
         expect(publicInspectorUrl).to.not.be.equal('');
         const splittedPublicInspectorUrl = publicInspectorUrl.split('?');
         expect(splittedPublicInspectorUrl.length).to.be.equal(1);
         return client.deleteSharedAgentInspectorUrl(agentId)
-        .then(() => client.getSharedAgentInspectorUrl(agentId))
-        .then((publicInspectorUrl2) => {
-          expect(publicInspectorUrl2).to.not.be.equal(publicInspectorUrl);
-        });
+          .then(() => client.getSharedAgentInspectorUrl(agentId))
+          .then((publicInspectorUrl2) => {
+            expect(publicInspectorUrl2).to.not.be.equal(publicInspectorUrl);
+          });
       });
   });
 
   it('should return a shared inspector url, when no timestamp is specified', function() {
     const timestamp = 1234567890987;
     return client.getSharedAgentInspectorUrl(agentId)
-      .then(publicInspectorUrl => {
+      .then((publicInspectorUrl) => {
         expect(publicInspectorUrl).to.not.be.equal('');
         const splittedPublicInspectorUrl = publicInspectorUrl.split('?');
         expect(splittedPublicInspectorUrl.length).to.be.equal(1);
@@ -69,7 +69,7 @@ describe('client.sharedAgentInspectorUrl(<agentId>, <timestamp>)', function() {
     return client.getSharedAgentInspectorUrl(agentId, 'toto')
       .then(
         () => Promise.reject(new Error('Should not be reached')),
-        err => {
+        (err) => {
           expect(err.name).to.be.equal('CraftAiTimeError');
           expect(err.message).to.be.equal('Time error, given "toto" is invalid.');
         }

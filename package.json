@@ -51,7 +51,7 @@
     "dotenv": "4.0.0",
     "download-cli": "1.0.1",
     "eslint": "2.13.1",
-    "eslint-config-craft-ai": "2.2.2",
+    "eslint-config-craft-ai": "2.3.0",
     "mocha": "3.2.0",
     "mocha-loader": "1.1.1",
     "moment-timezone": "0.5.13",
