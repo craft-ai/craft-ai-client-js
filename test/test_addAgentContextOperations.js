@@ -218,6 +218,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
         return client.getAgentContextOperations(agents[0].id);
       })
       .then((retrievedOperations) => {
+        expect(retrievedOperations.length).to.be.equal(CONFIGURATION_1_OPERATIONS_2.length);
         expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_2);
       });
   });
@@ -236,6 +237,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
     ])
       .then(() => client.getAgentContextOperations(agents[0].id))
       .then((retrievedOperations) => {
+        expect(retrievedOperations.length).to.be.equal(CONFIGURATION_1_OPERATIONS_2.length);
         expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_2);
       })
       .then(() => client.getAgentContextOperations(agents[1].id))

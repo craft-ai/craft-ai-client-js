@@ -186,8 +186,10 @@ export interface Client {
    * Retrieves every context operations pushed to the given agent id.
    *
    * @param agentId Id of the agent
+   * @param start The timestamp lower bound of the desired contexts (included)
+   * @param end The timestamp upper bound of the desired contexts (included)
    */
-  getAgentContextOperations<P extends Properties> (agentId: string): Promise<ContextOperation<P>[]>
+  getAgentContextOperations<P extends Properties> (agentId: string, start?: number, end?: number): Promise<ContextOperation<P>[]>
 
   /**
    * Retrieves the decision tree of the given agent id.

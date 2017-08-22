@@ -71,9 +71,9 @@ export default function createClient(tokenOrCfg) {
           configuration: configuration
         }
       }, this)
-        .then((agent) => {
-          debug(`Agent '${agent.id}' created.`);
-          return agent;
+        .then(({ body }) => {
+          debug(`Agent '${body.id}' created.`);
+          return body;
         });
     },
     getAgent: function(agentId) {
@@ -84,14 +84,15 @@ export default function createClient(tokenOrCfg) {
       return request({
         method: 'GET',
         path: `/agents/${agentId}`
-      }, this);
+      }, this)
+        .then(({ body }) => body);
     },
     listAgents: function(agentId) {
       return request({
         method: 'GET',
         path: '/agents'
       }, this)
-        .then((result) => result.agentsList);
+        .then(({ body }) => body.agentsList);
     },
     deleteAgent: function(agentId) {
       if (_.isUndefined(agentId)) {
@@ -102,9 +103,9 @@ export default function createClient(tokenOrCfg) {
         method: 'DELETE',
         path: `/agents/${agentId}`
       }, this)
-        .then((agent) => {
+        .then(({ body }) => {
           debug(`Agent '${agentId}' deleted`);
-          return agent;
+          return body;
         });
     },
     destroyAgent: function(agentId) {
@@ -126,7 +127,8 @@ export default function createClient(tokenOrCfg) {
         query: {
           t: posixTimestamp
         }
-      }, this);
+      }, this)
+        .then(({ body }) => body);
     },
     addAgentContextOperations: function(agentId, operations) {
       if (_.isUndefined(agentId)) {
@@ -167,15 +169,48 @@ export default function createClient(tokenOrCfg) {
           return { message };
         });
     },
-    getAgentContextOperations: function(agentId) {
+    getAgentContextOperations: function(agentId, start = undefined, end = undefined) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent context operations with no agentId provided.'));
       }
+      let startTimestamp;
+      if (start) {
+        startTimestamp = Time(start).timestamp;
+        if (_.isUndefined(startTimestamp)) {
+          return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent context operations with an invalid \'start\' timestamp provided.'));
+        }
+      }
+      let endTimestamp;
+      if (end) {
+        endTimestamp = Time(end).timestamp;
+        if (_.isUndefined(endTimestamp)) {
+          return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent context operations with an invalid \'end\' timestamp provided.'));
+        }
+      }
+
+      const requestFollowingPages = ({ operations, nextPageUrl }) => {
+        if (!nextPageUrl) {
+          return Promise.resolve(operations);
+        }
+        return request({ url: nextPageUrl }, this)
+          .then(({ body, nextPageUrl }) => requestFollowingPages({
+            operations: operations.concat(body),
+            nextPageUrl
+          }));
+      };
 
       return request({
         method: 'GET',
-        path: `/agents/${agentId}/context`
-      }, this);
+        path: `/agents/${agentId}/context`,
+        query: {
+          start: startTimestamp,
+          end: endTimestamp
+        }
+      }, this)
+        .then(({ body, nextPageUrl }) => requestFollowingPages({
+          operations: body,
+          nextPageUrl
+        }));
     },
     getAgentInspectorUrl: function(agentId, t = undefined) {
       console.warn('WARNING: \'getAgentInspectorUrl\' method of craft ai client is deprecated. It will be removed in the future, use \'getSharedAgentInspectorUrl\' instead. Refer to https://beta.craft.ai/doc/js.');
@@ -186,13 +221,13 @@ export default function createClient(tokenOrCfg) {
         method: 'GET',
         path: `/agents/${agentId}/shared`
       }, this)
-        .then((url) => {
+        .then(({ body }) => {
           if (_.isUndefined(t)) {
-            return url.shortUrl;
+            return body.shortUrl;
           }
           else {
             let posixTimestamp = Time(t).timestamp;
-            return `${url.shortUrl}?t=${posixTimestamp}`;
+            return `${body.shortUrl}?t=${posixTimestamp}`;
           }
         });
     },
@@ -220,7 +255,8 @@ export default function createClient(tokenOrCfg) {
         query: {
           t: posixTimestamp
         }
-      }, this);
+      }, this)
+        .then(({ body }) => body);
     },
     computeAgentDecision: function(agentId, t, ...contexts) {
       if (_.isUndefined(agentId)) {
@@ -241,8 +277,8 @@ export default function createClient(tokenOrCfg) {
           t: posixTimestamp
         }
       }, this)
-        .then((tree) => {
-          let decision = decide(tree, ...contexts);
+        .then(({ body }) => {
+          let decision = decide(body, ...contexts);
           decision.timestamp = posixTimestamp;
           return decision;
         });
