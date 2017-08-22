@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.8.0...HEAD) ##
 ### Changed ###
 - Updating the code linter rules to the latest version of [`eslint-config-craft-ai`](https://www.npmjs.com/package/eslint-config-craft-ai).
+- Requests sent to the craft ai have a specific `User-Agent` to identify the used client version & platform.
 
 ### Fixed ###
 - TypeScript type definition of the client method `addAgentContextOperations` now accepts a single context operation.
+- When using Node.js, created instance of `Time` with no specified timezone now properly take into account the local timezone.
 
 ## [1.8.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.7.1...v1.8.0) - 2017-08-11 ##
 ### Added ###

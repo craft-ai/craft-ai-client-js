@@ -32,24 +32,32 @@ export default function Time(t = undefined, tz = undefined) {
     // t is an instance of moment
     m = t;
   }
+  else if (_.isDate(t)) {
+    // t is a js Date
+    m = moment(t);
+  }
   else if (_.isNumber(t)) {
     // t is a posix timestamp
     // it might be a float as retrieved by Date.now() / 1000
     m = moment.unix(t);
   }
-  else if (_.isString(t) && t.match(OFFSET_REGEX)) {
-    // String with a explicit offset
-    m = moment.parseZone(t);
+  else if (_.isString(t)) {
+    // To make it consistent everywhere we only handle ISO 8601 format
+    if (t.match(OFFSET_REGEX)) {
+      // String with a explicit offset
+      m = moment.parseZone(t, moment.ISO_8601);
+    }
+    else {
+      // No explicit offset
+      m = moment(t, moment.ISO_8601);
+    }
   }
   else if (_.isUndefined(t)) {
     m = moment();
   }
-  else {
-    // Any other format, should be parseable by moment
-    m = moment(new Date(t));
-    if (!m.isValid()) {
-      throw new CraftAiTimeError(`Time error, given "${t}" is invalid.`);
-    }
+
+  if (m === undefined || !m.isValid()) {
+    throw new CraftAiTimeError(`Time error, given "${t}" is invalid.`);
   }
 
   if (tz) {
