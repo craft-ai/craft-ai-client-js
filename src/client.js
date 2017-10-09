@@ -212,46 +212,46 @@ export default function createClient(tokenOrCfg) {
           nextPageUrl
         }));
     },
-    getAgentStatesHistory: function(agentId, start = undefined, end = undefined) {
+    getAgentStateHistory: function(agentId, start = undefined, end = undefined) {
       if (_.isUndefined(agentId)) {
-        return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent states history with no agentId provided.'));
+        return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent state history with no agentId provided.'));
       }
       let startTimestamp;
       if (start) {
         startTimestamp = Time(start).timestamp;
         if (_.isUndefined(startTimestamp)) {
-          return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent states history with an invalid \'start\' timestamp provided.'));
+          return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent state history with an invalid \'start\' timestamp provided.'));
         }
       }
       let endTimestamp;
       if (end) {
         endTimestamp = Time(end).timestamp;
         if (_.isUndefined(endTimestamp)) {
-          return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent states history with an invalid \'end\' timestamp provided.'));
+          return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent state history with an invalid \'end\' timestamp provided.'));
         }
       }
 
-      const requestFollowingPages = ({ statesHistory, nextPageUrl }) => {
+      const requestFollowingPages = ({ stateHistory, nextPageUrl }) => {
         if (!nextPageUrl) {
-          return Promise.resolve(statesHistory);
+          return Promise.resolve(stateHistory);
         }
         return request({ url: nextPageUrl }, this)
           .then(({ body, nextPageUrl }) => requestFollowingPages({
-            statesHistory: statesHistory.concat(body),
+            stateHistory: stateHistory.concat(body),
             nextPageUrl
           }));
       };
 
       return request({
         method: 'GET',
-        path: `/agents/${agentId}/context/statesHistory`,
+        path: `/agents/${agentId}/context/state/history`,
         query: {
           start: startTimestamp,
           end: endTimestamp
         }
       }, this)
         .then(({ body, nextPageUrl }) => requestFollowingPages({
-          statesHistory: body,
+          stateHistory: body,
           nextPageUrl
         }));
     },

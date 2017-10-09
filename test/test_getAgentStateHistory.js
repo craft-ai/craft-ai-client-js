@@ -3,9 +3,9 @@ import craftai from '../src';
 import CONFIGURATION_1 from './data/configuration_1.json';
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
 
-describe('client.getAgentStatesHistory(<agentId>)', function() {
+describe('client.getAgentStateHistory(<agentId>)', function() {
   let client;
-  const agentId = `getAgentStatesHistory_${RUN_ID}`;
+  const agentId = `getAgentStateHistory_${RUN_ID}`;
 
   before(function() {
     client = craftai(CRAFT_CFG);
@@ -22,11 +22,11 @@ describe('client.getAgentStatesHistory(<agentId>)', function() {
     return client.deleteAgent(agentId);
   });
 
-  it('should retrieve all states history', function() {
-    return client.getAgentStatesHistory(agentId)
-      .then((statesHistory) => {
-        expect(statesHistory.length).to.be.equal(17);
-        expect(statesHistory).to.be.deep.equal([
+  it('should retrieve all state history', function() {
+    return client.getAgentStateHistory(agentId)
+      .then((stateHistory) => {
+        expect(stateHistory.length).to.be.equal(17);
+        expect(stateHistory).to.be.deep.equal([
           {
             sample: {
               presence: 'robert',
@@ -166,11 +166,11 @@ describe('client.getAgentStatesHistory(<agentId>)', function() {
       });
   });
 
-  it('should only retrieve the states after the given lower bound', function() {
+  it('should only retrieve the state after the given lower bound', function() {
     const lowerBound = 1464600867;
-    return client.getAgentStatesHistory(agentId, lowerBound)
-      .then((statesHistory) => {
-        expect(statesHistory).to.be.deep.equal([
+    return client.getAgentStateHistory(agentId, lowerBound)
+      .then((stateHistory) => {
+        expect(stateHistory).to.be.deep.equal([
           {
             sample: {
               presence: 'none',
@@ -239,11 +239,11 @@ describe('client.getAgentStatesHistory(<agentId>)', function() {
       });
   });
 
-  it('should only retrieve the states before the given upper bound', function() {
+  it('should only retrieve the state before the given upper bound', function() {
     const upperBound = 1464601439;
-    return client.getAgentStatesHistory(agentId, undefined, upperBound)
-      .then((statesHistory) => {
-        expect(statesHistory).to.be.deep.equal([
+    return client.getAgentStateHistory(agentId, undefined, upperBound)
+      .then((stateHistory) => {
+        expect(stateHistory).to.be.deep.equal([
           {
             sample: {
               presence: 'robert',
@@ -367,12 +367,12 @@ describe('client.getAgentStatesHistory(<agentId>)', function() {
       });
   });
 
-  it('should only retrieve the states between the desired bounds', function() {
+  it('should only retrieve the state between the desired bounds', function() {
     const lowerBound = 1464600449;
     const upperBound = 1464601124;
-    return client.getAgentStatesHistory(agentId, lowerBound, upperBound)
-      .then((statesHistory) => {
-        expect(statesHistory).to.be.deep.equal([
+    return client.getAgentStateHistory(agentId, lowerBound, upperBound)
+      .then((stateHistory) => {
+        expect(stateHistory).to.be.deep.equal([
           {
             sample: {
               presence: 'none',
