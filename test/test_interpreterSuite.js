@@ -43,6 +43,7 @@ describe('interpreter.decide', () => {
             catch (e) {
               if (e instanceof errors.CraftAiError) {
                 expect(e.message).to.equal(expectation.error.message);
+                expect(e.metadata).to.deep.equal(expectation.error.metadata);
               }
               else {
                 throw e;

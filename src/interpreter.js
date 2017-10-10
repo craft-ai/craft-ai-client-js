@@ -63,6 +63,7 @@ function decideRecursion(node, context) {
       return {
         predicted_value: undefined,
         confidence: undefined,
+        decision_rules: [],
         error: {
           name: 'CraftAiNullDecisionError',
           message: 'Unable to take decision: the decision tree has no valid predicted value for the given context.'
@@ -183,7 +184,7 @@ function checkContext(configuration) {
       );
       throw new CraftAiDecisionError({
         message: `Unable to take decision, the given context is not valid: ${messages.join(', ')}.`,
-        metadata: { missingProperties, badProperties }
+        metadata: _.assign({}, missingProperties.length && { missingProperties }, badProperties.length && { badProperties })
       });
     }
   };
