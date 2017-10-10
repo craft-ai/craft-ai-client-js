@@ -26,7 +26,6 @@ describe('interpreter.decideFromContextsArray', () => {
       context: expectation.context,
       error: expectation.error
     }));
-    console.log(interpreter.decideFromContextsArray(DECISION_TREE_UNKNOWN_OUTPUT, contexts)[0].error.metadata);
     expect(interpreter.decideFromContextsArray(DECISION_TREE_UNKNOWN_OUTPUT, contexts)).to.be.deep.equal(decisions);
   });
 });

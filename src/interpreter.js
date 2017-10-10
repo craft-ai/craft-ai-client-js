@@ -234,13 +234,11 @@ export function decideFromContextsArray(tree, contexts) {
     }
     catch (error) {
       if (error instanceof CraftAiNullDecisionError) {
+        const { message, metadata } = error;
         return {
           _version: DECISION_FORMAT_VERSION,
           context: ctx,
-          error: {
-            message: error.toString(),
-            metadata: error.metadata
-          }
+          error: { message, metadata }
         };
       }
       else {
