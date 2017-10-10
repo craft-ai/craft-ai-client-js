@@ -22,6 +22,8 @@ export namespace Property {
   type Cyclic = DayOfMonth | DayOfWeek | MonthOfYear | TimeOfDay
   type Generated = DayOfMonth | DayOfWeek | MonthOfYear | TimeOfDay
   type Any = Cyclic | Enum<string> | Continuous | Timezone
+
+  type NamedProperty = Any & { property: string }
 }
 
 export namespace DecisionRule {
@@ -278,6 +280,13 @@ export declare const interpreter: {
    * @param timeOrContextOperation A list of partial context operation or an instance of `Time`
    */
   decide<P extends Properties> (tree: DecisionTree<P>, ...timeOrContextOperation: (Partial<Context<P>> | Time)[]): Decision<P>
+
+  /**
+   * Traverse the given tree to retrieve all the properties used in decision rules
+   *
+   * @param tree The decision tree.
+   */
+  getDecisionRulesProperties<P extends Properties> (tree: DecisionTree<P>): Property.NamedProperty[]
 }
 
 export default createClient

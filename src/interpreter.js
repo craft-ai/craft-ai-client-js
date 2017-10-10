@@ -36,6 +36,26 @@ const VALUE_VALIDATOR = {
   month_of_year: (value) => _.isInteger(value)  && value >= 1 && value <= 12
 };
 
+function reduceNodes(tree, fn, initialAccValue) {
+  let nodes = [];
+  nodes.push(tree);
+  const recursiveNext = (acc) => {
+    if (nodes.length == 0) {
+      // No more nodes
+      return acc;
+    }
+
+    const node = nodes.pop();
+    if (node.children) {
+      nodes = node.children.concat(nodes);
+    }
+
+    const updatedAcc = fn(acc, node);
+    return recursiveNext(updatedAcc);
+  };
+  return recursiveNext(initialAccValue);
+}
+
 function decideRecursion(node, context) {
   // Leaf
   if (!(node.children && node.children.length)) {
@@ -168,8 +188,8 @@ function checkContext(configuration) {
   };
 }
 
-export function decide(json, ...args) {
-  const { configuration, trees } = parse(json);
+export function decide(tree, ...args) {
+  const { configuration, trees } = parse(tree);
   const ctx = configuration ? context(configuration, ...args) : _.extend({}, ...args);
   checkContext(configuration)(ctx);
   return {
@@ -198,4 +218,28 @@ export function decide(json, ...args) {
       };
     }))
   };
+}
+
+export function getDecisionRulesProperties(tree) {
+  const { configuration, trees } = parse(tree);
+
+  return _(trees)
+    .values()
+    .reduce(
+      (properties, tree) => reduceNodes(
+        tree,
+        (properties, node) => {
+          if (node.children) { // Skip leaves
+            return properties.concat(node.children[0].decision_rule.property);
+          }
+          return properties;
+        },
+        properties),
+      _([])
+    )
+    .uniq()
+    .map((property) => _.extend(configuration.context[property], {
+      property: property
+    }))
+    .value();
 }

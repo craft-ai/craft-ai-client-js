@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.9.0...HEAD) ##
+### Added ###
+- Introducing `craftai.interpreter.getDecisionRulesProperties` a function extracting the property used in the decision rules of a given decision tree.
+
 ### Deprecated ###
 - `craftai.decide` is deprecated in favor of `craftai.interpreter.decide`.
 
