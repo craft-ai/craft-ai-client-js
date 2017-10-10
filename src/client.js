@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Debug from 'debug';
-import decide from './decide';
+import { decide } from './interpreter';
 import DEFAULTS from './defaults';
 import jwtDecode from 'jwt-decode';
 import request from './request';

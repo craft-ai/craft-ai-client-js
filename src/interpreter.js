@@ -168,7 +168,7 @@ function checkContext(configuration) {
   };
 }
 
-export default function decide(json, ...args) {
+export function decide(json, ...args) {
   const { configuration, trees } = parse(json);
   const ctx = configuration ? context(configuration, ...args) : _.extend({}, ...args);
   checkContext(configuration)(ctx);

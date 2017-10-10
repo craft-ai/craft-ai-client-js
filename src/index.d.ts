@@ -246,25 +246,6 @@ export type ClientConfiguration = string | {
 export function Time (date: any): Time
 
 /**
- * Computes the decision for a given context with the provided decision tree.
- *
- * @param tree Decision tree retrieved from craft ai (see `client.getAgentDecisionTree()`)
- * @param context Full context
- */
-export function decide<P extends Properties> (tree: DecisionTree<P>, context: Context<P>): Decision<P>
-
-/**
- * Computes the decision for a given context with the provided decision tree.
- *
- * The partial context operations are merged from left to right to forge a single context.
- * The properties of the right-most partial context operation overwrites the other.
- * `Time` instance is used to generate the time-related properties and considered as a partial context operation.
- * @param tree Decision tree retrieved from craft ai (see `client.getAgentDecisionTree()`)
- * @param timeOrContextOperation A list of partial context operation or an instance of `Time`
- */
-export function decide<P extends Properties> (tree: DecisionTree<P>, ...timeOrContextOperation: (Partial<Context<P>> | Time)[]): Decision<P>
-
-/**
  * Creates a client instance of craft ai.
  *
  * A client is bound to a project.
@@ -273,5 +254,30 @@ export function decide<P extends Properties> (tree: DecisionTree<P>, ...timeOrCo
  * @param configuration Configuration of the client
  */
 export function createClient (configuration: ClientConfiguration): Client
+
+/**
+ * Decision tree interpreter functions.
+ */
+export declare const interpreter: {
+  /**
+   * Computes the decision for a given context with the provided decision tree.
+   *
+   * @param tree Decision tree retrieved from craft ai (see `client.getAgentDecisionTree()`)
+   * @param context Full context
+   */
+  decide<P extends Properties> (tree: DecisionTree<P>, context: Context<P>): Decision<P>
+
+  /**
+   * Computes the decision for a given context with the provided decision tree.
+   *
+   * The partial context operations are merged from left to right to forge a single context.
+   * The properties of the right-most partial context operation overwrites the other.
+   * `Time` instance is used to generate the time-related properties and considered as a partial context operation.
+   *
+   * @param tree Decision tree retrieved from craft ai (see `client.getAgentDecisionTree()`)
+   * @param timeOrContextOperation A list of partial context operation or an instance of `Time`
+   */
+  decide<P extends Properties> (tree: DecisionTree<P>, ...timeOrContextOperation: (Partial<Context<P>> | Time)[]): Decision<P>
+}
 
 export default createClient
