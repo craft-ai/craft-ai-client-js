@@ -117,6 +117,7 @@ function decideRecursion(node, context) {
     return {
       predicted_value: undefined,
       confidence: undefined,
+      decision_rules: [],
       error: {
         name: 'CraftAiNullDecisionError',
         message: `Unable to take decision: value '${context[property]}' for property '${property}' doesn't validate any of the decision rules.`,
@@ -172,7 +173,7 @@ function checkContext(configuration) {
         }
         return { badProperties, missingProperties };
       },
-      { badProperties: [], missingProperties:[] }
+      { badProperties: [], missingProperties: [] }
     );
 
     if (missingProperties.length || badProperties.length) {
@@ -188,15 +189,13 @@ function checkContext(configuration) {
   };
 }
 
-export function decide(tree, ...args) {
-  const { configuration, trees } = parse(tree);
-  const ctx = configuration ? context(configuration, ...args) : _.extend({}, ...args);
-  checkContext(configuration)(ctx);
+function _decide(configuration, trees, context) {
+  checkContext(configuration)(context);
   return {
     _version: DECISION_FORMAT_VERSION,
-    context: ctx,
+    context,
     output: _.assign(..._.map(configuration.output, (output) => {
-      let decision = decideRecursion(trees[output], ctx);
+      let decision = decideRecursion(trees[output], context);
       if (decision.error) {
         switch (decision.error.name) {
           case 'CraftAiNullDecisionError':
@@ -218,6 +217,43 @@ export function decide(tree, ...args) {
       };
     }))
   };
+}
+
+export function decideFromContextsArray(tree, contexts) {
+  const { configuration, trees } = parse(tree);
+  return _.map(contexts, (contextsItem) => {
+    let ctx;
+    if (_.isArray(contextsItem)) {
+      ctx = context(configuration, ...contextsItem);
+    }
+    else {
+      ctx = context(configuration, contextsItem);
+    }
+    try {
+      return _decide(configuration, trees, ctx);
+    }
+    catch (error) {
+      if (error instanceof CraftAiNullDecisionError) {
+        return {
+          _version: DECISION_FORMAT_VERSION,
+          context: ctx,
+          error: {
+            message: error.toString(),
+            metadata: error.metadata
+          }
+        };
+      }
+      else {
+        throw error;
+      }
+    }
+  });
+}
+
+export function decide(tree, ...args) {
+  const { configuration, trees } = parse(tree);
+  const ctx = configuration ? context(configuration, ...args) : _.extend({}, ...args);
+  return _decide(configuration, trees, ctx);
 }
 
 export function getDecisionRulesProperties(tree) {
