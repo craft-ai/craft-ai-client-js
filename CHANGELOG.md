@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.9.0...HEAD) ##
 ### Added ###
 - Introducing `craftai.interpreter.getDecisionRulesProperties` a function extracting the property used in the decision rules of a given decision tree.
+- Introducing `craftai.interpreter.decideFromContextsArray` a function that take decisions on an array of several contexts at once.
 
 ### Fixed ###
 - `craftai.interpreter.decide` no longer omits to return the standard deviation if it is exactly 0.
