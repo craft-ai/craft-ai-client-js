@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added ###
 - Introducing `craftai.interpreter.getDecisionRulesProperties` a function extracting the property used in the decision rules of a given decision tree.
 
+### Fixed ###
+- `craftai.interpreter.decide` no longer omits to return the standard deviation if it is exactly 0.
+
 ### Deprecated ###
 - `craftai.decide` is deprecated in favor of `craftai.interpreter.decide`.
 

@@ -77,7 +77,7 @@ function decideRecursion(node, context) {
       decision_rules: []
     };
 
-    if (node.standard_deviation) {
+    if (!_.isUndefined(node.standard_deviation)) {
       leafNode.standard_deviation = node.standard_deviation;
     }
 
