@@ -782,6 +782,24 @@ client.getAgentContext(
 })
 ```
 
+#### Retrieve state history ####
+
+```js
+client.getAgentStateHistory(
+  'impervious_kraken', // The agent id
+  1478894153, // Optional, the **start** timestamp from which the
+              // operations are retrieved (inclusive bound)
+  1478895266, // Optional, the **end** timestamp up to which the
+              /// operations are retrieved (inclusive bound)
+)
+.then(function(stateHistory) {
+  // Work on states history
+})
+.catch(function(error) {
+  // Catch errors here
+})
+```
+
 ### Decision tree ###
 
 Decision trees are computed at specific timestamps, directly by **craft ai** which learns from the context operations [added](#add-operations) throughout time.
