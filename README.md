@@ -12,7 +12,7 @@ If you're reading this you are probably already registered with **craft ai**, if
 
 ### 1 - Create a project ###
 
-Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/projects), and press **Create a project**. 
+Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/projects), and press **Create a project**.
 
 Once it's done, you can click on your newly created project to retrieve its tokens. There are two types of tokens: **read** and **write**. You'll need the **write** token to create, update and delete your agent.
 
@@ -298,7 +298,7 @@ client.deleteAgent(AGENT_ID)
 })
 .then(function(tree) {
   console.log('Decision tree retrieved!', tree);
-  let res = craftai.decide(tree, {
+  let res = craftai.interpreter.decide(tree, {
     timezone: '+02:00',
     timeOfDay: 7.25,
     peopleCount: 2
@@ -898,7 +898,7 @@ client.getAgentDecisionTree(
 })
 ```
 
-#### Take Decision ####
+#### Take decision ####
 
 The first method retrieves the decision tree then applies it on the given context.
 
@@ -920,13 +920,13 @@ client.computeAgentDecision(
 })
 ```
 
-To get a chance to store and reuse the decision tree, use `getAgentDecisionTree` and use `craftai.decide`, a simple function evaluating a decision tree **offline**.
+To get a chance to store and reuse the decision tree, use `getAgentDecisionTree` and use `craftai.interpreter.decide`, a simple function evaluating a decision tree **offline**.
 
 ```js
 // `tree` is the decision tree as retrieved through the craft ai REST API
 let tree = { ... };
 // Compute the decision with specifying every context field
-let decision = craftai.decide(
+let decision = craftai.interpreter.decide(
   tree,
   {
     timezone: '+02:00',
@@ -935,7 +935,7 @@ let decision = craftai.decide(
   }
 // Or Compute the decision on a context created from the given one and filling the
 // `day_of_week`, `time_of_day` and `timezone` properties from the given `Time`
-let decision = craftai.decide(
+let decision = craftai.interpreter.decide(
   tree,
   {
     timezone: '+02:00',
@@ -999,6 +999,137 @@ A `decision` in a case where the tree cannot make a prediction:
       decision_rules: [ ... ]
     }
   },
+```
+
+#### Take multiple decisions ####
+
+From the tree previously retrieved, ask for multiple decisions.
+
+```js
+// `tree` is the decision tree as retrieved through the craft ai REST API
+let tree = { ... };
+// Pass an array containing each context on which you want to take a decision
+let decisionRules = craftai.interpreter.decideFromContextsArray(tree, [
+  {
+    timezone: '+02:00',
+    peopleCount: 3,
+    timeOfDay: 7.5
+  },
+  {
+    timezone: '+02:00',
+    peopleCount: 4,
+    timeOfDay: 7.5
+  },
+  {
+    timezone: '+02:00',
+    peopleCount: 0,
+    timeOfDay: 4.5
+  }
+])
+```
+
+Results for `craftai.interpreter.decideFromContextsArray` would look like:
+
+```js
+[
+  {
+    context: { // In which context the decision was taken
+      timezone: '+02:00',
+      timeOfDay: 7.5,
+      peopleCount: 3
+    },
+    output: { // The decision itself
+      lightbulbState: {
+        predicted_value: 'ON',
+        confidence: 0.9937745256361138, // The confidence in the decision
+        decision_rules: [ // The ordered list of decision_rules that were validated to reach this decision
+          {
+            property: 'timeOfDay',
+            operator: '>=',
+            operand: 6
+          },
+          {
+            property: 'peopleCount',
+            operator: '>=',
+            operand: 2
+          }
+        ]
+      }
+    }
+  },
+  {
+    context: {
+      timezone: '+02:00',
+      timeOfDay: 7.5,
+      peopleCount: 4
+    },
+    output: {
+      lightbulbState: {
+        predicted_value: 'ON',
+        confidence: 0.9937745256361138,
+        decision_rules: [
+          {
+            property: 'timeOfDay',
+            operator: '>=',
+            operand: 6
+          },
+          {
+            property: 'peopleCount',
+            operator: '>=',
+            operand: 2
+          }
+        ]
+      }
+    }
+  },
+  {
+    context: {
+      timezone: '+02:00',
+      timeOfDay: 4.5,
+      peopleCount: 0
+    },
+    output: {
+      lightbulbState: {
+        predicted_value: 'OFF',
+        confidence: 0.9545537233352661,
+        decision_rules: [ // The ordered list of decision_rules that were validated to reach this decision
+          {
+            property: 'timeOfDay',
+            operator: '<',
+            operand: 5.666666507720947
+          },
+          {
+            property: 'peopleCount',
+            operator: '<',
+            operand: 1
+          }
+        ]
+      }
+    }
+  }
+]
+```
+#### Get decision rules properties ####
+
+From the tree previously retrieved, get the properties from the context that matters in the tree.
+
+```js
+// `tree` is the decision tree as retrieved through the craft ai REST API
+let tree = { ... };
+
+let decisionRules = craftai.interpreter.getDecisionRulesProperties(tree)
+```
+
+Results for `craftai.interpreter.getDecisionRulesProperties` would look like:
+
+```js
+[
+  {
+    property: 'timeOfDay',
+    is_generated: true,
+    type: 'time_of_day'
+  }
+]
 ```
 
 ### Logging ###
