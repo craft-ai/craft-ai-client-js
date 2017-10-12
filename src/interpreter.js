@@ -36,6 +36,26 @@ const VALUE_VALIDATOR = {
   month_of_year: (value) => _.isInteger(value)  && value >= 1 && value <= 12
 };
 
+function reduceNodes(tree, fn, initialAccValue) {
+  let nodes = [];
+  nodes.push(tree);
+  const recursiveNext = (acc) => {
+    if (nodes.length == 0) {
+      // No more nodes
+      return acc;
+    }
+
+    const node = nodes.pop();
+    if (node.children) {
+      nodes = node.children.concat(nodes);
+    }
+
+    const updatedAcc = fn(acc, node);
+    return recursiveNext(updatedAcc);
+  };
+  return recursiveNext(initialAccValue);
+}
+
 function decideRecursion(node, context) {
   // Leaf
   if (!(node.children && node.children.length)) {
@@ -43,6 +63,7 @@ function decideRecursion(node, context) {
       return {
         predicted_value: undefined,
         confidence: undefined,
+        decision_rules: [],
         error: {
           name: 'CraftAiNullDecisionError',
           message: 'Unable to take decision: the decision tree has no valid predicted value for the given context.'
@@ -56,7 +77,7 @@ function decideRecursion(node, context) {
       decision_rules: []
     };
 
-    if (node.standard_deviation) {
+    if (!_.isUndefined(node.standard_deviation)) {
       leafNode.standard_deviation = node.standard_deviation;
     }
 
@@ -97,6 +118,7 @@ function decideRecursion(node, context) {
     return {
       predicted_value: undefined,
       confidence: undefined,
+      decision_rules: [],
       error: {
         name: 'CraftAiNullDecisionError',
         message: `Unable to take decision: value '${context[property]}' for property '${property}' doesn't validate any of the decision rules.`,
@@ -152,7 +174,7 @@ function checkContext(configuration) {
         }
         return { badProperties, missingProperties };
       },
-      { badProperties: [], missingProperties:[] }
+      { badProperties: [], missingProperties: [] }
     );
 
     if (missingProperties.length || badProperties.length) {
@@ -162,21 +184,19 @@ function checkContext(configuration) {
       );
       throw new CraftAiDecisionError({
         message: `Unable to take decision, the given context is not valid: ${messages.join(', ')}.`,
-        metadata: { missingProperties, badProperties }
+        metadata: _.assign({}, missingProperties.length && { missingProperties }, badProperties.length && { badProperties })
       });
     }
   };
 }
 
-export default function decide(json, ...args) {
-  const { configuration, trees } = parse(json);
-  const ctx = configuration ? context(configuration, ...args) : _.extend({}, ...args);
-  checkContext(configuration)(ctx);
+function _decide(configuration, trees, context) {
+  checkContext(configuration)(context);
   return {
     _version: DECISION_FORMAT_VERSION,
-    context: ctx,
+    context,
     output: _.assign(..._.map(configuration.output, (output) => {
-      let decision = decideRecursion(trees[output], ctx);
+      let decision = decideRecursion(trees[output], context);
       if (decision.error) {
         switch (decision.error.name) {
           case 'CraftAiNullDecisionError':
@@ -198,4 +218,63 @@ export default function decide(json, ...args) {
       };
     }))
   };
+}
+
+export function decideFromContextsArray(tree, contexts) {
+  const { configuration, trees } = parse(tree);
+  return _.map(contexts, (contextsItem) => {
+    let ctx;
+    if (_.isArray(contextsItem)) {
+      ctx = context(configuration, ...contextsItem);
+    }
+    else {
+      ctx = context(configuration, contextsItem);
+    }
+    try {
+      return _decide(configuration, trees, ctx);
+    }
+    catch (error) {
+      if (error instanceof CraftAiNullDecisionError) {
+        const { message, metadata } = error;
+        return {
+          _version: DECISION_FORMAT_VERSION,
+          context: ctx,
+          error: { message, metadata }
+        };
+      }
+      else {
+        throw error;
+      }
+    }
+  });
+}
+
+export function decide(tree, ...args) {
+  const { configuration, trees } = parse(tree);
+  const ctx = configuration ? context(configuration, ...args) : _.extend({}, ...args);
+  return _decide(configuration, trees, ctx);
+}
+
+export function getDecisionRulesProperties(tree) {
+  const { configuration, trees } = parse(tree);
+
+  return _(trees)
+    .values()
+    .reduce(
+      (properties, tree) => reduceNodes(
+        tree,
+        (properties, node) => {
+          if (node.children) { // Skip leaves
+            return properties.concat(node.children[0].decision_rule.property);
+          }
+          return properties;
+        },
+        properties),
+      _([])
+    )
+    .uniq()
+    .map((property) => _.extend(configuration.context[property], {
+      property: property
+    }))
+    .value();
 }
