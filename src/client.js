@@ -212,6 +212,49 @@ export default function createClient(tokenOrCfg) {
           nextPageUrl
         }));
     },
+    getAgentStateHistory: function(agentId, start = undefined, end = undefined) {
+      if (_.isUndefined(agentId)) {
+        return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent state history with no agentId provided.'));
+      }
+      let startTimestamp;
+      if (start) {
+        startTimestamp = Time(start).timestamp;
+        if (_.isUndefined(startTimestamp)) {
+          return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent state history with an invalid \'start\' timestamp provided.'));
+        }
+      }
+      let endTimestamp;
+      if (end) {
+        endTimestamp = Time(end).timestamp;
+        if (_.isUndefined(endTimestamp)) {
+          return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get agent state history with an invalid \'end\' timestamp provided.'));
+        }
+      }
+
+      const requestFollowingPages = ({ stateHistory, nextPageUrl }) => {
+        if (!nextPageUrl) {
+          return Promise.resolve(stateHistory);
+        }
+        return request({ url: nextPageUrl }, this)
+          .then(({ body, nextPageUrl }) => requestFollowingPages({
+            stateHistory: stateHistory.concat(body),
+            nextPageUrl
+          }));
+      };
+
+      return request({
+        method: 'GET',
+        path: `/agents/${agentId}/context/state/history`,
+        query: {
+          start: startTimestamp,
+          end: endTimestamp
+        }
+      }, this)
+        .then(({ body, nextPageUrl }) => requestFollowingPages({
+          stateHistory: body,
+          nextPageUrl
+        }));
+    },
     getAgentInspectorUrl: function(agentId, t = undefined) {
       console.warn('WARNING: \'getAgentInspectorUrl\' method of craft ai client is deprecated. It will be removed in the future, use \'getSharedAgentInspectorUrl\' instead. Refer to https://beta.craft.ai/doc/js.');
       return this.getSharedAgentInspectorUrl(agentId, t);
