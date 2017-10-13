@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.11.0...HEAD) ##
+## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.11.1...HEAD) ##
+
+## [1.11.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.11.0...v1.11.1) - 2017-10-13 ##
 ### Added ###
 - Add new function `client.getAgentStateHistory` retrieving a agent's state history. Take a look a the [documentation](https://beta.craft.ai/doc/js#retrieve-state-history) for further informations.
 
