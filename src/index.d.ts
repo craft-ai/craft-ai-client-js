@@ -194,13 +194,13 @@ export interface Client {
   getAgentContextOperations<P extends Properties> (agentId: string, start?: number, end?: number): Promise<ContextOperation<P>[]>
 
   /**
-   * Retrieves every states genereted, every time_quantum, from the context operations pushed to the given agent id.
+   * Retrieves every an agent's state history, at every `time_quantum`, between the given bounds.
    *
    * @param agentId Id of the agent
    * @param start The timestamp lower bound of the desired contexts (included)
    * @param end The timestamp upper bound of the desired contexts (included)
    */
-  getAgentStatesHistory<P extends Properties> (agentId: string, start?: number, end?: number): Promise<ContextOperation<P>[]>
+  getAgentStateHistory<P extends Properties> (agentId: string, start?: number, end?: number): Promise<ContextOperation<P>[]>
 
   /**
    * Retrieves the decision tree of the given agent id.
