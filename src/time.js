@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { CraftAiTimeError } from './errors';
+import { timezones } from './timezones';
 
 // From 'moment/src/lib/parse/regex.js'
 const OFFSET_REGEX = /Z|[+-]\d\d:?\d\d/gi; // +00:00 -00:00 +0000 -0000 or Z
@@ -62,7 +63,12 @@ export default function Time(t = undefined, tz = undefined) {
 
   if (tz) {
     // tz formats should be parseable by moment
-    m.utcOffset(tz);
+    if (timezones[tz]) {
+      m.utcOffset(timezones[tz]);
+    }
+    else {
+      m.utcOffset(tz);
+    }
   }
 
   const minuteOffset =  m.utcOffset();

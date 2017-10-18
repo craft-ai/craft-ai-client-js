@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import context from './context';
 import parse from './parse';
+import isTimezone from './timezones';
 import { CraftAiDecisionError, CraftAiNullDecisionError, CraftAiUnknownError } from './errors';
 
 const DECISION_FORMAT_VERSION = '1.1.0';
@@ -24,12 +25,10 @@ const OPERATORS = {
   }
 };
 
-const TIMEZONE_REGEX = /[+-]\d\d:\d\d/gi; // +00:00 -00:00
-
 const VALUE_VALIDATOR = {
   continuous: (value) => _.isFinite(value),
   enum: (value) => _.isString(value),
-  timezone: (value) => _.isString(value) && value.match(TIMEZONE_REGEX),
+  timezone: (value) => _.isString(value) && isTimezone(value),
   time_of_day: (value) => _.isFinite(value) && value >= 0 && value < 24,
   day_of_week: (value) => _.isInteger(value)  && value >= 0 && value <= 6,
   day_of_month: (value) => _.isInteger(value)  && value >= 1 && value <= 31,
