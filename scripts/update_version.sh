@@ -102,7 +102,7 @@ echo "Increment version from v$current_major.$current_minor.$current_patch to v$
 TODAY=`date +%Y-%m-%d`
 
 eval "sed -i.bak 's/\"version\": \"$current_major.$current_minor.$current_patch/\"version\": \"$next_major.$next_minor.$next_patch/g' $PACKAGE_JSON_FILE"
-eval "sed -i.bak 's/.*[[Unreleased]].*/## [Unreleased](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$next_major.$next_minor.$next_patch...HEAD) ##$NL$NL## [$next_major.$next_minor.$next_patch](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$current_major.$current_minor.$current_patch...v$next_major.$next_minor.$next_patch) - $TODAY ##/g' $CHANGELOG_MD_FILE"
+eval "sed -i.bak 's/.*\[Unreleased\].*/## [Unreleased](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$next_major.$next_minor.$next_patch...HEAD) ##$NL$NL## [$next_major.$next_minor.$next_patch](https:\/\/github.com\/$GH_ORG\/$GH_REPO\/compare\/v$current_major.$current_minor.$current_patch...v$next_major.$next_minor.$next_patch) - $TODAY ##/g' $CHANGELOG_MD_FILE"
 
 if [ $do_git == 1 ]; then
   eval "git add $PACKAGE_JSON_FILE $CHANGELOG_MD_FILE"
