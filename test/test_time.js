@@ -317,6 +317,42 @@ describe('Time(...)', function() {
         timezone: '+02:30'
       });
     });
+
+    it('works with a Time having a specified timezone and a given timezone (+hhmm)', function() {
+      expect(new Time(Time('1977-04-22T01:00:00-05:00'), '+0230')).to.be.deep.equal({
+        utc: '1977-04-22T06:00:00.000Z',
+        timestamp: 230536800,
+        day_of_week: 4,
+        time_of_day: 8.5,
+        day_of_month: 22,
+        month_of_year: 4,
+        timezone: '+02:30'
+      });
+    });
+
+    it('works with a Time having a specified timezone and a given timezone (+hh)', function() {
+      expect(new Time(Time('1977-04-22T01:00:00-05:00'), '+02')).to.be.deep.equal({
+        utc: '1977-04-22T06:00:00.000Z',
+        timestamp: 230536800,
+        day_of_week: 4,
+        time_of_day: 8,
+        day_of_month: 22,
+        month_of_year: 4,
+        timezone: '+02:00'
+      });
+    });
+
+    it('works with a Time having a specified timezone and a given timezone (CET)', function() {
+      expect(new Time(Time('1977-04-22T01:00:00-05:00'), 'CET')).to.be.deep.equal({
+        utc: '1977-04-22T06:00:00.000Z',
+        timestamp: 230536800,
+        day_of_week: 4,
+        time_of_day: 7,
+        day_of_month: 22,
+        month_of_year: 4,
+        timezone: '+01:00'
+      });
+    });
   });
 
   describe('from anythings(...)', function() {

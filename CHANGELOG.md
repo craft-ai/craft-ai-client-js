@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.11.1...HEAD) ##
+### Added ###
+- Support new format for timezone offsets: +/-hhmm, +/-hh and some abbreviations(CEST, PST, ...). Check the [documentation](https://beta.craft.ai/doc/http#context-properties-types) for the complete list.
+
 ### Fixed ###
 - Fixing the Typescript signature for `client.getAgentStateHistory`.
 
