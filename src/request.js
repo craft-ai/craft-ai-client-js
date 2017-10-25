@@ -5,6 +5,7 @@ import {
   CraftAiCredentialsError,
   CraftAiInternalError,
   CraftAiNetworkError,
+  CraftAiLongRequestTimeOutError,
   CraftAiUnknownError
 } from './errors';
 import { IN_BROWSER } from './constants';
@@ -63,6 +64,11 @@ function parseResponse(req, res, resBody) {
         body: parseBody(req, resBody),
         nextPageUrl: res.headers.get('x-craft-ai-next-page-url')
       };
+    case 202:
+      throw new CraftAiLongRequestTimeOutError({
+        message: parseBody(req, resBody).message,
+        request: req
+      });
     case 401:
     case 403:
       throw new CraftAiCredentialsError({

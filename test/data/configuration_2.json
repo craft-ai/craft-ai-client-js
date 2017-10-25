@@ -1,0 +1,44 @@
+{
+  "context": {
+    "e1": {
+      "type": "enum"
+    },
+    "e2": {
+      "type": "enum"
+    },
+    "e3": {
+      "type": "enum"
+    },
+    "e4": {
+      "type": "enum"
+    },
+    "c1": {
+      "type": "continuous"
+    },
+    "c2": {
+      "type": "continuous"
+    },
+    "c3": {
+      "type": "continuous"
+    },
+    "c4": {
+      "type": "continuous"
+    },
+    "time": {
+      "type": "time_of_day",
+      "is_generated": true
+    },
+    "day_of_week": {
+      "type": "time_of_day",
+      "is_generated": true
+    },
+    "tz": {
+      "type": "timezone"
+    }
+  },
+  "output": [
+    "c4"
+  ],
+  "time_quantum": 10,
+  "learning_period": 3600
+}

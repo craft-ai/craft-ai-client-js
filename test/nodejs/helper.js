@@ -1,7 +1,7 @@
 import _ from 'lodash';
+import { expect } from 'chai';
 import Debug from 'debug';
 import dotenv from 'dotenv';
-import { expect } from 'chai';
 
 dotenv.load({ silent: true });
 

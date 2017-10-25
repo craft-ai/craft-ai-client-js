@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import Debug from 'debug';
 import { expect } from 'chai';
+import Debug from 'debug';
 
 window.logger = Debug;
 

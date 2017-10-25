@@ -78,6 +78,11 @@ let CraftAiTimeError = createCustomError(
   'Time error, see err.more for details'
 );
 
+let CraftAiLongRequestTimeOutError = createCustomError(
+  'CraftAiLongRequestTimeOutError',
+  'Request timed out because the computation is not finished, please try again'
+);
+
 export {
   CraftAiBadRequestError,
   CraftAiCredentialsError,
@@ -87,5 +92,6 @@ export {
   CraftAiNetworkError,
   CraftAiNullDecisionError,
   CraftAiTimeError,
+  CraftAiLongRequestTimeOutError,
   CraftAiUnknownError
 };
