@@ -65,7 +65,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
           const { _version, configuration, trees } = parse(treeJson);
           expect(trees).to.be.ok;
           expect(_version).to.be.ok;
-          expect(configuration).to.be.deep.equal(configuration);
+          expect(configuration).to.be.deep.equal(CONFIGURATION_1);
         });
     });
   });
@@ -81,10 +81,44 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
           }, Promise.resolve());
         });
     });
-    it('should fail with a timeout error', function() {
-      this.timeout(60000);
+    it('should fail with a timeout error when the client side timeout is deactivated', function() {
+      this.timeout(100000);
+      const otherClient = craftai(_.assign({}, CRAFT_CFG, {
+        decisionTreeRetrievalTimeout: false
+      }));
       const lastOperation = _.last(_.last(CONFIGURATION_2_OPERATIONS));
-      return expect(client.getAgentDecisionTree(agent.id, lastOperation.timestamp)).to.be.rejectedWith(errors.CraftAiLongRequestTimeOutError);
+      return otherClient.getAgentDecisionTree(agent.id, lastOperation.timestamp)
+      .then(
+        () => Promise.reject(new Error('Should not be reached')),
+        (err) => {
+          expect(err).to.be.an.instanceof(errors.CraftAiLongRequestTimeOutError);
+        }
+      );
+    });
+    it('should fail with a timeout error when the client side timeout is low', function() {
+      const otherClient = craftai(_.assign({}, CRAFT_CFG, {
+        decisionTreeRetrievalTimeout: 5000
+      }));
+      const lastOperation = _.last(_.last(CONFIGURATION_2_OPERATIONS));
+      return otherClient.getAgentDecisionTree(agent.id, lastOperation.timestamp)
+      .then(
+        () => Promise.reject(new Error('Should not be reached')),
+        (err) => {
+          expect(err).to.be.an.instanceof(errors.CraftAiLongRequestTimeOutError);
+        }
+      );
+    });
+    it('should work with the standard timeout', function() {
+      this.timeout(300000);
+      const lastOperation = _.last(_.last(CONFIGURATION_2_OPERATIONS));
+      return client.getAgentDecisionTree(agent.id, lastOperation.timestamp)
+      .then((treeJson) => {
+        expect(treeJson).to.be.ok;
+        const { _version, configuration, trees } = parse(treeJson);
+        expect(trees).to.be.ok;
+        expect(_version).to.be.ok;
+        expect(configuration).to.be.deep.equal(CONFIGURATION_2);
+      });
     });
   });
 });
