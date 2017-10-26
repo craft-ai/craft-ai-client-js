@@ -1,7 +1,7 @@
 import _ from 'lodash';
+import { expect } from 'chai';
 import Debug from 'debug';
 import dotenv from 'dotenv';
-import { expect } from 'chai';
 
 dotenv.load({ silent: true });
 
@@ -19,3 +19,4 @@ global.debug = Debug('craft-ai:client:test');
 global.expect = expect;
 global.IN_BROWSER = false;
 global.RUN_ID = process.env.TRAVIS_JOB_ID || 'local';
+global.DISABLE_LONG_TESTS = process.env.DISABLE_LONG_TESTS;

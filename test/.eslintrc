@@ -8,6 +8,7 @@
     "debug": true,
     "expect": true,
     "IN_BROWSER": true,
-    "RUN_ID": true
+    "RUN_ID": true,
+    "DISABLE_LONG_TESTS": true
   }
 }

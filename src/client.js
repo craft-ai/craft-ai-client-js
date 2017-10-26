@@ -6,9 +6,13 @@ import jwtDecode from 'jwt-decode';
 import request from './request';
 import Time from './time';
 import { AGENT_ID_ALLOWED_REGEXP, AGENT_ID_MAX_LENGTH } from './constants';
-import { CraftAiBadRequestError, CraftAiCredentialsError } from './errors';
+import { CraftAiBadRequestError, CraftAiCredentialsError, CraftAiLongRequestTimeOutError } from './errors';
 
 let debug = Debug('craft-ai:client');
+
+function resolveAfterTimeout(timeout) {
+  return new Promise((resolve) => setTimeout(() => resolve(), timeout));
+}
 
 export default function createClient(tokenOrCfg) {
   let cfg = _.defaults(
@@ -292,14 +296,41 @@ export default function createClient(tokenOrCfg) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to retrieve an agent decision tree with an invalid timestamp provided.'));
       }
 
-      return request({
+      const agentDecisionTreeRequest = () => request({
         method: 'GET',
         path: `/agents/${agentId}/decision/tree`,
         query: {
           t: posixTimestamp
         }
       }, this)
-        .then(({ body }) => body);
+      .then(({ body }) => body);
+
+      if (!cfg.decisionTreeRetrievalTimeout) {
+        // Don't retry
+        return agentDecisionTreeRequest();
+      }
+      else {
+        // Retry until the given timeout is reached
+        let timedOut = false;
+        const retriedAgentDecisionTreeRequest = () => agentDecisionTreeRequest()
+          .catch((error) => {
+            if (!timedOut && error instanceof CraftAiLongRequestTimeOutError) {
+              return retriedAgentDecisionTreeRequest();
+            }
+            else {
+              return Promise.reject(error);
+            }
+          });
+
+        return Promise.race([
+          retriedAgentDecisionTreeRequest(),
+          resolveAfterTimeout(cfg.decisionTreeRetrievalTimeout)
+          .then(() => {
+            timedOut = true;
+            return Promise.reject(new CraftAiLongRequestTimeOutError());
+          })
+        ]);
+      }
     },
     computeAgentDecision: function(agentId, t, ...contexts) {
       if (_.isUndefined(agentId)) {

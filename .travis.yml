@@ -8,7 +8,7 @@ before_install:
 - git submodule update --init --recursive
 before_cache: npm prune
 install: npm install --ignore-scripts
-script: npm test
+script: DISABLE_LONG_TESTS=1 npm test
 deploy:
 - provider: npm
   email: ops@craft.ai
