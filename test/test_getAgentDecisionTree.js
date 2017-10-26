@@ -68,10 +68,21 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
           expect(configuration).to.be.deep.equal(CONFIGURATION_1);
         });
     });
+    it('should fail with a timeout error when the client side timeout is low', function() {
+      const otherClient = craftai(_.assign({}, CRAFT_CFG, {
+        decisionTreeRetrievalTimeout: 50
+      }));
+      return otherClient.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO)
+      .then(
+        () => Promise.reject(new Error('Should not be reached')),
+        (err) => {
+          expect(err).to.be.an.instanceof(errors.CraftAiLongRequestTimeOutError);
+        }
+      );
+    });
   });
-  describe('on an agent with data spanning a looong time', function() {
+  (DISABLE_LONG_TESTS ? describe.skip : describe)('on an agent with data spanning a looong time', function() {
     beforeEach(function() {
-      this.timeout(30000);
       return client.createAgent(CONFIGURATION_2, agentId)
         .then((createdAgent) => {
           expect(createdAgent).to.be.ok;
@@ -85,19 +96,6 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
       this.timeout(100000);
       const otherClient = craftai(_.assign({}, CRAFT_CFG, {
         decisionTreeRetrievalTimeout: false
-      }));
-      const lastOperation = _.last(_.last(CONFIGURATION_2_OPERATIONS));
-      return otherClient.getAgentDecisionTree(agent.id, lastOperation.timestamp)
-      .then(
-        () => Promise.reject(new Error('Should not be reached')),
-        (err) => {
-          expect(err).to.be.an.instanceof(errors.CraftAiLongRequestTimeOutError);
-        }
-      );
-    });
-    it('should fail with a timeout error when the client side timeout is low', function() {
-      const otherClient = craftai(_.assign({}, CRAFT_CFG, {
-        decisionTreeRetrievalTimeout: 5000
       }));
       const lastOperation = _.last(_.last(CONFIGURATION_2_OPERATIONS));
       return otherClient.getAgentDecisionTree(agent.id, lastOperation.timestamp)
