@@ -69,7 +69,9 @@ let client = craftai({
   // Mandatory, the token
   token: '{token}',
   // Optional, default value is 500
-  operationsChunksSize: {max_number_of_operations_sent_at_once}
+  operationsChunksSize: {max_number_of_operations_sent_at_once},
+  // Optional, default value is 5 minutes (300000)
+  decisionTreeRetrievalTimeout: {timeout_duration_for_decision_trees_retrieval}
 });
 ```
 
@@ -948,7 +950,12 @@ client.getAgentDecisionTree(
   */
 })
 .catch(function(error) {
-  // Catch errors here
+  if (error instanceof craftai.errors.CraftAiLongRequestTimeOutError) {
+    // Handle timeout errors here
+  }
+  else {
+    // Handle other errors here
+  }
 })
 ```
 
