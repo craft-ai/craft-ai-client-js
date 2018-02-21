@@ -64,7 +64,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
     });
 
     it('should succeed when using valid parameters', function() {
-      return client.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO + 200)
+      return client.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO)
         .then((treeJson) => {
           expect(treeJson).to.be.ok;
           const { _version, configuration, trees } = parse(treeJson);
