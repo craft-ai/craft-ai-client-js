@@ -9,10 +9,12 @@ describe('client.computeAgentDecision(<agentId>, <timestamp>, <context>)', funct
   let client;
   let agent;
   const agentId = `compute_agent_decision_${RUN_ID}`;
+
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
   });
+
   beforeEach(function() {
     return client.deleteAgent(agentId) // Delete any preexisting agent with this id.
       .then(() => client.createAgent(CONFIGURATION_1, agentId))
@@ -22,9 +24,11 @@ describe('client.computeAgentDecision(<agentId>, <timestamp>, <context>)', funct
         return client.addAgentContextOperations(agent.id, CONFIGURATION_1_OPERATIONS_1);
       });
   });
+
   afterEach(function() {
     return client.deleteAgent(agentId);
   });
+
   it('should succeed when using valid parameters', function() {
     return client.computeAgentDecision(agent.id, CONFIGURATION_1_OPERATIONS_1_TO + 200, {
       presence: 'none',

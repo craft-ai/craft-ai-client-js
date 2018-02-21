@@ -39,16 +39,20 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
   let client;
   let agent;
   const agentId = `get_agent_decision_tree_${RUN_ID}`;
+
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
   });
+
   beforeEach(function() {
     return client.deleteAgent(agentId); // Delete any preexisting agent with this id.
   });
+
   afterEach(function() {
     return client.deleteAgent(agentId);
   });
+
   describe('on an agent with few data', function() {
     beforeEach(function() {
       return client.createAgent(CONFIGURATION_1, agentId)
@@ -58,6 +62,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
           return client.addAgentContextOperations(agent.id, CONFIGURATION_1_OPERATIONS_1);
         });
     });
+
     it('should succeed when using valid parameters', function() {
       return client.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO + 200)
         .then((treeJson) => {
@@ -68,6 +73,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
           expect(configuration).to.be.deep.equal(CONFIGURATION_1);
         });
     });
+
     it('should fail with a timeout error when the client side timeout is low', function() {
       const otherClient = craftai(_.assign({}, CRAFT_CFG, {
         decisionTreeRetrievalTimeout: 50
@@ -81,6 +87,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
       );
     });
   });
+
   (DISABLE_LONG_TESTS ? describe.skip : describe)('on an agent with data spanning a looong time', function() {
     beforeEach(function() {
       return client.createAgent(CONFIGURATION_2, agentId)
@@ -92,6 +99,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
           }, Promise.resolve());
         });
     });
+
     it('should fail with a timeout error when the client side timeout is deactivated', function() {
       this.timeout(100000);
       const otherClient = craftai(_.assign({}, CRAFT_CFG, {
@@ -106,6 +114,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
         }
       );
     });
+
     it('should work with the standard timeout', function() {
       this.timeout(300000);
       const lastOperation = _.last(_.last(CONFIGURATION_2_OPERATIONS));

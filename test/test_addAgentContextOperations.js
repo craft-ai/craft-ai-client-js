@@ -16,10 +16,12 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
   let client;
   let agents;
   const agentsId = [`addAgentContextOps_${RUN_ID}_1`, `addAgentContextOps_${RUN_ID}_2`];
+
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
   });
+
   beforeEach(function() {
     return Promise.all(_.map(agentsId, (agentId) => client.deleteAgent(agentId) // Delete any preexisting agent with this id.
       .then(() => client.createAgent(CONFIGURATION_1, agentId))
@@ -32,9 +34,11 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
         agents = createdAgents;
       });
   });
+
   afterEach(function() {
     return Promise.all(_.map(agents, (agent) => client.deleteAgent(agent.id)));
   });
+
   it('should succeed when using valid operations', function() {
     return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1)
       .then(() => {

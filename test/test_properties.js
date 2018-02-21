@@ -5,21 +5,25 @@ describe('Properties', () => {
   describe('.formatProperty(<property_type>)', () => {
     describe(TYPES.time_of_day, () => {
       const formatter = formatProperty(TYPES.time_of_day);
+
       it('Works properly on property values', () => {
         expect(formatter(11.5)).to.be.equal('11:30');
         expect(formatter(11.008)).to.be.equal('11:00:28');
       });
+
       it('Works properly on moment', () => {
         expect(formatter(moment('2016-10-20T08:20:03').toDate())).to.be.equal('08:20:03');
         expect(formatter(moment('2016-08-12T13:37').toDate())).to.be.equal('13:37');
       });
     });
+
     describe(TYPES.enum, () => {
       const formatter = formatProperty(TYPES.enum);
       it('Works properly on property values', () => {
         expect(formatter('toto')).to.be.equal('toto');
       });
     });
+
     describe(TYPES.continuous, () => {
       const formatter = formatProperty(TYPES.continuous);
       it('Works properly on property values', () => {
@@ -27,6 +31,7 @@ describe('Properties', () => {
         expect(formatter(12.4234)).to.be.equal('12.42');
       });
     });
+
     describe(TYPES.month_of_year, () => {
       const formatter = formatProperty(TYPES.month_of_year);
       it('Works properly on property values', () => {
@@ -48,6 +53,7 @@ describe('Properties', () => {
           })).to.be.equal('[11:30, 12:18[');
         });
       });
+
       describe(TYPES.continuous, () => {
         it('Works properly', () => {
           expect(formatDecisionRule({
@@ -57,6 +63,7 @@ describe('Properties', () => {
           })).to.be.equal('[11.5, 12.3[');
         });
       });
+
       describe(TYPES.day_of_week, () => {
         it('Works properly, when the days are ordered', () => {
           expect(formatDecisionRule({
@@ -74,6 +81,7 @@ describe('Properties', () => {
           })).to.be.equal('Fri to Sun');
         });
       });
+
       describe(TYPES.month_of_year, () => {
         it('Works properly, when the months are ordered', () => {
           expect(formatDecisionRule({
@@ -108,6 +116,7 @@ describe('Properties', () => {
           })).to.be.equal('>= 3.14');
         });
       });
+
       describe(TYPES.enum, () => {
         it('Works properly', () => {
           expect(formatDecisionRule({
@@ -118,6 +127,7 @@ describe('Properties', () => {
         });
       });
     });
+
     describe(OPERATORS.LT, () => {
       describe(TYPES.continuous, () => {
         it('Works properly', () => {
@@ -128,6 +138,7 @@ describe('Properties', () => {
           })).to.be.equal('< 666');
         });
       });
+
       describe(TYPES.timezone, () => {
         it('Works properly', () => {
           expect(formatDecisionRule({
@@ -138,6 +149,7 @@ describe('Properties', () => {
         });
       });
     });
+
     describe(OPERATORS.IS, () => {
       describe(TYPES.continuous, () => {
         it('Works properly', () => {
@@ -148,6 +160,7 @@ describe('Properties', () => {
           })).to.be.equal('is 5637');
         });
       });
+
       describe(TYPES.enum, () => {
         it('Works properly', () => {
           expect(formatDecisionRule({
