@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/npm/v/craft-ai.svg?style=flat-square)](https://npmjs.org/package/craft-ai) [![Build](https://img.shields.io/travis/craft-ai/craft-ai-client-js/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-client-js) [![License](https://img.shields.io/badge/license-BSD--3--Clause-42358A.svg?style=flat-square)](LICENSE) [![Dependencies](https://img.shields.io/david/craft-ai/craft-ai-client-js.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-client-js) [![Dev Dependencies](https://img.shields.io/david/dev/craft-ai/craft-ai-client-js.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-client-js#info=devDependencies)
 
-[**craft ai** _AI-as-a-service_](http://craft.ai) enables your services to learn every day: provide a personalized experience to each user and automate complex tasks.
+[**craft ai** cognitive automation API](http://craft.ai) leverages explainable Artificial Intelligence to 10x your knowledge workers productivity. craft ai is the first high level AI API enabling Automated Machine Learning at the individual level that generates explainable predictive models on the fly.
 
 ## Get Started! ##
 
@@ -217,7 +217,8 @@ client.deleteAgent(AGENT_ID)
       {
         timestamp: 1469473560,
         context: {
-          peopleCount: 0
+          peopleCount: 0,
+          lightbulbState: 'OFF'
         }
       }
     ]
@@ -342,6 +343,8 @@ Each agent has a configuration defining:
 
 > :warning: if no learning_period is specified, the default value is 15000 time quantums.
 
+> :warning: the maximum learning_period value is 750000 * time_quantum.
+
 #### Context properties types ####
 
 ##### Base types: `enum` and `continuous` #####
@@ -369,10 +372,10 @@ offset from UTC, supported format are:
   - **±[hh]:[mm]**,
   - **±[hh][mm]**,
   - **±[hh]**,
-  
+
   where `hh` represent the hour and `mm` the minutes from UTC (eg. `+01:30`)), between `-12:00` and
   `+14:00`.
-  
+
   Some abbreviations are also supported:
   - **UTC** or **Z** Universal Time Coordinated,
   - **GMT** Greenwich Mean Time, as UTC,
@@ -586,6 +589,8 @@ These advanced configuration parameters are optional, and will appear in the age
 #### Create ####
 
 Create a new agent, and create its [configuration](#configuration).
+
+> The agent's identifier is a case sensitive string between 1 and 36 characters long. It only accepts letters, digits, hyphen-minuses and underscores (i.e. the regular expression `/[a-zA-Z0-9_-]{1,36}/`).
 
 ```js
 client.createAgent(
@@ -861,10 +866,102 @@ client.getAgentDecisionTree(
 .then(function(tree) {
   // Works with the given tree
   console.log(tree);
-  /* Outputed tree is the following
+  /* Outputted tree is the following
   {
-    "_version": "1.0.0",
+    "_version": "1.1.0",
+    "trees": {
+      "lightbulbState": {
+        "children": [
+          {
+            "children": [
+              {
+                "confidence": 0.6774609088897705,
+                "decision_rule": {
+                  "operand": 0.5,
+                  "operator": "<",
+                  "property": "peopleCount"
+                },
+                "predicted_value": "OFF"
+              },
+              {
+                "confidence": 0.8630361557006836,
+                "decision_rule": {
+                  "operand": 0.5,
+                  "operator": ">=",
+                  "property": "peopleCount"
+                },
+                "predicted_value": "ON"
+              }
+            ],
+            "decision_rule": {
+              "operand": [
+                5,
+                5.6666665
+              ],
+              "operator": "[in[",
+              "property": "timeOfDay"
+            }
+          },
+          {
+            "children": [
+              {
+                "confidence": 0.9947378635406494,
+                "decision_rule": {
+                  "operand": [
+                    5.6666665,
+                    20.666666
+                  ],
+                  "operator": "[in[",
+                  "property": "timeOfDay"
+                },
+                "predicted_value": "OFF"
+              },
+              {
+                "children": [
+                  {
+                    "confidence": 0.969236433506012,
+                    "decision_rule": {
+                      "operand": 1,
+                      "operator": "<",
+                      "property": "peopleCount"
+                    },
+                    "predicted_value": "OFF"
+                  },
+                  {
+                    "confidence": 0.8630361557006836,
+                    "decision_rule": {
+                      "operand": 1,
+                      "operator": ">=",
+                      "property": "peopleCount"
+                    },
+                    "predicted_value": "ON"
+                  }
+                ],
+                "decision_rule": {
+                  "operand": [
+                    20.666666,
+                    5
+                  ],
+                  "operator": "[in[",
+                  "property": "timeOfDay"
+                }
+              }
+            ],
+            "decision_rule": {
+              "operand": [
+                5.6666665,
+                5
+              ],
+              "operator": "[in[",
+              "property": "timeOfDay"
+            }
+          }
+        ]
+      }
+    },
     "configuration": {
+      "time_quantum": 600,
+      "learning_period": 9000000,
       "context": {
         "peopleCount": {
           "type": "continuous"
@@ -882,71 +979,9 @@ client.getAgentDecisionTree(
       },
       "output": [
         "lightbulbState"
-      ],
-      "time_quantum": 600,
-      "learning_period": 108000
-    },
-    "trees": {
-      "lightbulbState": {
-        "children": [
-          {
-            "children": [
-              {
-                "children": [
-                  {
-                    "confidence": 0.9545537233352661,
-                    "decision_rule": {
-                      "operator": "<",
-                      "operand": 1,
-                      "property": "peopleCount"
-                    },
-                    "predicted_value": "OFF"
-                  },
-                  {
-                    "confidence": 0.8630361557006836,
-                    "decision_rule": {
-                      "operator": ">=",
-                      "operand": 1,
-                      "property": "peopleCount"
-                    },
-                    "predicted_value": "ON"
-                  }
-                ],
-                "decision_rule": {
-                  "operator": "<",
-                  "operand": 5.666666507720947,
-                  "property": "timeOfDay"
-                }
-              },
-              {
-                "confidence": 0.9947378635406494,
-                "decision_rule": {
-                  "operator": ">=",
-                  "operand": 5.666666507720947,
-                  "property": "timeOfDay"
-                },
-                "predicted_value": "OFF"
-              }
-            ],
-            "decision_rule": {
-              "operator": "<",
-              "operand": 20.66666603088379,
-              "property": "timeOfDay"
-            }
-          },
-          {
-            "confidence": 0.8630361557006836,
-            "decision_rule": {
-              "operator": ">=",
-              "operand": 20.66666603088379,
-              "property": "timeOfDay"
-            },
-            "predicted_value": "ON"
-          }
-        ],
-      }
+      ]
     }
-  ]
+  }
   */
 })
 .catch(function(error) {
