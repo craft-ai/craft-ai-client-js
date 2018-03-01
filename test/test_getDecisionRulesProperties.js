@@ -16,6 +16,7 @@ describe('interpreter.getDecisionRulesProperties(<tree>)', function() {
       }
     ]);
   });
+
   it('can list the properties used in a tree\'s decision rules (continuous output)', function() {
     expect(interpreter.getDecisionRulesProperties(DECISION_TREE_2)).to.be.deep.equal([
       {
@@ -34,9 +35,11 @@ describe('interpreter.getDecisionRulesProperties(<tree>)', function() {
       }
     ]);
   });
+
   it('can list the properties used in a tree\'s decision rules (single leaf)', function() {
     expect(interpreter.getDecisionRulesProperties(DECISION_TREE_3)).to.be.deep.equal([]);
   });
+
   it('works properly on invalid trees', function() {
     expect(() => interpreter.getDecisionRulesProperties(INVALID_DECISION_TREE_1)).to.throw;
   });

@@ -25,7 +25,7 @@ describe('client.getAgentStateHistory(<agentId>)', function() {
   it('should retrieve all state history', function() {
     return client.getAgentStateHistory(agentId)
       .then((stateHistory) => {
-        expect(stateHistory.length).to.be.equal(17);
+        expect(stateHistory.length).to.be.equal(16);
         expect(stateHistory).to.be.deep.equal([
           {
             sample: {
@@ -153,14 +153,6 @@ describe('client.getAgentStateHistory(<agentId>)', function() {
               lightbulbColor: 'green'
             },
             timestamp: 1464601500
-          },
-          {
-            sample: {
-              presence: 'robert',
-              lightIntensity: 0.6,
-              lightbulbColor: 'green'
-            },
-            timestamp: 1464601600
           }
         ]);
       });
@@ -226,14 +218,6 @@ describe('client.getAgentStateHistory(<agentId>)', function() {
               lightbulbColor: 'green'
             },
             timestamp: 1464601500
-          },
-          {
-            sample: {
-              presence: 'robert',
-              lightIntensity: 0.6,
-              lightbulbColor: 'green'
-            },
-            timestamp: 1464601600
           }
         ]);
       });
