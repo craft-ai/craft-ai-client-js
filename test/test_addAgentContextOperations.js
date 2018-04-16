@@ -46,7 +46,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       })
       .then((context) => {
         expect(context.context).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1_LAST.context);
-        expect(context.timestamp).to.equal(CONFIGURATION_1_OPERATIONS_1_TO + 100);
+        expect(context.timestamp).to.equal(CONFIGURATION_1_OPERATIONS_1_TO);
       })
       .then(() => {
         return client.getAgentContextOperations(agents[0].id);
