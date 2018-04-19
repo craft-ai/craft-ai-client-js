@@ -303,7 +303,7 @@ export default function createClient(tokenOrCfg) {
           t: posixTimestamp
         }
       }, this)
-      .then(({ body }) => body);
+        .then(({ body }) => body);
 
       if (!cfg.decisionTreeRetrievalTimeout) {
         // Don't retry
@@ -325,10 +325,10 @@ export default function createClient(tokenOrCfg) {
         return Promise.race([
           retriedAgentDecisionTreeRequest(),
           resolveAfterTimeout(cfg.decisionTreeRetrievalTimeout)
-          .then(() => {
-            timedOut = true;
-            return Promise.reject(new CraftAiLongRequestTimeOutError());
-          })
+            .then(() => {
+              timedOut = true;
+              return Promise.reject(new CraftAiLongRequestTimeOutError());
+            })
         ]);
       }
     },
