@@ -105,52 +105,54 @@ function parseResponse(req, res, resBody) {
   }
 }
 
-export default function request(req, cfg) {
-  req = _.defaults(req || {}, {
-    method: 'GET',
-    path: '',
-    body: undefined,
-    query: {},
-    headers: {}
-  });
+export default function createRequest(cfg) {
+  return (req) => {
+    req = _.defaults(req || {}, {
+      method: 'GET',
+      path: '',
+      body: undefined,
+      query: {},
+      headers: {}
+    });
 
-  req.url = req.url || `${cfg.url}/api/v1/${cfg.owner}/${cfg.project}${req.path}`;
-  const queryStr = _(req.query)
-    .map((value, key) => ([key, value]))
-    .filter(([key, value]) => !_.isUndefined(value))
-    .map((keyVal) => keyVal.join('='))
-    .join('&');
-  if (queryStr.length > 0) {
-    req.url += `?${queryStr}`;
-  }
-  req.headers['Authorization'] = `Bearer ${cfg.token}`;
-  req.headers['Content-Type'] = 'application/json; charset=utf-8';
-  req.headers['Accept'] = 'application/json';
-  if (!IN_BROWSER) {
-    // Don't set the user agent in browsers it can cause CORS issues
-    // e.g. Safari v10.1.2 (12603.3.8)
-    req.headers['User-Agent'] = USER_AGENT;
-  }
+    req.url = req.url || `${cfg.url}/api/v1/${cfg.owner}/${cfg.project}${req.path}`;
+    const queryStr = _(req.query)
+      .map((value, key) => ([key, value]))
+      .filter(([key, value]) => !_.isUndefined(value))
+      .map((keyVal) => keyVal.join('='))
+      .join('&');
+    if (queryStr.length > 0) {
+      req.url += `?${queryStr}`;
+    }
+    req.headers['Authorization'] = `Bearer ${cfg.token}`;
+    req.headers['Content-Type'] = 'application/json; charset=utf-8';
+    req.headers['Accept'] = 'application/json';
+    if (!IN_BROWSER) {
+      // Don't set the user agent in browsers it can cause CORS issues
+      // e.g. Safari v10.1.2 (12603.3.8)
+      req.headers['User-Agent'] = USER_AGENT;
+    }
 
 
-  req.body = req.body && JSON.stringify(req.body);
+    req.body = req.body && JSON.stringify(req.body);
 
-  return fetch(req.url, req)
-    .catch((err) => {
-      debug(`Network error while executing ${req.method} ${req.path}`, err);
-      return Promise.reject(new CraftAiNetworkError({
-        more: err.message
-      }));
-    })
-    .then((res) => res.text()
+    return fetch(req.url, req)
       .catch((err) => {
-        debug(`Invalid response from ${req.method} ${req.path}`, err);
-
-        throw new CraftAiInternalError('Internal Error, the craft ai server responded an invalid response, see err.more for details.', {
-          request: req,
+        debug(`Network error while executing ${req.method} ${req.path}`, err);
+        return Promise.reject(new CraftAiNetworkError({
           more: err.message
-        });
+        }));
       })
-      .then((resBody) => parseResponse(req, res, resBody))
-    );
+      .then((res) => res.text()
+        .catch((err) => {
+          debug(`Invalid response from ${req.method} ${req.path}`, err);
+
+          throw new CraftAiInternalError('Internal Error, the craft ai server responded an invalid response, see err.more for details.', {
+            request: req,
+            more: err.message
+          });
+        })
+        .then((resBody) => parseResponse(req, res, resBody))
+      );
+  };
 }

@@ -3,7 +3,7 @@ import Debug from 'debug';
 import { decide } from './interpreter';
 import DEFAULTS from './defaults';
 import jwtDecode from 'jwt-decode';
-import request from './request';
+import createRequest from './request';
 import Time from './time';
 import { AGENT_ID_ALLOWED_REGEXP, AGENT_ID_MAX_LENGTH } from './constants';
 import { CraftAiBadRequestError, CraftAiCredentialsError, CraftAiLongRequestTimeOutError } from './errors';
@@ -55,6 +55,8 @@ export default function createClient(tokenOrCfg) {
 
   debug(`Creating a client instance for project '${cfg.owner}/${cfg.project}' on '${cfg.url}'.`);
 
+  let request = createRequest(cfg);
+
   // 'Public' attributes & methods
   let instance = _.defaults(_.clone(cfg), DEFAULTS, {
     cfg: cfg,
@@ -74,7 +76,7 @@ export default function createClient(tokenOrCfg) {
           id: id,
           configuration: configuration
         }
-      }, this)
+      })
         .then(({ body }) => {
           debug(`Agent '${body.id}' created.`);
           return body;
@@ -88,14 +90,14 @@ export default function createClient(tokenOrCfg) {
       return request({
         method: 'GET',
         path: `/agents/${agentId}`
-      }, this)
+      })
         .then(({ body }) => body);
     },
     listAgents: function(agentId) {
       return request({
         method: 'GET',
         path: '/agents'
-      }, this)
+      })
         .then(({ body }) => body.agentsList);
     },
     deleteAgent: function(agentId) {
@@ -106,7 +108,7 @@ export default function createClient(tokenOrCfg) {
       return request({
         method: 'DELETE',
         path: `/agents/${agentId}`
-      }, this)
+      })
         .then(({ body }) => {
           debug(`Agent '${agentId}' deleted`);
           return body;
@@ -131,7 +133,7 @@ export default function createClient(tokenOrCfg) {
         query: {
           t: posixTimestamp
         }
-      }, this)
+      })
         .then(({ body }) => body);
     },
     addAgentContextOperations: function(agentId, operations) {
@@ -164,7 +166,7 @@ export default function createClient(tokenOrCfg) {
             method: 'POST',
             path: `/agents/${agentId}/context`,
             body: chunk
-          }, cfg)
+          })
         ),
         Promise.resolve())
         .then(() => {
@@ -210,7 +212,7 @@ export default function createClient(tokenOrCfg) {
           start: startTimestamp,
           end: endTimestamp
         }
-      }, this)
+      })
         .then(({ body, nextPageUrl }) => requestFollowingPages({
           operations: body,
           nextPageUrl
@@ -239,7 +241,7 @@ export default function createClient(tokenOrCfg) {
         if (!nextPageUrl) {
           return Promise.resolve(stateHistory);
         }
-        return request({ url: nextPageUrl }, this)
+        return request({ url: nextPageUrl })
           .then(({ body, nextPageUrl }) => requestFollowingPages({
             stateHistory: stateHistory.concat(body),
             nextPageUrl
@@ -253,7 +255,7 @@ export default function createClient(tokenOrCfg) {
           start: startTimestamp,
           end: endTimestamp
         }
-      }, this)
+      })
         .then(({ body, nextPageUrl }) => requestFollowingPages({
           stateHistory: body,
           nextPageUrl
@@ -267,7 +269,7 @@ export default function createClient(tokenOrCfg) {
       return request({
         method: 'GET',
         path: `/agents/${agentId}/shared`
-      }, this)
+      })
         .then(({ body }) => {
           if (_.isUndefined(t)) {
             return body.shortUrl;
@@ -282,7 +284,7 @@ export default function createClient(tokenOrCfg) {
       return request({
         method: 'DELETE',
         path: `/agents/${agentId}/shared`
-      }, this)
+      })
         .then(() => {
           debug(`Delete shared inspector link for agent "${agentId}".`);
         });
@@ -302,7 +304,7 @@ export default function createClient(tokenOrCfg) {
         query: {
           t: posixTimestamp
         }
-      }, this)
+      })
         .then(({ body }) => body);
 
       if (!cfg.decisionTreeRetrievalTimeout) {
@@ -350,7 +352,7 @@ export default function createClient(tokenOrCfg) {
         query: {
           t: posixTimestamp
         }
-      }, this)
+      })
         .then(({ body }) => {
           let decision = decide(body, ...contexts);
           decision.timestamp = posixTimestamp;
