@@ -79,12 +79,12 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
         decisionTreeRetrievalTimeout: 50
       }));
       return otherClient.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO)
-      .then(
-        () => Promise.reject(new Error('Should not be reached')),
-        (err) => {
-          expect(err).to.be.an.instanceof(errors.CraftAiLongRequestTimeOutError);
-        }
-      );
+        .then(
+          () => Promise.reject(new Error('Should not be reached')),
+          (err) => {
+            expect(err).to.be.an.instanceof(errors.CraftAiLongRequestTimeOutError);
+          }
+        );
     });
   });
 
@@ -107,25 +107,25 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
       }));
       const lastOperation = _.last(_.last(CONFIGURATION_2_OPERATIONS));
       return otherClient.getAgentDecisionTree(agent.id, lastOperation.timestamp)
-      .then(
-        () => Promise.reject(new Error('Should not be reached')),
-        (err) => {
-          expect(err).to.be.an.instanceof(errors.CraftAiLongRequestTimeOutError);
-        }
-      );
+        .then(
+          () => Promise.reject(new Error('Should not be reached')),
+          (err) => {
+            expect(err).to.be.an.instanceof(errors.CraftAiLongRequestTimeOutError);
+          }
+        );
     });
 
     it('should work with the standard timeout', function() {
       this.timeout(300000);
       const lastOperation = _.last(_.last(CONFIGURATION_2_OPERATIONS));
       return client.getAgentDecisionTree(agent.id, lastOperation.timestamp)
-      .then((treeJson) => {
-        expect(treeJson).to.be.ok;
-        const { _version, configuration, trees } = parse(treeJson);
-        expect(trees).to.be.ok;
-        expect(_version).to.be.ok;
-        expect(configuration).to.be.deep.equal(CONFIGURATION_2);
-      });
+        .then((treeJson) => {
+          expect(treeJson).to.be.ok;
+          const { _version, configuration, trees } = parse(treeJson);
+          expect(trees).to.be.ok;
+          expect(_version).to.be.ok;
+          expect(configuration).to.be.deep.equal(CONFIGURATION_2);
+        });
     });
   });
 });
