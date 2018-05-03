@@ -106,6 +106,20 @@ function parseResponse(req, res, resBody) {
 }
 
 export default function createRequest(cfg) {
+  const defaultHeaders = {
+    'Authorization': `Bearer ${cfg.token}`,
+    'Content-Type': 'application/json; charset=utf-8',
+    'Accept': 'application/json'
+  };
+
+  if (!IN_BROWSER) {
+    // Don't set the user agent in browsers it can cause CORS issues
+    // e.g. Safari v10.1.2 (12603.3.8)
+    defaultHeaders['User-Agent'] = USER_AGENT;
+  }
+
+  const baseUrl = `${cfg.url}/api/v1/${cfg.owner}/${cfg.project}`;
+
   return (req) => {
     req = _.defaults(req || {}, {
       method: 'GET',
@@ -115,24 +129,18 @@ export default function createRequest(cfg) {
       headers: {}
     });
 
-    req.url = req.url || `${cfg.url}/api/v1/${cfg.owner}/${cfg.project}${req.path}`;
+    req.url = req.url || `${baseUrl}${req.path}`;
+
     const queryStr = _(req.query)
       .map((value, key) => ([key, value]))
       .filter(([key, value]) => !_.isUndefined(value))
       .map((keyVal) => keyVal.join('='))
       .join('&');
+
     if (queryStr.length > 0) {
       req.url += `?${queryStr}`;
     }
-    req.headers['Authorization'] = `Bearer ${cfg.token}`;
-    req.headers['Content-Type'] = 'application/json; charset=utf-8';
-    req.headers['Accept'] = 'application/json';
-    if (!IN_BROWSER) {
-      // Don't set the user agent in browsers it can cause CORS issues
-      // e.g. Safari v10.1.2 (12603.3.8)
-      req.headers['User-Agent'] = USER_AGENT;
-    }
-
+    req.headers = _.defaults(req.headers, defaultHeaders);
 
     req.body = req.body && JSON.stringify(req.body);
 
