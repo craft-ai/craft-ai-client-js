@@ -58,7 +58,7 @@ export default function createClient(tokenOrCfg) {
   let request = createRequest(cfg);
 
   // 'Public' attributes & methods
-  let instance = _.defaults(_.clone(cfg), DEFAULTS, {
+  let instance = {
     cfg: cfg,
     createAgent: function(configuration, id = undefined) {
       if (_.isUndefined(configuration) || !_.isObject(configuration)) {
@@ -359,7 +359,7 @@ export default function createClient(tokenOrCfg) {
           return decision;
         });
     }
-  });
+  };
 
   return instance;
 }

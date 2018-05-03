@@ -105,6 +105,25 @@ function parseResponse(req, res, resBody) {
   }
 }
 
+function createHttpAgents() {
+  if (IN_BROWSER) {
+    return { http: null, https: null };
+  }
+  else {
+    const https = require('https');
+    const http = require('http');
+
+    const agentCfg = {
+      keepAlive: true
+    };
+
+    return {
+      https: new https.Agent(agentCfg),
+      http: new http.Agent(agentCfg)
+    };
+  }
+}
+
 export default function createRequest(cfg) {
   const defaultHeaders = {
     'Authorization': `Bearer ${cfg.token}`,
@@ -117,6 +136,8 @@ export default function createRequest(cfg) {
     // e.g. Safari v10.1.2 (12603.3.8)
     defaultHeaders['User-Agent'] = USER_AGENT;
   }
+
+  const agents = createHttpAgents();
 
   const baseUrl = `${cfg.url}/api/v1/${cfg.owner}/${cfg.project}`;
 
@@ -143,6 +164,10 @@ export default function createRequest(cfg) {
     req.headers = _.defaults(req.headers, defaultHeaders);
 
     req.body = req.body && JSON.stringify(req.body);
+
+    if (!IN_BROWSER) {
+      req.agent = req.url.slice(0, 5) === 'https' ? agents.https : agents.http;
+    }
 
     return fetch(req.url, req)
       .catch((err) => {
