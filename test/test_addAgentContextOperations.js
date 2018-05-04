@@ -20,6 +20,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
+    expect(CONFIGURATION_1_OPERATIONS_2).to.have.lengthOf(3260);
   });
 
   beforeEach(function() {
