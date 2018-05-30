@@ -6,10 +6,15 @@ require('../test_computeAgentDecision');
 require('../test_context');
 require('../test_createAgent');
 require('../test_createClient');
+require('../test_decideFromContextsArray');
 require('../test_errors');
 require('../test_getAgent');
+require('../test_getAgentContextOperations');
 require('../test_getAgentDecisionTree');
+require('../test_getAgentStateHistory');
+require('../test_getDecisionRulesProperties');
 require('../test_getSharedAgentInspectorUrl');
+require('../test_listAgents');
 require('../test_properties');
 require('../test_time');
 
