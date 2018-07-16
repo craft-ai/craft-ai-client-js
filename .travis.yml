@@ -10,14 +10,14 @@ before_cache: npm prune
 install: npm install --ignore-scripts
 script: DISABLE_LONG_TESTS=1 npm test
 deploy:
-- provider: npm
+  provider: npm
   email: ops@craft.ai
   api_key:
-    secure: eNf/9wOC/uoHKKZGhUG1CGryKHBxuUIUkZhis/TVAGvh65D3LRfWU9kbGTbWmrFV7dQXgMRtZ0OZhevQ5c27gpVZKvIaNZynV53PpBtUwbtOE2vjbdie58PCNo7GKIJsAVfeiQta3pUUq6r9ZyN0573ROch+0pD2bNDLh+YT+JC54lnvGvceOZwajCsITecUgl7aev//6gnWr0cW3TDhNFyhAhpoy0r92g25i4M1IQ8D2nLZ46Wpi0ISL7xlT2DDp45w2ltu1bpJctNhymt1KTduTUbUHymVNceaHzq7llMA4DNhqtXD928JRa/TG2tnor9X7sGd4PUtheEsCJTX7OVrDMQnRnZTMRBXg3VBM/zLoNd6VLh38kddBQfh4cnlqYRyzcPdT5tbBYwmv34BdpdAXoApd0n5hPWkTSBFhFqGcP+h8sU2xv1U96o6X0atCzZdo/2RvUfbqEOdqWRHSOc/suhEyGordJbH3TGE7W0OaWsuUzjm0b+HNcpWKFp2vdhjAgwLxZQ1WvMyXmSOqeQ1GCMbYMjcTiP/U2tpq4+SnNVzeAzZaFJ1TiSS0x18F/hl9FukBOdv1jxXH1AulCxi54EcIZjnMVni7J4oIRz+iMk1qCIS/UbZsEmGIzBWlYGqwKeZTO5eF48M6LBR/+aimhREKvaoyek/dJjdGQE=
+    secure: Dqm70ZZOVH8Xe6sO6Y3Rh1lxTXW4mRQls2xZRKmWC5K1biZlFRZcpxJWb2jw6e3fNKdprirRF+6oCVgs1SYiINroV+uG6+K5ZLch+sG4G2O84ZN2rIbLyyP0ssegMCPjVQGtd9jjhC1kBIVMpQ5mjrdVCDzh3icPsczNHJhF6itBwuX+aCWOtEt4O3ks6mp7hT7GjR4jwU+fk6Eegexi3aLCyWY6wZgNr0wQmp0yZcu+xfHltBX7EIhO7oNMXkgZVGQV2s5BV4W9euTwVIKLuWIm4O1acgKe8szXlnX5tvBb0P/K7qd6KlKptyXBdR5LwnW0Jwu8OD0NGSDijsElMKKkZKoEbn8qkyXTyWiJa2X+Re+2Xmf4MK6XPoPhHWGm4RJu8GN5XUKf+Nr9+5zNTl0OABcOuD8p1zMTpWWPpNbmIuHMi18rCMgck6FbFouynclN6aS76iCSvRP7Oe0/5tpkWJm4cfvVljVSlNiSDTKkkOzNT35AkcjqnM4Iv4l6ZX32ty631Fc1s4FBsSVl0pI+pkaUfyleZgUmbCirviccyHO+MHOynlHea1fiV1L9LSP2A+wOooXuzf6hdjSWXfVZObyempi/bPomFaXqgIc3yDsteAJwT+BYedrsFlC+DTw5dHG3RU1dFv/88DG7pLKOm7aIELhbmlk8tfQPWTk=
   on:
     tags: true
     repo: craft-ai/craft-ai-client-js
-    node: '6'
+  node: '6'
   skip_cleanup: true
 env:
   global:
