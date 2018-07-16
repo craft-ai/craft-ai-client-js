@@ -1,10 +1,10 @@
 import { interpreter } from '../src';
 
-const DECISION_TREE_1 = require('./data/interpreter-test-suite/trees/enum.json');
-const DECISION_TREE_2 = require('./data/interpreter-test-suite/trees/continuous.json');
-const DECISION_TREE_3 = require('./data/interpreter-test-suite/trees/oneColor.json');
+const DECISION_TREE_1 = require('./data/interpreter-test-suite/decide/trees/enum.json');
+const DECISION_TREE_2 = require('./data/interpreter-test-suite/decide/trees/continuous.json');
+const DECISION_TREE_3 = require('./data/interpreter-test-suite/decide/trees/oneColor.json');
 
-const INVALID_DECISION_TREE_1 = require('./data/interpreter-test-suite/trees/emptyArray.json');
+const INVALID_DECISION_TREE_1 = require('./data/interpreter-test-suite/decide/trees/emptyArray.json');
 
 describe('interpreter.getDecisionRulesProperties(<tree>)', function() {
   it('can list the properties used in a tree\'s decision rules (enum output)', function() {
