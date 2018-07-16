@@ -5,7 +5,7 @@ import DEFAULTS from './defaults';
 import jwtDecode from 'jwt-decode';
 import createRequest from './request';
 import Time from './time';
-import { AGENT_ID_ALLOWED_REGEXP, AGENT_ID_MAX_LENGTH } from './constants';
+import { AGENT_ID_ALLOWED_REGEXP, AGENT_ID_MAX_LENGTH, deprecation } from './constants';
 import { CraftAiBadRequestError, CraftAiCredentialsError, CraftAiLongRequestTimeOutError } from './errors';
 
 let debug = Debug('craft-ai:client');
@@ -115,7 +115,7 @@ export default function createClient(tokenOrCfg) {
         });
     },
     destroyAgent: function(agentId) {
-      console.warn('WARNING: \'destroyAgent\' method of craft ai client is deprecated. It will be removed in the future, use \'deleteAgent\' instead. Refer to https://beta.craft.ai/doc/js.');
+      deprecation('client.destroyAgent', 'client.deleteAgent');
       return this.deleteAgent(agentId);
     },
     getAgentContext: function(agentId, t = undefined) {
@@ -262,7 +262,7 @@ export default function createClient(tokenOrCfg) {
         }));
     },
     getAgentInspectorUrl: function(agentId, t = undefined) {
-      console.warn('WARNING: \'getAgentInspectorUrl\' method of craft ai client is deprecated. It will be removed in the future, use \'getSharedAgentInspectorUrl\' instead. Refer to https://beta.craft.ai/doc/js.');
+      deprecation('client.getAgentInspectorUrl', 'client.getSharedAgentInspectorUrl');
       return this.getSharedAgentInspectorUrl(agentId, t);
     },
     getSharedAgentInspectorUrl: function(agentId, t = undefined) {

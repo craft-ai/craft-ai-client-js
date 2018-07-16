@@ -1,9 +1,9 @@
 import { interpreter, Time } from '../src';
 
-const DECISION_TREE_ENUM = require('./data/interpreter-test-suite/trees/enum.json');
-const EXPECTATION_DECISION_TREE_ENUM = require('./data/interpreter-test-suite/expectations/enum.json');
-const DECISION_TREE_UNKNOWN_OUTPUT = require('./data/interpreter-test-suite/trees/unknownOutput.json');
-const EXPECTATION_DECISION_TREE_UNKNOWN_OUTPUT = require('./data/interpreter-test-suite/expectations/unknownOutput.json');
+const DECISION_TREE_ENUM = require('./data/interpreter-test-suite/decide/trees/enum.json');
+const EXPECTATION_DECISION_TREE_ENUM = require('./data/interpreter-test-suite/decide/expectations/enum.json');
+const DECISION_TREE_UNKNOWN_OUTPUT = require('./data/interpreter-test-suite/decide/trees/unknownOutput.json');
+const EXPECTATION_DECISION_TREE_UNKNOWN_OUTPUT = require('./data/interpreter-test-suite/decide/expectations/unknownOutput.json');
 
 describe('interpreter.decideFromContextsArray', () => {
   it('works on an array of contexts', function() {

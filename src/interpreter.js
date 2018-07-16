@@ -3,6 +3,8 @@ import context from './context';
 import parse from './parse';
 import isTimezone from './timezones';
 import { CraftAiDecisionError, CraftAiNullDecisionError, CraftAiUnknownError } from './errors';
+import { formatDecisionRules, formatProperty } from './formatter';
+import { reduceDecisionRules } from './reducer';
 
 const DECISION_FORMAT_VERSION = '1.1.0';
 
@@ -277,3 +279,5 @@ export function getDecisionRulesProperties(tree) {
     }))
     .value();
 }
+
+export { formatDecisionRules, formatProperty, reduceDecisionRules };
