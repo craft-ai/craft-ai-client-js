@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.14.1...HEAD) ##
 
+### Added ###
+
+- Add new function `interpreter.reduceDecisionRules` taking a list of decision rules (as retrieved by `interpreter.decide`) and merging rules that are applied to the same properties.
+- Add new function `interpreter.formatDecisionRules` taking a list of decision rules (as retrieved by `interpreter.decide`) and formatting them into a human readable string.
+- Add new function `interpreter.formatProperty` formatting a property and its value.
+
 ### Changed ###
 
 - Function deprecation notices are now logged only once, using `console.warning`.
