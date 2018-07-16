@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.14.1...HEAD) ##
 
+### Changed ###
+
+- Function deprecation notices are now logged only once, using `console.warning`.
+
 ## [1.14.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.14.0...v1.14.1) - 2018-06-06 ##
 ### Changed ###
 

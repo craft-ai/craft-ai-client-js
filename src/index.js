@@ -4,11 +4,12 @@ import DEFAULT from './defaults';
 import Time from './time';
 import * as errors from './errors';
 import * as Properties from './properties';
+import { deprecation } from './constants';
 
 export default createClient;
 
 function decide(tree, ...args) {
-  console.warn('WARNING: \'decide\' method of craft ai client is deprecated. It will be removed in the future, use \'interpreter.decide\' instead. Refer to https://beta.craft.ai/doc/js.');
+  deprecation('decide', 'interpreter.decide');
   return interpreter.decide(tree, ...args);
 }
 
