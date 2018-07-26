@@ -19,7 +19,9 @@
     "url": "https://github.com/craft-ai/craft-ai-client-js"
   },
   "browser": {
-    "lodash": "lodash/lodash.min.js"
+    "lodash": "lodash/lodash.min.js",
+    "https-proxy-agent": false,
+    "http-proxy-agent": false
   },
   "keywords": [
     "ai",
@@ -61,6 +63,8 @@
   },
   "dependencies": {
     "debug": "3.1.0",
+    "http-proxy-agent": "2.1.0",
+    "https-proxy-agent": "2.2.1",
     "inherits": "2.0.3",
     "jwt-decode": "2.2.0",
     "lodash": "4.17.5",

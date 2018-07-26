@@ -105,22 +105,39 @@ function parseResponse(req, res, resBody) {
   }
 }
 
-function createHttpAgents() {
+function createHttpAgent(proxy = undefined) {
   if (IN_BROWSER) {
-    return { http: null, https: null };
+    return undefined;
+  }
+  else if (proxy) {
+    const HttpProxyAgent = require('http-proxy-agent');
+
+    return new HttpProxyAgent(proxy);
+  }
+  else {
+    const http = require('http');
+
+    return new http.Agent({
+      keepAlive: true
+    });
+  }
+}
+
+function createHttpsAgent(proxy = undefined) {
+  if (IN_BROWSER) {
+    return undefined;
+  }
+  else if (proxy) {
+    const HttpsProxyAgent = require('https-proxy-agent');
+
+    return new HttpsProxyAgent(proxy);
   }
   else {
     const https = require('https');
-    const http = require('http');
 
-    const agentCfg = {
+    return new https.Agent({
       keepAlive: true
-    };
-
-    return {
-      https: new https.Agent(agentCfg),
-      http: new http.Agent(agentCfg)
-    };
+    });
   }
 }
 
@@ -137,12 +154,13 @@ export default function createRequest(cfg) {
     defaultHeaders['User-Agent'] = USER_AGENT;
   }
 
-  const agents = createHttpAgents();
-
   const baseUrl = `${cfg.url}/api/v1/${cfg.owner}/${cfg.project}`;
+
+  const agent = baseUrl.slice(0, 5) === 'https' ? createHttpsAgent(cfg.proxy) : createHttpAgent(cfg.proxy);
 
   return (req) => {
     req = _.defaults(req || {}, {
+      agent,
       method: 'GET',
       path: '',
       body: undefined,
@@ -164,10 +182,6 @@ export default function createRequest(cfg) {
     req.headers = _.defaults(req.headers, defaultHeaders);
 
     req.body = req.body && JSON.stringify(req.body);
-
-    if (!IN_BROWSER) {
-      req.agent = req.url.slice(0, 5) === 'https' ? agents.https : agents.http;
-    }
 
     return fetch(req.url, req)
       .catch((err) => {

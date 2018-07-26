@@ -14,6 +14,13 @@ function resolveAfterTimeout(timeout) {
   return new Promise((resolve) => setTimeout(() => resolve(), timeout));
 }
 
+// A very simple regex, helps detect some issues.
+const SIMPLE_HTTP_URL_REGEX = /^https?:\/\/.*$/;
+
+function isUrl(url) {
+  return SIMPLE_HTTP_URL_REGEX.test(url);
+}
+
 export default function createClient(tokenOrCfg) {
   let cfg = _.defaults(
     {},
@@ -36,7 +43,7 @@ export default function createClient(tokenOrCfg) {
   catch (e) {
     throw new CraftAiCredentialsError();
   }
-  if (!_.has(cfg, 'url') || !_.isString(cfg.url)) {
+  if (!_.has(cfg, 'url') || !isUrl(cfg.url)) {
     throw new CraftAiBadRequestError('Bad Request, unable to create a client with no or invalid url provided.');
   }
   if (!_.has(cfg, 'project') || !_.isString(cfg.project)) {
@@ -52,10 +59,13 @@ export default function createClient(tokenOrCfg) {
   if (!_.has(cfg, 'owner') || !_.isString(cfg.owner)) {
     throw new CraftAiBadRequestError('Bad Request, unable to create a client with no or invalid owner provided.');
   }
+  if (_.has(cfg, 'proxy') && !isUrl(cfg.proxy)) {
+    throw new CraftAiBadRequestError('Bad Request, unable to create a client with an invalid proxy url provided.');
+  }
 
   debug(`Creating a client instance for project '${cfg.owner}/${cfg.project}' on '${cfg.url}'.`);
 
-  let request = createRequest(cfg);
+  const request = createRequest(cfg);
 
   // 'Public' attributes & methods
   let instance = {
