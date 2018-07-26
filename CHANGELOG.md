@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.15.1...HEAD) ##
 
+### Fixed ###
+
+- The `proxy` settings now works properly when set to `undefined`.
+
 ## [1.15.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.15.0...v1.15.1) - 2018-07-26 ##
 
 ### Added ###

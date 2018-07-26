@@ -45,4 +45,15 @@ describe('craftai(<token_or_cfg>)', function() {
     expect(client.cfg.project).to.be.ok;
     expect(client.cfg.proxy).to.be.equal(proxy);
   });
+
+  it('should create a valid client given an undefined proxy configuration', function() {
+    const proxy = undefined;
+
+    const client = craftai(Object.assign({}, CRAFT_CFG, { proxy }));
+
+    expect(client.cfg.url).to.be.ok;
+    expect(client.cfg.owner).to.be.ok;
+    expect(client.cfg.project).to.be.ok;
+    expect(client.cfg.proxy).to.be.equal(proxy);
+  });
 });

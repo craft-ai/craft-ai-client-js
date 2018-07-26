@@ -59,7 +59,7 @@ export default function createClient(tokenOrCfg) {
   if (!_.has(cfg, 'owner') || !_.isString(cfg.owner)) {
     throw new CraftAiBadRequestError('Bad Request, unable to create a client with no or invalid owner provided.');
   }
-  if (_.has(cfg, 'proxy') && !isUrl(cfg.proxy)) {
+  if (cfg.proxy != null && !isUrl(cfg.proxy)) {
     throw new CraftAiBadRequestError('Bad Request, unable to create a client with an invalid proxy url provided.');
   }
 
