@@ -30,7 +30,7 @@ npm install craft-ai --save
 Then import it in your code
 
 ```js
-var craftai = require('craft-ai').createClient;
+const craftai = require('craft-ai').createClient;
 ```
 
 or using [es2015](https://babeljs.io/docs/learn-es2015/) syntax
@@ -59,13 +59,13 @@ The simple version:
 
 ```js
 // The token you retrieved for a given project
-let client = craftai('{token}');
+const client = craftai('{token}');
 ```
 
 The more complete version:
 
 ```js
-let client = craftai({
+const client = craftai({
   // Mandatory, the token
   token: '{token}',
   // Optional, default value is 500
@@ -88,8 +88,10 @@ In this example, we will create an agent that learns the **decision model** of a
 - `timezone`, a property of type `timezone` needed to generate proper values for `timeOfDay` (cf. the [context properties type section](#context-properties-types) for further information),
 - and finally `lightbulbState` which is an `enum` property that is also the output.
 
+> :information_source: `timeOfDay` is auto-generated, you will find more information below.
+
 ```js
-var AGENT_ID = 'my_first_agent';
+const AGENT_ID = 'my_first_agent';
 
 client.createAgent(
   {
@@ -124,7 +126,7 @@ Pretty straightforward to test! Open [`https://beta.craft.ai/inspector`](https:/
 Now, if you run that a second time, you'll get an error: the agent `'my_first_agent'` is already existing. Let's see how we can delete it before recreating it.
 
 ```js
-var AGENT_ID = 'my_first_agent';
+const AGENT_ID = 'my_first_agent';
 
 client.deleteAgent(AGENT_ID)
 .then(function() {
@@ -157,7 +159,7 @@ In the following we add 8 operations:
 8. At 23:06, everyone leaves the room and the light is turned off.
 
 ```js
-var AGENT_ID = 'my_first_agent';
+const AGENT_ID = 'my_first_agent';
 
 client.deleteAgent(AGENT_ID)
 .then(function() {
@@ -246,7 +248,7 @@ The agent has acquired a context history, we can now compute a decision tree fro
 The decision tree is computed at a given timestamp, which means it will consider the context history from the creation of this agent up to this moment. Let's first try to compute the decision tree at midnight on July 26, 2016.
 
 ```js
-var AGENT_ID = 'my_first_agent';
+const AGENT_ID = 'my_first_agent';
 
 client.deleteAgent(AGENT_ID)
 .then(function() {
@@ -281,7 +283,7 @@ _For further information, check the ['compute decision tree' reference documenta
 Once the decision tree is computed it can be used to take a decision. In our case it is basically answering this type of question: "What is the anticipated **state of the lightbulb** at 7:15 if there are 2 persons in the room ?".
 
 ```js
-var AGENT_ID = 'my_first_agent';
+const AGENT_ID = 'my_first_agent';
 
 client.deleteAgent(AGENT_ID)
 .then(function() {
@@ -301,7 +303,7 @@ client.deleteAgent(AGENT_ID)
 })
 .then(function(tree) {
   console.log('Decision tree retrieved!', tree);
-  let res = craftai.interpreter.decide(tree, {
+  const res = craftai.interpreter.decide(tree, {
     timezone: '+02:00',
     timeOfDay: 7.25,
     peopleCount: 2
@@ -360,15 +362,11 @@ Each agent has a configuration defining:
 
 **craft ai** defines the following types related to time:
 
-- a `time_of_day` property is a real number belonging to **[0.0; 24.0[**, each value represents the number of hours in the day since midnight (e.g. 13.5 means
-13:30),
-- a `day_of_week` property is an integer belonging to **[0, 6]**, each
-value represents a day of the week starting from Monday (0 is Monday, 6 is
-Sunday).
+- a `time_of_day` property is a real number belonging to **[0.0; 24.0[**, each value represents the number of hours in the day since midnight (e.g. 13.5 means 13:30),
+- a `day_of_week` property is an integer belonging to **[0, 6]**, each value represents a day of the week starting from Monday (0 is Monday, 6 is Sunday).
 - a `day_of_month` property is an integer belonging to **[1, 31]**, each value represents a day of the month.
 - a `month_of_year` property is an integer belonging to **[1, 12]**, each value represents a month of the year.
-- a `timezone` property is a string value representing the timezone as an
-offset from UTC, supported format are:
+- a `timezone` property is a string value representing the timezone as an offset from UTC, supported format are:
   - **±[hh]:[mm]**,
   - **±[hh][mm]**,
   - **±[hh]**,
@@ -578,9 +576,9 @@ const nowP5 = new craftai.Time(undefined, '+05:00');
 
 The following **advanced** configuration parameters can be set in specific cases. They are **optional**. Usually you would not need them.
 
-- `operations_as_events` is a boolean, either `true` or `false`. The default value is `false`. If it is set to true, all context operations are treated as events, as opposed to context updates. This is appropriate if the data for an agent is made of events that have no duration, and if many events are more significant than a few. If `operations_as_events` is `true`, `learning_period` and the advanced parameter `tree_max_operations` must be set as well. In that case, `time_quantum` is ignored because events have no duration, as opposed to the evolution of an agent's context over time.
-- `tree_max_operations` is a positive integer. It **can and must** be set only if `operations_as_events` is `true`. It defines the maximum number of events on which a single decision tree can be based. It is complementary to `learning_period`, which limits the maximum age of events on which a decision tree is based.
-- `tree_max_depth` is a positive integer. It defines the maximum depth of decision trees, which is the maximum distance between the root node and a leaf (terminal) node. A depth of 0 means that the tree is made of a single root node. By default, `tree_max_depth` is set to 6 if the output is categorical (e.g. `enum`), or to 4 if the output is numerical (e.g. `continuous`).
+- **`operations_as_events`** is a boolean, either `true` or `false`. The default value is `false`. If it is set to true, all context operations are treated as events, as opposed to context updates. This is appropriate if the data for an agent is made of events that have no duration, and if many events are more significant than a few. If `operations_as_events` is `true`, `learning_period` and the advanced parameter `tree_max_operations` must be set as well. In that case, `time_quantum` is ignored because events have no duration, as opposed to the evolution of an agent's context over time.
+- **`tree_max_operations`** is a positive integer. It **can and must** be set only if `operations_as_events` is `true`. It defines the maximum number of events on which a single decision tree can be based. It is complementary to `learning_period`, which limits the maximum age of events on which a decision tree is based.
+- **`tree_max_depth`** is a positive integer. It defines the maximum depth of decision trees, which is the maximum distance between the root node and a leaf (terminal) node. A depth of 0 means that the tree is made of a single root node. By default, `tree_max_depth` is set to 6 if the output is categorical (e.g. `enum`), or to 4 if the output is numerical (e.g. `continuous`).
 
 These advanced configuration parameters are optional, and will appear in the agent information returned by **craft ai** only if you set them to something other than their default value. If you intend to use them in a production environment, please get in touch with us.
 
@@ -687,6 +685,7 @@ client.listAgents()
 ```
 
 #### Create and retrieve shared url ####
+
 Create and get a shareable url to view an agent tree.
 Only one url can be created at a time.
 
@@ -704,6 +703,7 @@ client.getSharedAgentInspectorUrl(
 ```
 
 #### Delete shared url ####
+
 Delete a shareable url.
 The previous url cannot access the agent tree anymore.
 
@@ -848,13 +848,14 @@ client.getAgentStateHistory(
 Decision trees are computed at specific timestamps, directly by **craft ai** which learns from the context operations [added](#add-operations) throughout time.
 
 When you [compute](#compute) a decision tree, **craft ai** returns an object containing:
+
 - the **API version**
 - the agent's configuration as specified during the agent's [creation](#create-agent)
 - the tree itself as a JSON object:
 
-  * Internal nodes are represented by a `"decision_rule"` object and a `"children"` array. The first one, contains the `"property`, and the `"property"`'s value, to decide which child matches a context.
-  * Leaves have a `"predicted_value"`, `"confidence"` and `"decision_rule"` object for this value, instead of a `"children"` array. `"predicted_value`" is an estimation of the output in the contexts matching the node. `"confidence"` is a number between 0 and 1 that indicates how confident **craft ai** is that the output is a reliable prediction.  When the output is a numerical type, leaves also have a `"standard_deviation"` that indicates a margin of error around the `"predicted_value"`.
-  * The root only contains a `"children"` array.
+  - Internal nodes are represented by a `"decision_rule"` object and a `"children"` array. The first one, contains the `"property`, and the `"property"`'s value, to decide which child matches a context.
+  - Leaves have a `"predicted_value"`, `"confidence"` and `"decision_rule"` object for this value, instead of a `"children"` array. `"predicted_value`" is an estimation of the output in the contexts matching the node. `"confidence"` is a number between 0 and 1 that indicates how confident **craft ai** is that the output is a reliable prediction.  When the output is a numerical type, leaves also have a `"standard_deviation"` that indicates a margin of error around the `"predicted_value"`.
+  - The root only contains a `"children"` array.
 
 #### Compute ####
 
@@ -996,42 +997,30 @@ client.getAgentDecisionTree(
 
 #### Take decision ####
 
-The first method retrieves the decision tree then applies it on the given context.
+> :information_source: To take a decision, first compute the decision tree then use the **offline interpreter**.
 
-```js
-client.computeAgentDecision(
-  'impervious_kraken', // The agent id
-  1464600256, // The timestamp at which the decision is taken
-  { // The context on which the decision is taken
-    timezone: '+02:00',
-    timeOfDay: 7.5,
-    peopleCount: 3
-  }
-)
-.then(function(decision) {
-  // Work on the decision
-})
-.catch(function(error) {
-  // Catch errors here
-})
-```
 
-To get a chance to store and reuse the decision tree, use `getAgentDecisionTree` and use `craftai.interpreter.decide`, a simple function evaluating a decision tree **offline**.
+## Interpreter ##
+
+The decision tree interpreter can be used offline from decisions tree computed through the API.
+
+### Take decision ###
 
 ```js
 // `tree` is the decision tree as retrieved through the craft ai REST API
-let tree = { ... };
+const tree = { ... };
 // Compute the decision with specifying every context field
-let decision = craftai.interpreter.decide(
+const decision = craftai.interpreter.decide(
   tree,
   {
     timezone: '+02:00',
     timeOfDay: 7.5,
     peopleCount: 3
-  }
+  });
+
 // Or Compute the decision on a context created from the given one and filling the
 // `day_of_week`, `time_of_day` and `timezone` properties from the given `Time`
-let decision = craftai.interpreter.decide(
+const decision = craftai.interpreter.decide(
   tree,
   {
     timezone: '+02:00',
@@ -1097,15 +1086,15 @@ A `decision` in a case where the tree cannot make a prediction:
   },
 ```
 
-#### Take multiple decisions ####
+### Take multiple decisions ###
 
 From the tree previously retrieved, ask for multiple decisions.
 
 ```js
 // `tree` is the decision tree as retrieved through the craft ai REST API
-let tree = { ... };
+const tree = { ... };
 // Pass an array containing each context on which you want to take a decision
-let decisionRules = craftai.interpreter.decideFromContextsArray(tree, [
+const decisions = craftai.interpreter.decideFromContextsArray(tree, [
   {
     timezone: '+02:00',
     peopleCount: 3,
@@ -1205,15 +1194,46 @@ Results for `craftai.interpreter.decideFromContextsArray` would look like:
   }
 ]
 ```
-#### Get decision rules properties ####
 
-From the tree previously retrieved, get the properties from the context that matters in the tree.
+### Reduce decision rules ###
+
+From a list of decision rules, as retrieved when taking a decision, when taking a decision compute an equivalent & minimal list of rules.
+
+```js
+// `decision` is the decision tree as retrieved from taking a decision
+const decision = craftai.interpreter.decide( ... );
+
+// `decisionRules` is the decision rules that led to decision for the `lightBulbState` value
+const decisionRules = decision.output.lightBulbState.decision_rules;
+
+// `minimalDecisionRules` has the mininum list of rules strictly equivalent to `decisionRules`
+const minimalDecisionRules = craftai.interpreter.reduceDecisionRules(decisionRules)
+```
+
+### Format decision rules ###
+
+From a list of decision rules, compute a _human readable_ version of these rules, in english.
+
+```js
+// `decision` is the decision tree as retrieved from taking a decision
+const decision = craftai.interpreter.decide( ... );
+
+// `decisionRules` is the decision rules that led to decision for the `lightBulbState` value
+const decisionRules = decision.output.lightBulbState.decision_rules;
+
+// `decisionRulesStr` is a human readable string representation of the rules.
+const decisionRulesStr = craftai.interpreter.reduceDecisionRules.formatDecisionRules(decisionRules);
+```
+
+### Get decision rules properties ###
+
+Retrieve the context properties that matters to a previously computed tree.
 
 ```js
 // `tree` is the decision tree as retrieved through the craft ai REST API
-let tree = { ... };
+const tree = { ... };
 
-let decisionRules = craftai.interpreter.getDecisionRulesProperties(tree)
+const decisionRules = craftai.interpreter.getDecisionRulesProperties(tree)
 ```
 
 Results for `craftai.interpreter.getDecisionRulesProperties` would look like:
@@ -1228,9 +1248,6 @@ Results for `craftai.interpreter.getDecisionRulesProperties` would look like:
 ]
 ```
 
-### Logging ###
+## Logging ##
 
-The **craft ai** client is using
-[visionmedia/debug](https://www.npmjs.com/package/debug) under the namespace
-`'craft-ai:client:*'`, please refer to their documentation for further
-information.
+The **craft ai** client is using [visionmedia/debug](https://www.npmjs.com/package/debug) under the namespace `'craft-ai:client:*'`, please refer to their documentation for further information.
