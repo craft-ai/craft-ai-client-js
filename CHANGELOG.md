@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Introducing an experimental `proxy` configuration parameter to the client.
 
+### Changed ###
+
+- Discontinuing the continuous testing for Node.js v0.12 due to a SSL certificate issue.
+
 ## [1.15.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.14.1...v1.15.0) - 2018-07-16 ##
 
 ### Added ###
