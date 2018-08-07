@@ -32,5 +32,5 @@ export const OPERATORS = {
 };
 
 export const deprecation = _.memoize(((oldFunction, newFunction) =>
-  console.warn(`DEPRECATION WARNING: the \'${oldFunction}\' function of the craft ai client is deprecated. It will be removed in the future, \'${newFunction}\' should be used instead.`)
+  console.warn(`DEPRECATION WARNING: the '${oldFunction}' function of the craft ai client is deprecated. It will be removed in the future, '${newFunction}' should be used instead.`)
 ));
