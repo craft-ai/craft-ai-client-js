@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { OPERATORS, TYPE_ANY, TYPES } from './constants';
-import moment from 'moment';
+import Time from './time';
 
 const DAYS = [
   'Mon',
@@ -31,56 +31,34 @@ const PROPERTY_FORMATTER = {
   [TYPE_ANY]: (value) => value,
   [TYPES.continuous]: (number) => `${Math.round(number * 100) / 100}`,
   [TYPES.time_of_day]: (time) => {
-    if (_.isDate(time)) {
-      const momentTime = moment(time);
-      if (momentTime.seconds() < 1) {
-        return momentTime.format('HH:mm');
-      }
-      else {
-        return momentTime.format('HH:mm:ss');
-      }
+    const _time = time instanceof Time ? time.time_of_day : time;
+    const hours = Math.floor(_time);
+    const hoursStr = _.padStart(hours, 2, '0');
+    const decMinutes = (_time - hours) * 60;
+    const minutes = Math.floor(decMinutes);
+    const minutesStr = _.padStart(minutes, 2, '0');
+    const seconds = Math.round((decMinutes - minutes) * 60);
+    const secondsStr = _.padStart(seconds, 2, '0');
+
+    if (seconds > 0) {
+      return `${hoursStr}:${minutesStr}:${secondsStr}`;
     }
     else {
-      const hours = Math.floor(time);
-      const hoursStr = _.padStart(hours, 2, '0');
-      const decMinutes = (time - hours) * 60;
-      const minutes = Math.floor(decMinutes);
-      const minutesStr = _.padStart(minutes, 2, '0');
-      const seconds = Math.floor((decMinutes - minutes) * 60);
-      const secondsStr = _.padStart(seconds, 2, '0');
-
-      if (seconds > 0) {
-        return `${hoursStr}:${minutesStr}:${secondsStr}`;
-      }
-      else {
-        return `${hoursStr}:${minutesStr}`;
-      }
+      return `${hoursStr}:${minutesStr}`;
     }
   },
   [TYPES.day_of_week]: (day) => {
-    if (_.isDate(day)) {
-      return DAYS[moment(day).isoWeekday() - 1];
-    }
-    else {
-      return DAYS[day];
-    }
+    const _day = day instanceof Time ? day.day_of_week : day;
+    return DAYS[_day];
   },
   [TYPES.day_of_month]: (day) => {
-    if (_.isDate(day)) {
-      return moment(day).date();
-    }
-    else {
-      return day;
-    }
+    const _day = day instanceof Time ? day.day_of_month : day;
+    return _.padStart(_day, 2, '0');
   },
   // Months are in [1; 12] thus -1 to be index month name in [0; 11]
   [TYPES.month_of_year]: (month) => {
-    if (_.isDate(month)) {
-      return MONTH[moment(month).month()];
-    }
-    else {
-      return MONTH[month - 1];
-    }
+    const _month = month instanceof Time ? month.month_of_year : month;
+    return MONTH[_month - 1];
   }
 };
 
