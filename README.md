@@ -55,24 +55,9 @@ to include a specific version specify it in the url like
 
 #### Initialize ####
 
-The simple version:
-
 ```js
 // The token you retrieved for a given project
 const client = craftai('{token}');
-```
-
-The more complete version:
-
-```js
-const client = craftai({
-  // Mandatory, the token
-  token: '{token}',
-  // Optional, default value is 500
-  operationsChunksSize: {max_number_of_operations_sent_at_once},
-  // Optional, default value is 5 minutes (300000)
-  decisionTreeRetrievalTimeout: {timeout_duration_for_decision_trees_retrieval}
-});
 ```
 
 ### 3 - Create an agent ###
@@ -999,7 +984,50 @@ client.getAgentDecisionTree(
 
 > :information_source: To take a decision, first compute the decision tree then use the **offline interpreter**.
 
+### Advanced client configuration ###
 
+The simple configuration to create the `client` is just the token. For special needs, additional advanced configuration can be provided.
+
+#### Amount of operations sent in one chunk ####
+
+`client.addAgentContextOperations` splits the provided operations into chunks in order to limit the size of the http requests to the craft ai API. In the client configuration, `operationsChunksSize` can be increased in order to limit the number of request, or decreased when large http requests cause errors.
+
+```js
+const client = craftai({
+  // Mandatory, the token
+  token: '{token}',
+  // Optional, default value is 500
+  operationsChunksSize: {max_number_of_operations_sent_at_once}
+});
+```
+
+#### Timeout duration for decision trees retrieval ####
+
+It is possible to increase or decrease the timeout duration of `client.getAgentDecisionTree`, for exemple to account for especially long computations.
+
+```js
+const client = craftai({
+  // Mandatory, the token
+  token: '{token}',
+  // Optional, default value is 5 minutes (300000)
+  decisionTreeRetrievalTimeout: {timeout_duration_for_decision_trees_retrieval}
+});
+```
+
+#### Proxy ####
+
+> :information_source: This setting can only be set in Node.js environements. In a browser environement the settings of the browser will be used automatically.
+
+It is possible to provide proxy configuration in the `proxy` property of the client configuration. It will be used to call the craft ai API (through HTTPS). The expected format is a host name or IP and port, optionally preceded by credentials such as `http://user:pass@10.10.1.10:1080`.
+
+```js
+const client = craftai({
+  // Mandatory, the token
+  token: '{token}',
+  // Optional, no default value
+  proxy: 'http://{user}:{password}@{host_or_ip}:{port}'
+});
+```
 ## Interpreter ##
 
 The decision tree interpreter can be used offline from decisions tree computed through the API.
