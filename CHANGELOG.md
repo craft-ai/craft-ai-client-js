@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed ###
 
 - Updating a bunch of dependencies including `babel`, `dotenv`, `eslint`, `moment`, `node-fetch` and `lodash`.
+- `interpreter.formatProperty` is now able to take an instance of `Time`.
 
 ## [1.15.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.15.0...v1.15.1) - 2018-07-26 ##
 

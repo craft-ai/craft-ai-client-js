@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { interpreter } from '../src';
+import { interpreter, Time } from '../src';
 
 const EXPECTATIONS_DIR = path.join(__dirname, 'data/interpreter-test-suite/format_decision_rules');
 
@@ -22,6 +22,38 @@ describe('interpreter.formatDecisionRules', () => {
           }
         });
       });
+    });
+  });
+});
+describe('interpreter.formatProperty', () => {
+  describe('on generated date types, works from a Time instance', () => {
+    it('From \'2018-08-07T16:06:06+0200\'', () => {
+      const date = new Time('2018-08-07T16:06:06+0200');
+      expect(interpreter.formatProperty('month_of_year', date)).to.be.equal('Aug');
+      expect(interpreter.formatProperty('day_of_month', date)).to.be.equal('07');
+      expect(interpreter.formatProperty('day_of_week', date)).to.be.equal('Tue');
+      expect(interpreter.formatProperty('time_of_day', date)).to.be.equal('16:06:06');
+    });
+    it('From \'2018-08-06T08:32:58.000Z\'', () => {
+      const date = new Time('2018-08-06T08:32:58.000Z');
+      expect(interpreter.formatProperty('month_of_year', date)).to.be.equal('Aug');
+      expect(interpreter.formatProperty('day_of_month', date)).to.be.equal('06');
+      expect(interpreter.formatProperty('day_of_week', date)).to.be.equal('Mon');
+      expect(interpreter.formatProperty('time_of_day', date)).to.be.equal('08:32:58');
+    });
+    it('From \'2017-10-03T09:13-0800\'', () => {
+      const date = new Time('2017-10-03T09:13-0800');
+      expect(interpreter.formatProperty('month_of_year', date)).to.be.equal('Oct');
+      expect(interpreter.formatProperty('day_of_month', date)).to.be.equal('03');
+      expect(interpreter.formatProperty('day_of_week', date)).to.be.equal('Tue');
+      expect(interpreter.formatProperty('time_of_day', date)).to.be.equal('09:13');
+    });
+    it('From \'2017-12-03T02:03+0500\' on tz \'-02:00\'', () => {
+      const date = new Time('2017-12-03T02:03+0500', '-02:00');
+      expect(interpreter.formatProperty('month_of_year', date)).to.be.equal('Dec');
+      expect(interpreter.formatProperty('day_of_month', date)).to.be.equal('02');
+      expect(interpreter.formatProperty('day_of_week', date)).to.be.equal('Sat');
+      expect(interpreter.formatProperty('time_of_day', date)).to.be.equal('19:03');
     });
   });
 });
