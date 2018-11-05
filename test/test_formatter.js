@@ -55,5 +55,19 @@ describe('interpreter.formatProperty', () => {
       expect(interpreter.formatProperty('day_of_week', date)).to.be.equal('Sat');
       expect(interpreter.formatProperty('time_of_day', date)).to.be.equal('19:03');
     });
+    it('From \'2017-07-01T04:20:00.000Z\' on tz \'+02:00\'', () => {
+      const date = new Time('2017-07-01T04:20:00.000Z', '+02:00');
+      expect(interpreter.formatProperty('month_of_year', date)).to.be.equal('Jul');
+      expect(interpreter.formatProperty('day_of_month', date)).to.be.equal('01');
+      expect(interpreter.formatProperty('day_of_week', date)).to.be.equal('Sat');
+      expect(interpreter.formatProperty('time_of_day', date)).to.be.equal('06:20');
+    });
+    it('From \'2007-12-01T17:23:00.000Z\' on tz \'+01:00\'', () => {
+      const date = new Time('2007-12-01T17:23:00.000Z', '+01:00');
+      expect(interpreter.formatProperty('month_of_year', date)).to.be.equal('Dec');
+      expect(interpreter.formatProperty('day_of_month', date)).to.be.equal('01');
+      expect(interpreter.formatProperty('day_of_week', date)).to.be.equal('Sat');
+      expect(interpreter.formatProperty('time_of_day', date)).to.be.equal('18:23');
+    });
   });
 });
