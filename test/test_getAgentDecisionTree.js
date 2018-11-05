@@ -74,6 +74,17 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
         });
     });
 
+    it('should succeed when passing a version parameters', function() {
+      return client.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO, '1')
+        .then((treeJson) => {
+          expect(treeJson).to.be.ok;
+          const { _version, configuration, trees } = parse(treeJson);
+          expect(trees).to.be.ok;
+          expect(_version).to.be.ok;
+          expect(configuration).to.be.deep.equal(CONFIGURATION_1);
+        });
+    });
+
     it('should fail with a timeout error when the client side timeout is low', function() {
       const otherClient = craftai(_.assign({}, CRAFT_CFG, {
         decisionTreeRetrievalTimeout: 50
