@@ -4,6 +4,7 @@ import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.js
 
 import craftai, { errors } from '../src';
 import parse from '../src/parse';
+import semver from 'semver';
 
 const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
 
@@ -75,12 +76,14 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
     });
 
     it('should succeed when passing a version parameters', function() {
-      return client.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO, '1')
+      let version = '1';
+      return client.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO, version)
         .then((treeJson) => {
           expect(treeJson).to.be.ok;
           const { _version, configuration, trees } = parse(treeJson);
           expect(trees).to.be.ok;
           expect(_version).to.be.ok;
+          expect(semver.major(_version)).to.be.equal(parseInt(version));
           expect(configuration).to.be.deep.equal(CONFIGURATION_1);
         });
     });
