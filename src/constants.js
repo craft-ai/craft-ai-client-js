@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+export const DEFAULT_DECISION_TREE_VERSION = '1';
+
 export const IN_BROWSER = typeof window !== 'undefined';
 
 export const AGENT_ID_MAX_LENGTH = 36;
