@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.15.2...HEAD) ##
 
+### Fixed ###
+
+- The conversion from timestamps to time of day is properly rounded. Example: for a timestamp of 1498882800 (01/07/2017 06:20), the time of day is now formatted in '06:20:00' instead of '06:19:59' previously.
+
 ## [1.15.2](https://github.com/craft-ai/craft-ai-client-js/compare/v1.15.1...v1.15.2) - 2018-08-07 ##
 
 ### Fixed ###
