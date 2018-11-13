@@ -2,15 +2,7 @@ import _ from 'lodash';
 import { OPERATORS, TYPE_ANY, TYPES } from './constants';
 import Time from './time';
 
-const DAYS = [
-  'Mon',
-  'Tue',
-  'Wed',
-  'Thu',
-  'Fri',
-  'Sat',
-  'Sun'
-];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const MONTH = [
   'Jan',
@@ -34,7 +26,7 @@ const PROPERTY_FORMATTER = {
     const _time = time instanceof Time ? time.time_of_day : time;
     const hours = Math.floor(_time);
     const hoursStr = _.padStart(hours, 2, '0');
-    const decMinutes = ((_time - hours) * 60).toFixed(2);
+    const decMinutes = Math.round((_time - hours) * 60 * 100) / 100;
     const minutes = Math.floor(decMinutes);
     const minutesStr = _.padStart(minutes, 2, '0');
     const seconds = Math.round((decMinutes - minutes) * 60);
@@ -42,8 +34,7 @@ const PROPERTY_FORMATTER = {
 
     if (seconds > 0) {
       return `${hoursStr}:${minutesStr}:${secondsStr}`;
-    }
-    else {
+    } else {
       return `${hoursStr}:${minutesStr}`;
     }
   },
@@ -82,49 +73,60 @@ const FORMATTER_FROM_DECISION_RULE = {
   [OPERATORS.IN]: {
     [TYPE_ANY]: ({ property, operand, operandFormatter }) => {
       if (property) {
-        return `'${property}' in [${operandFormatter(operand[0])}, ${operandFormatter(operand[1])}[`;
+        return `'${property}' in [${operandFormatter(
+          operand[0]
+        )}, ${operandFormatter(operand[1])}[`;
       }
-      return `[${operandFormatter(operand[0])}, ${operandFormatter(operand[1])}[`;
+      return `[${operandFormatter(operand[0])}, ${operandFormatter(
+        operand[1]
+      )}[`;
     },
     [TYPES.day_of_week]: ({ property, operand, operandFormatter }) => {
       const day_from = Math.floor(operand[0]);
       const day_to = Math.floor(operand[1]);
       // If there is only one day in the interval
-      if ((day_to - day_from == 1) || (day_from == 6 && day_to == 0)){
+      if (day_to - day_from == 1 || (day_from == 6 && day_to == 0)) {
         if (property) {
           return `'${property}' is ${operandFormatter(day_from)}`;
         }
         return operandFormatter(day_from);
-      }
-      else {
+      } else {
         if (property) {
-          return `'${property}' from ${operandFormatter(day_from)} to ${operandFormatter((7 + day_to - 1) % 7)}`;
+          return `'${property}' from ${operandFormatter(
+            day_from
+          )} to ${operandFormatter((7 + day_to - 1) % 7)}`;
         }
-        return `${operandFormatter(day_from)} to ${operandFormatter((7 + day_to - 1) % 7)}`;
+        return `${operandFormatter(day_from)} to ${operandFormatter(
+          (7 + day_to - 1) % 7
+        )}`;
       }
     },
     [TYPES.month_of_year]: ({ property, operand, operandFormatter }) => {
       const month_from = Math.floor(operand[0]);
       const month_to = Math.floor(operand[1]);
-      if ((month_to - month_from == 1) || (month_from == 12 && month_to == 1)){
+      if (month_to - month_from == 1 || (month_from == 12 && month_to == 1)) {
         // One month in the interval
         if (property) {
           return `'${property}' is ${operandFormatter(month_from)}`;
         }
         return operandFormatter(month_from);
-      }
-      else if (month_to == 1) {
+      } else if (month_to == 1) {
         // (Excluded) upper bound is january
         if (property) {
-          return `'${property}' from ${operandFormatter(month_from)} to ${operandFormatter(12)}`;
+          return `'${property}' from ${operandFormatter(
+            month_from
+          )} to ${operandFormatter(12)}`;
         }
         return `${operandFormatter(month_from)} to ${operandFormatter(12)}`;
-      }
-      else {
+      } else {
         if (property) {
-          return `'${property}' from ${operandFormatter(month_from)} to ${operandFormatter(month_to - 1)}`;
+          return `'${property}' from ${operandFormatter(
+            month_from
+          )} to ${operandFormatter(month_to - 1)}`;
         }
-        return `${operandFormatter(month_from)} to ${operandFormatter(month_to - 1)}`;
+        return `${operandFormatter(month_from)} to ${operandFormatter(
+          month_to - 1
+        )}`;
       }
     }
   },
@@ -151,9 +153,12 @@ export function formatDecisionRules(decisionRules) {
     .map(({ property, type, operand, operator }) => {
       const operatorFormatters = FORMATTER_FROM_DECISION_RULE[operator];
       if (!operatorFormatters) {
-        throw new Error(`Unable to format the given decision rule: unknown operator '${operator}'.`);
+        throw new Error(
+          `Unable to format the given decision rule: unknown operator '${operator}'.`
+        );
       }
-      const formatter = operatorFormatters[type] || operatorFormatters[TYPE_ANY];
+      const formatter =
+        operatorFormatters[type] || operatorFormatters[TYPE_ANY];
       const operandFormatter = formatProperty(type || TYPE_ANY);
       return formatter({ property, type, operator, operandFormatter, operand });
     })
