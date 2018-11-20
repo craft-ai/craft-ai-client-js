@@ -29,7 +29,7 @@ const OPERATORS = {
 };
 
 const VALUE_VALIDATOR = {
-  continuous: (value) => _.isFinite(value),
+  continuous: (value) => _.isFinite(value) || _.isNull(value),
   enum: (value) => _.isString(value),
   timezone: (value) => isTimezone(value),
   time_of_day: (value) => _.isFinite(value) && value >= 0 && value < 24,
@@ -58,7 +58,7 @@ function reduceNodes(tree, fn, initialAccValue) {
   return recursiveNext(initialAccValue);
 }
 
-function decideRecursion(node, context) {
+function decideRecursion(node, context, configuration, output_values) {
   // Leaf
   if (!(node.children && node.children.length)) {
     if (node.predicted_value == null) {
@@ -92,6 +92,24 @@ function decideRecursion(node, context) {
     (child) => {
       const decision_rule = child.decision_rule;
       const property = decision_rule.property;
+      if (_.isNull(context[property])) {
+        if (!_.isUndefined(configuration.missing_value_method)) {
+          if (configuration.missing_value_method.includes('NullBranch')) {
+            return _.isNull(decision_rule.operand);
+          } else {
+            return false;
+          }
+        }
+        return {
+          predicted_value: undefined,
+          confidence: undefined,
+          error: {
+            name: 'CraftAiUnknownError',
+            message: `Unable to take decision: property '${property}' is missing from the given context.`
+          }
+        };
+      }
+      
       if (_.isUndefined(context[property])) {
         // Should not happen
         return {
@@ -114,27 +132,36 @@ function decideRecursion(node, context) {
   }
 
   if (_.isUndefined(matchingChild)) {
-    // Should only happens when an unexpected value for an enum is encountered
-    const operandList = _.uniq(_.map(_.values(node.children), (child) => child.decision_rule.operand));
-    const property = _.head(node.children).decision_rule.property;
-    return {
-      predicted_value: undefined,
-      confidence: undefined,
-      decision_rules: [],
-      error: {
-        name: 'CraftAiNullDecisionError',
-        message: `Unable to take decision: value '${context[property]}' for property '${property}' doesn't validate any of the decision rules.`,
-        metadata: {
-          property: property,
-          value: context[property],
-          expected_values: operandList
+    if (!_.isUndefined(configuration.missing_value_method)) {
+      let result = _probabilistic_distribution(node, output_values.length);
+      let argmax = result.distribution.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
+      return {
+        predicted_value: output_values[argmax],
+        confidence: null,
+        decision_rules: []
+      };
+    } else { // TODO
+      // Should only happens when an unexpected value for an enum is encountered
+      const operandList = _.uniq(_.map(_.values(node.children), (child) => child.decision_rule.operand));
+      const property = _.head(node.children).decision_rule.property;
+      return {
+        predicted_value: undefined,
+        confidence: undefined,
+        decision_rules: [],
+        error: {
+          name: 'CraftAiNullDecisionError',
+          message: `Unable to take decision: value '${context[property]}' for property '${property}' doesn't validate any of the decision rules.`,
+          metadata: {
+            property: property,
+            value: context[property],
+            expected_values: operandList
+          }
         }
-      }
-    };
+      };
+    }
   }
-
   // matching child found: recurse !
-  const result = decideRecursion(matchingChild, context);
+  const result = decideRecursion(matchingChild, context, configuration, output_values);
 
   let finalResult = _.extend(result, {
     decision_rules: [matchingChild.decision_rule].concat(result.decision_rules)
@@ -192,6 +219,35 @@ function checkContext(configuration) {
   };
 }
 
+function _probabilistic_distribution(node, nb_outputs) {
+  if (!(node.children && node.children.length)) {
+    let value_repartition = node.weighted_repartition;
+    let sum = _.sum(value_repartition);
+    return { distribution:_.map(value_repartition, (p) => p / sum), size: sum };
+  }
+
+  let result = _.map(node.children, (child) => _probabilistic_distribution(child, nb_outputs))
+    .reduce((acc, r) => {
+      acc.distributions.push(r.distribution);
+      acc.sizes.push(r.size);
+      return acc;
+    }, { distributions: [], sizes: [] });
+
+  let total_size = _.sum(result.sizes);
+  let ratios = _.map(result.sizes, (size) => size / total_size);
+
+  let distribution = 
+  _.zip(result.distributions, ratios)
+    .map((zipped) => _.map(zipped[0], (elem) => elem * zipped[1]))
+    .reduce((sum, distribution) => 
+      _.zip(sum, distribution)
+        .map((zip) => 
+          (zip[0] || 0.) + zip[1]
+        ), new Array(nb_outputs));
+   
+  return { distribution: distribution, size: total_size };
+}
+
 function _decide(configuration, trees, context) {
   checkContext(configuration)(context);
   // Convert timezones as integers to the standard +/-hh:mm format
@@ -204,7 +260,7 @@ function _decide(configuration, trees, context) {
     _version: DECISION_FORMAT_VERSION,
     context,
     output: _.assign(..._.map(configuration.output, (output) => {
-      let decision = decideRecursion(trees[output], context);
+      let decision = decideRecursion(trees[output], context, configuration, trees[output].output_values);
       if (decision.error) {
         switch (decision.error.name) {
           case 'CraftAiNullDecisionError':
