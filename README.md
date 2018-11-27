@@ -146,6 +146,7 @@ In the following we add 8 operations:
 ```js
 const AGENT_ID = 'my_first_agent';
 
+// for the purpose of this test, we delete and recreate the agent
 client.deleteAgent(AGENT_ID)
 .then(function() {
   console.log('Agent ' + AGENT_ID + ' no longer exists.');
@@ -235,6 +236,7 @@ The decision tree is computed at a given timestamp, which means it will consider
 ```js
 const AGENT_ID = 'my_first_agent';
 
+// for the purpose of this test, we delete and recreate the agent
 client.deleteAgent(AGENT_ID)
 .then(function() {
   console.log('Agent ' + AGENT_ID + ' no longer exists.');
@@ -270,6 +272,7 @@ Once the decision tree is computed it can be used to take a decision. In our cas
 ```js
 const AGENT_ID = 'my_first_agent';
 
+// for the purpose of this test, we delete and recreate the agent
 client.deleteAgent(AGENT_ID)
 .then(function() {
   console.log('Agent ' + AGENT_ID + ' no longer exists.');
