@@ -130,7 +130,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
     });
 
     it('should work with the standard timeout', function() {
-      this.timeout(300000);
+      this.timeout(client.cfg.decisionTreeRetrievalTimeout + 2000);
       const lastOperation = _.last(_.last(CONFIGURATION_2_OPERATIONS));
       return client.getAgentDecisionTree(agent.id, lastOperation.timestamp)
         .then((treeJson) => {

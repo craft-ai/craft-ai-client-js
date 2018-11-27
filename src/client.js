@@ -334,26 +334,28 @@ export default function createClient(tokenOrCfg) {
         return agentDecisionTreeRequest();
       }
       else {
-        // Retry until the given timeout is reached
-        let timedOut = false;
-        const retriedAgentDecisionTreeRequest = () => agentDecisionTreeRequest()
-          .catch((error) => {
-            if (!timedOut && error instanceof CraftAiLongRequestTimeOutError) {
-              return retriedAgentDecisionTreeRequest();
-            }
-            else {
-              return Promise.reject(error);
-            }
-          });
-
+        const start = Date.now();
         return Promise.race([
-          retriedAgentDecisionTreeRequest(),
+          agentDecisionTreeRequest()
+            .catch((error) => {
+              const requestDuration = Date.now() - start;
+              const expectedRetryDuration = requestDuration + 2000; // Let's add some margin
+              const timeoutBeforeRetrying = cfg.decisionTreeRetrievalTimeout - requestDuration - expectedRetryDuration;
+              if (error instanceof CraftAiLongRequestTimeOutError && timeoutBeforeRetrying > 0) {
+                // First timeout, let's retry once near the end of the set timeout
+                return resolveAfterTimeout(timeoutBeforeRetrying)
+                  .then(() => agentDecisionTreeRequest());
+              }
+              else {
+                return Promise.reject(error);
+              }
+            }),
           resolveAfterTimeout(cfg.decisionTreeRetrievalTimeout)
             .then(() => {
-              timedOut = true;
-              return Promise.reject(new CraftAiLongRequestTimeOutError());
+              throw new CraftAiLongRequestTimeOutError();
             })
         ]);
+
       }
     },
     computeAgentDecision: function(agentId, t, ...contexts) {

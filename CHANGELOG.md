@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.15.3...HEAD) ##
 
+### Changed ###
+
+- `client.getAgentDecisionTree` deals with the retry in a slightly differentr way, it shouldn't have any impact on the SDK users but improve the occupation of **craft ai** infrastructures.
+- `cfg.decisionTreeRetrievalTimeout` increased from 5 minutes to 10 minutes.
+
 ## [1.15.3](https://github.com/craft-ai/craft-ai-client-js/compare/v1.15.2...v1.15.3) - 2018-11-13 ##
 
 ### Fixed ###
