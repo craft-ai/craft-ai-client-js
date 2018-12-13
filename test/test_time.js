@@ -361,19 +361,55 @@ describe('Time(...)', function() {
         timezone: '+01:00'
       });
     });
+
+    it('works with a Time having a specified timezone and a given timezone (320)', function() {
+      expect(new Time(Time('1977-04-22T01:00:00-05:00'), 330)).to.be.deep.equal({
+        utc: '1977-04-22T06:00:00.000Z',
+        timestamp: 230536800,
+        day_of_week: 4,
+        time_of_day: 11.5,
+        day_of_month: 22,
+        month_of_year: 4,
+        timezone: '+05:30'
+      });
+    });
+
+    it('works with a Time having a specified timezone and a given timezone (-320)', function() {
+      expect(new Time(Time('1977-04-22T01:00:00-05:00'), -330)).to.be.deep.equal({
+        utc: '1977-04-22T06:00:00.000Z',
+        timestamp: 230536800,
+        day_of_week: 4,
+        time_of_day: 0.5,
+        day_of_month: 22,
+        month_of_year: 4,
+        timezone: '-05:30'
+      });
+    });
   });
 
   describe('from anythings(...)', function() {
-    it('don\'t works with non time string', function() {
+    it('doesn\'t work with non time string', function() {
       expect(() => Time('toto')).to.throw(CraftAiTimeError);
     });
 
-    it('don\'t works with object', function() {
+    it('doesn\'t work with object', function() {
       expect(() => Time({ toto: 'toto' })).to.throw(CraftAiTimeError);
     });
 
-    it('don\'t works with array containing alphabetical string', function() {
+    it('doesn\'t work with array containing alphabetical string', function() {
       expect(() => Time(['aaa152'])).to.throw(CraftAiTimeError);
+    });
+
+    it('doesn\'t work with a Time having an invalid specified timezone (900)', function() {
+      expect(() => new Time(Time('1977-04-22T01:00:00-05:00'), 900)).to.throw(CraftAiTimeError);
+    });
+
+    it('doesn\'t work with a Time having an invalid specified timezone (-730)', function() {
+      expect(() => new Time(Time('1977-04-22T01:00:00-05:00'), -730)).to.throw(CraftAiTimeError);
+    });
+
+    it('doesn\'t work with a Time having an invalid specified timezone ("aaaa")', function() {
+      expect(() => new Time(Time('1977-04-22T01:00:00-05:00'), 'aaaa')).to.throw(CraftAiTimeError);
     });
   });
 });

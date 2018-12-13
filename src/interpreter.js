@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import context from './context';
-import isTimezone from './timezones';
 import parse from './parse';
 import { reduceDecisionRules } from './reducer';
+import { tzFromOffset } from './time';
 import { CraftAiDecisionError, CraftAiNullDecisionError, CraftAiUnknownError } from './errors';
 import { formatDecisionRules, formatProperty } from './formatter';
+import isTimezone, { getTimezoneKey } from './timezones';
 
 const DECISION_FORMAT_VERSION = '1.1.0';
 
@@ -30,7 +31,7 @@ const OPERATORS = {
 const VALUE_VALIDATOR = {
   continuous: (value) => _.isFinite(value),
   enum: (value) => _.isString(value),
-  timezone: (value) => _.isString(value) && isTimezone(value),
+  timezone: (value) => isTimezone(value),
   time_of_day: (value) => _.isFinite(value) && value >= 0 && value < 24,
   day_of_week: (value) => _.isInteger(value)  && value >= 0 && value <= 6,
   day_of_month: (value) => _.isInteger(value)  && value >= 1 && value <= 31,
@@ -193,6 +194,12 @@ function checkContext(configuration) {
 
 function _decide(configuration, trees, context) {
   checkContext(configuration)(context);
+  // Convert timezones as integers to the standard +/-hh:mm format
+  // This should only happen when no Time() object is passed to the interpreter
+  const timezoneProperty = getTimezoneKey(configuration.context);
+  if (!_.isUndefined(timezoneProperty)) {
+    context[timezoneProperty] = tzFromOffset(context[timezoneProperty]);
+  }
   return {
     _version: DECISION_FORMAT_VERSION,
     context,

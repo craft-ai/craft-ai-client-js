@@ -354,47 +354,53 @@ Each agent has a configuration defining:
 - a `day_of_week` property is an integer belonging to **[0, 6]**, each value represents a day of the week starting from Monday (0 is Monday, 6 is Sunday).
 - a `day_of_month` property is an integer belonging to **[1, 31]**, each value represents a day of the month.
 - a `month_of_year` property is an integer belonging to **[1, 12]**, each value represents a month of the year.
-- a `timezone` property is a string value representing the timezone as an offset from UTC, supported format are:
+- a `timezone` property can be:
+  * a string value representing the timezone as an offset from UTC, supported formats are:
 
-  - **±[hh]:[mm]**,
-  - **±[hh][mm]**,
-  - **±[hh]**,
+    - **±[hh]:[mm]**,
+    - **±[hh][mm]**,
+    - **±[hh]**,
 
-  where `hh` represent the hour and `mm` the minutes from UTC (eg. `+01:30`)), between `-12:00` and
-  `+14:00`.
+    where `hh` represent the hour and `mm` the minutes from UTC (eg. `+01:30`)), between `-12:00` and
+    `+14:00`.
 
-  Some abbreviations are also supported:
+  * an integer belonging to **[-720, 840]** which represents the timezone as an offset from UTC:
 
-  - **UTC** or **Z** Universal Time Coordinated,
-  - **GMT** Greenwich Mean Time, as UTC,
-  - **BST** British Summer Time, as UTC+1 hour,
-  - **IST** Irish Summer Time, as UTC+1,
-  - **WET** Western Europe Time, as UTC,
-  - **WEST** Western Europe Summer Time, as UTC+1,
-  - **CET** Central Europe Time, as UTC+1,
-  - **CEST** Central Europe Summer Time, as UTC+2,
-  - **EET** Eastern Europe Time, as UTC+2,
-  - **EEST** Eastern Europe Summer Time, as UTC+3,
-  - **MSK** Moscow Time, as UTC+3,
-  - **MSD** Moscow Summer Time, as UTC+4,
-  - **AST** Atlantic Standard Time, as UTC-4,
-  - **ADT** Atlantic Daylight Time, as UTC-3,
-  - **EST** Eastern Standard Time, as UTC-5,
-  - **EDT** Eastern Daylight Saving Time, as UTC-4,
-  - **CST** Central Standard Time, as UTC-6,
-  - **CDT** Central Daylight Saving Time, as UTC-5,
-  - **MST** Mountain Standard Time, as UTC-7,
-  - **MDT** Mountain Daylight Saving Time, as UTC-6,
-  - **PST** Pacific Standard Time, as UTC-8,
-  - **PDT** Pacific Daylight Saving Time, as UTC-7,
-  - **HST** Hawaiian Standard Time, as UTC-10,
-  - **AKST** Alaska Standard Time, as UTC-9,
-  - **AKDT** Alaska Standard Daylight Saving Time, as UTC-8,
-  - **AEST** Australian Eastern Standard Time, as UTC+10,
-  - **AEDT** Australian Eastern Daylight Time, as UTC+11,
-  - **ACST** Australian Central Standard Time, as UTC+9.5,
-  - **ACDT** Australian Central Daylight Time, as UTC+10.5,
-  - **AWST** Australian Western Standard Time, as UTC+8.
+    - in hours if the integer belongs to **[-15, 15]**
+    - in minutes otherwise
+
+  * an abbreviation among the following:
+
+    - **UTC** or **Z** Universal Time Coordinated,
+    - **GMT** Greenwich Mean Time, as UTC,
+    - **BST** British Summer Time, as UTC+1 hour,
+    - **IST** Irish Summer Time, as UTC+1,
+    - **WET** Western Europe Time, as UTC,
+    - **WEST** Western Europe Summer Time, as UTC+1,
+    - **CET** Central Europe Time, as UTC+1,
+    - **CEST** Central Europe Summer Time, as UTC+2,
+    - **EET** Eastern Europe Time, as UTC+2,
+    - **EEST** Eastern Europe Summer Time, as UTC+3,
+    - **MSK** Moscow Time, as UTC+3,
+    - **MSD** Moscow Summer Time, as UTC+4,
+    - **AST** Atlantic Standard Time, as UTC-4,
+    - **ADT** Atlantic Daylight Time, as UTC-3,
+    - **EST** Eastern Standard Time, as UTC-5,
+    - **EDT** Eastern Daylight Saving Time, as UTC-4,
+    - **CST** Central Standard Time, as UTC-6,
+    - **CDT** Central Daylight Saving Time, as UTC-5,
+    - **MST** Mountain Standard Time, as UTC-7,
+    - **MDT** Mountain Daylight Saving Time, as UTC-6,
+    - **PST** Pacific Standard Time, as UTC-8,
+    - **PDT** Pacific Daylight Saving Time, as UTC-7,
+    - **HST** Hawaiian Standard Time, as UTC-10,
+    - **AKST** Alaska Standard Time, as UTC-9,
+    - **AKDT** Alaska Standard Daylight Saving Time, as UTC-8,
+    - **AEST** Australian Eastern Standard Time, as UTC+10,
+    - **AEDT** Australian Eastern Daylight Time, as UTC+11,
+    - **ACST** Australian Central Standard Time, as UTC+9.5,
+    - **ACDT** Australian Central Daylight Time, as UTC+10.5,
+    - **AWST** Australian Western Standard Time, as UTC+8.
 
 > :information_source: By default, the values of the `time_of_day` and `day_of_week`
 > properties are generated from the [`timestamp`](#timestamp) of an agent's
