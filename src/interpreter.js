@@ -25,7 +25,8 @@ const OPERATORS = {
     else {
       return (context_val >= from || context_val < to);
     }
-  }
+  },
+  'is_null' : (context, value) => _.isNull(context) && _.isNull(value)
 };
 
 const VALUE_VALIDATOR = {
@@ -92,14 +93,7 @@ function decideRecursion(node, context, configuration, output_values) {
     (child) => {
       const decision_rule = child.decision_rule;
       const property = decision_rule.property;
-      if (_.isNull(context[property])) {
-        if (!_.isUndefined(configuration.missing_value_method)) {
-          if (configuration.missing_value_method.includes('NullBranch')) {
-            return _.isNull(decision_rule.operand);
-          } else {
-            return false;
-          }
-        }
+      if (configuration.deactivate_missing_values == true) {
         return {
           predicted_value: undefined,
           confidence: undefined,
@@ -109,18 +103,20 @@ function decideRecursion(node, context, configuration, output_values) {
           }
         };
       }
-      
-      if (_.isUndefined(context[property])) {
-        // Should not happen
-        return {
-          predicted_value: undefined,
-          confidence: undefined,
-          error: {
-            name: 'CraftAiUnknownError',
-            message: `Unable to take decision: property '${property}' is missing from the given context.`
-          }
-        };
-      }
+
+      // TODO
+
+      // if (_.isUndefined(context[property])) {
+      //   // Should not happen
+      //   return {
+      //     predicted_value: undefined,
+      //     confidence: undefined,
+      //     error: {
+      //       name: 'CraftAiUnknownError',
+      //       message: `Unable to take decision: property '${property}' is missing from the given context.`
+      //     }
+      //   };
+      // }
 
       return OPERATORS[decision_rule.operator](context[property], decision_rule.operand);
     }
@@ -132,25 +128,20 @@ function decideRecursion(node, context, configuration, output_values) {
   }
 
   if (_.isUndefined(matchingChild)) {
-    if (!_.isUndefined(configuration.missing_value_method)) {
-      let result = _distribution(node, output_values.length);
-
+    if (configuration.deactivate_missing_values == false) {
+      let predicted_value = _distribution(node, output_values.length);
       // If it is a classification problem we return the class witht he highest
       // probability. Otherwise we return the computed mean value.
-      if (_.isArray(result.distribution[0])) {
-        let argmax = result.distribution.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
-        return {
-          predicted_value: output_values[argmax],
-          confidence: null,
-          decision_rules: []
-        };  
-      } else {
-        return {
-          predicted_value: result,
-          confidence: null,
-          decision_rules: []
-        };
+      if (_.isArray(predicted_value.distribution[0])) {
+        // Compute the argmax function on the returned distribution
+        let argmax = predicted_value.distribution.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
+        predicted_value = output_values[argmax];
       }
+      return {
+        predicted_value: predicted_value,
+        confidence: null,
+        decision_rules: []
+      };
     } else { // TODO
       // Should only happens when an unexpected value for an enum is encountered
       const operandList = _.uniq(_.map(_.values(node.children), (child) => child.decision_rule.operand));
@@ -232,13 +223,13 @@ function checkContext(configuration) {
 
 function _distribution(node, nb_outputs) {
   if (!(node.children && node.children.length)) {
-    let value_repartition = node.weighted_repartition;
-    // If there is no repartition attribute it means that it is
+    let value_distribution = node.distribution;
+    // If there is no distribution attribute it means that it is
     // a classification problem. We therefore compute the distribution of
     // the classes in this leaf and return the weighted branch size.
-    if (!_.isUndefined(value_repartition)) {
-      let sum = _.sum(value_repartition);
-      return { distribution:_.map(value_repartition, (p) => p / sum), size: sum };
+    if (!_.isUndefined(value_distribution)) {
+      let sum = _.sum(value_distribution);
+      return { distribution:_.map(value_distribution, (p) => p / sum), size: sum };
     }
     // Otherwise it is a regression problem, and we return the mean value 
     // of the leaf and the branch size.
