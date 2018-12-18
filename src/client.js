@@ -1,26 +1,26 @@
-import _ from "lodash";
-import Debug from "debug";
-import { decide } from "./interpreter";
-import DEFAULTS from "./defaults";
-import jwtDecode from "jwt-decode";
-import createRequest from "./request";
-import Time from "./time";
+import _ from 'lodash';
+import Debug from 'debug';
+import { decide } from './interpreter';
+import DEFAULTS from './defaults';
+import jwtDecode from 'jwt-decode';
+import createRequest from './request';
+import Time from './time';
 import {
   AGENT_ID_ALLOWED_REGEXP,
   AGENT_ID_MAX_LENGTH,
   DEFAULT_DECISION_TREE_VERSION,
   deprecation
-} from "./constants";
+} from './constants';
 import {
   CraftAiBadRequestError,
   CraftAiCredentialsError,
   CraftAiLongRequestTimeOutError
-} from "./errors";
+} from './errors';
 
-let debug = Debug("craft-ai:client");
+let debug = Debug('craft-ai:client');
 
 function resolveAfterTimeout(timeout) {
-  return new Promise(resolve => setTimeout(() => resolve(), timeout));
+  return new Promise((resolve) => setTimeout(() => resolve(), timeout));
 }
 
 // A very simple regex, helps detect some issues.
@@ -38,9 +38,9 @@ export default function createClient(tokenOrCfg) {
   );
 
   // Initialization check
-  if (!_.has(cfg, "token") || !_.isString(cfg.token)) {
+  if (!_.has(cfg, 'token') || !_.isString(cfg.token)) {
     throw new CraftAiBadRequestError(
-      "Bad Request, unable to create a client with no or invalid token provided."
+      'Bad Request, unable to create a client with no or invalid token provided.'
     );
   }
   try {
@@ -53,30 +53,30 @@ export default function createClient(tokenOrCfg) {
   } catch (e) {
     throw new CraftAiCredentialsError();
   }
-  if (!_.has(cfg, "url") || !isUrl(cfg.url)) {
+  if (!_.has(cfg, 'url') || !isUrl(cfg.url)) {
     throw new CraftAiBadRequestError(
-      "Bad Request, unable to create a client with no or invalid url provided."
+      'Bad Request, unable to create a client with no or invalid url provided.'
     );
   }
-  if (!_.has(cfg, "project") || !_.isString(cfg.project)) {
+  if (!_.has(cfg, 'project') || !_.isString(cfg.project)) {
     throw new CraftAiBadRequestError(
-      "Bad Request, unable to create a client with no or invalid project provided."
+      'Bad Request, unable to create a client with no or invalid project provided.'
     );
   } else {
-    const splittedProject = cfg.project.split("/");
+    const splittedProject = cfg.project.split('/');
     if (splittedProject.length >= 2) {
       cfg.owner = splittedProject[0];
       cfg.project = splittedProject[1];
     }
   }
-  if (!_.has(cfg, "owner") || !_.isString(cfg.owner)) {
+  if (!_.has(cfg, 'owner') || !_.isString(cfg.owner)) {
     throw new CraftAiBadRequestError(
-      "Bad Request, unable to create a client with no or invalid owner provided."
+      'Bad Request, unable to create a client with no or invalid owner provided.'
     );
   }
   if (cfg.proxy != null && !isUrl(cfg.proxy)) {
     throw new CraftAiBadRequestError(
-      "Bad Request, unable to create a client with an invalid proxy url provided."
+      'Bad Request, unable to create a client with an invalid proxy url provided.'
     );
   }
 
@@ -95,7 +95,7 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(configuration) || !_.isObject(configuration)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to create an agent with no or invalid configuration provided."
+            'Bad Request, unable to create an agent with no or invalid configuration provided.'
           )
         );
       }
@@ -109,8 +109,8 @@ export default function createClient(tokenOrCfg) {
       }
 
       return request({
-        method: "POST",
-        path: "/agents",
+        method: 'POST',
+        path: '/agents',
         body: {
           id: id,
           configuration: configuration
@@ -121,36 +121,37 @@ export default function createClient(tokenOrCfg) {
       });
     },
     createAgents: function(agentsList = undefined) {
-      const verification_results = agentsList.map(agent => {
+      const verification_results = agentsList.map((agent) => {
         let agent_res = {};
-        let error_count = 0;
+        let errors = [];
         if (
           _.isUndefined(agent.configuration) ||
           !_.isObject(agent.configuration)
         ) {
-          error_count++;
-          agent_res["configuration"] =
-            "Bad Request, unable to create an agent with no or invalid configuration provided.";
+          errors.push(
+            'unable to create an agent with no or invalid configuration provided.'
+          );
         }
 
         if (
           !_.isUndefined(agent.id) &&
           !AGENT_ID_ALLOWED_REGEXP.test(agent.id)
         ) {
-          error_count++;
-          agent_res[
-            "id"
-          ] = `Bad Request, unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`;
+          errors.push(
+            `unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+          );
         }
 
-        agent_res["status"] =
-          error_count === 0 ? 200 : error_count === 2 ? 400 : 207;
+        agent_res['status'] =
+          errors.length === 0 ? 200 : errors.length === 2 ? 400 : 207;
+        agent_res['error'] = 'BadRequestError';
+        agent_res['message'] = errors.join(' | ');
         return agent_res;
       });
 
-      if (verification_results.filter(v => v.status > 200)) {
+      if (verification_results.filter((v) => v.status > 200).length > 0) {
         return Promise.reject(
-          new CraftAiBadRequesCraftAiBadRequestErrortError(
+          new CraftAiBadRequestError(
             `Bad Request, unable to create at least one agent: ${JSON.stringify(
               verification_results
             )}`
@@ -159,11 +160,11 @@ export default function createClient(tokenOrCfg) {
       }
 
       return request({
-        method: "POST",
-        path: "/bulk/agents",
-        body: listAgents
+        method: 'POST',
+        path: '/bulk/agents',
+        body: agentsList
       }).then(({ body }) => {
-        debug(`Agents '${body.map(agent => agent.id)}' created.`);
+        debug(`Agents '${body.map((agent) => agent.id)}' created.`);
         return body;
       });
     },
@@ -177,42 +178,53 @@ export default function createClient(tokenOrCfg) {
       }
 
       return request({
-        method: "GET",
+        method: 'GET',
         path: `/agents/${agentId}`
       }).then(({ body }) => body);
     },
     listAgents: function(agentId) {
       return request({
-        method: "GET",
-        path: "/agents"
+        method: 'GET',
+        path: '/agents'
       }).then(({ body }) => body.agentsList);
     },
     deleteAgent: function(agentId) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to delete an agent with no agentId provided."
+            'Bad Request, unable to delete an agent with no agentId provided.'
           )
         );
       }
 
       return request({
-        method: "DELETE",
+        method: 'DELETE',
         path: `/agents/${agentId}`
       }).then(({ body }) => {
         debug(`Agent '${agentId}' deleted`);
         return body;
       });
     },
+    deleteAgents: function(agentsList) {
+      const verification_results = agentsList.map((agent) => {
+        if (_.isUndefined(agent.id)) {
+          return {
+            status: 200,
+            id:
+              'Bad Request, unable to delete an agent with no agentId provided.'
+          };
+        }
+      });
+    },
     destroyAgent: function(agentId) {
-      deprecation("client.destroyAgent", "client.deleteAgent");
+      deprecation('client.destroyAgent', 'client.deleteAgent');
       return this.deleteAgent(agentId);
     },
     getAgentContext: function(agentId, t = undefined) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to get the agent context with no agentId provided."
+            'Bad Request, unable to get the agent context with no agentId provided.'
           )
         );
       }
@@ -220,13 +232,13 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(posixTimestamp)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to get the agent context with an invalid timestamp provided."
+            'Bad Request, unable to get the agent context with an invalid timestamp provided.'
           )
         );
       }
 
       return request({
-        method: "GET",
+        method: 'GET',
         path: `/agents/${agentId}/context/state`,
         query: {
           t: posixTimestamp
@@ -237,7 +249,7 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to add agent context operations with no agentId provided."
+            'Bad Request, unable to add agent context operations with no agentId provided.'
           )
         );
       }
@@ -262,13 +274,13 @@ export default function createClient(tokenOrCfg) {
           context: context,
           timestamp: Time(timestamp).timestamp
         }))
-        .orderBy("timestamp")
+        .orderBy('timestamp')
         .chunk(cfg.operationsChunksSize)
         .reduce(
           (p, chunk) =>
             p.then(() =>
               request({
-                method: "POST",
+                method: 'POST',
                 path: `/agents/${agentId}/context`,
                 body: chunk
               })
@@ -293,7 +305,7 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to get agent context operations with no agentId provided."
+            'Bad Request, unable to get agent context operations with no agentId provided.'
           )
         );
       }
@@ -303,7 +315,7 @@ export default function createClient(tokenOrCfg) {
         if (_.isUndefined(startTimestamp)) {
           return Promise.reject(
             new CraftAiBadRequestError(
-              "Bad Request, unable to get agent context operations with an invalid 'start' timestamp provided."
+              'Bad Request, unable to get agent context operations with an invalid \'start\' timestamp provided.'
             )
           );
         }
@@ -314,7 +326,7 @@ export default function createClient(tokenOrCfg) {
         if (_.isUndefined(endTimestamp)) {
           return Promise.reject(
             new CraftAiBadRequestError(
-              "Bad Request, unable to get agent context operations with an invalid 'end' timestamp provided."
+              'Bad Request, unable to get agent context operations with an invalid \'end\' timestamp provided.'
             )
           );
         }
@@ -334,7 +346,7 @@ export default function createClient(tokenOrCfg) {
       };
 
       return request({
-        method: "GET",
+        method: 'GET',
         path: `/agents/${agentId}/context`,
         query: {
           start: startTimestamp,
@@ -355,7 +367,7 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to get agent state history with no agentId provided."
+            'Bad Request, unable to get agent state history with no agentId provided.'
           )
         );
       }
@@ -365,7 +377,7 @@ export default function createClient(tokenOrCfg) {
         if (_.isUndefined(startTimestamp)) {
           return Promise.reject(
             new CraftAiBadRequestError(
-              "Bad Request, unable to get agent state history with an invalid 'start' timestamp provided."
+              'Bad Request, unable to get agent state history with an invalid \'start\' timestamp provided.'
             )
           );
         }
@@ -376,7 +388,7 @@ export default function createClient(tokenOrCfg) {
         if (_.isUndefined(endTimestamp)) {
           return Promise.reject(
             new CraftAiBadRequestError(
-              "Bad Request, unable to get agent state history with an invalid 'end' timestamp provided."
+              'Bad Request, unable to get agent state history with an invalid \'end\' timestamp provided.'
             )
           );
         }
@@ -395,7 +407,7 @@ export default function createClient(tokenOrCfg) {
       };
 
       return request({
-        method: "GET",
+        method: 'GET',
         path: `/agents/${agentId}/context/state/history`,
         query: {
           start: startTimestamp,
@@ -410,14 +422,14 @@ export default function createClient(tokenOrCfg) {
     },
     getAgentInspectorUrl: function(agentId, t = undefined) {
       deprecation(
-        "client.getAgentInspectorUrl",
-        "client.getSharedAgentInspectorUrl"
+        'client.getAgentInspectorUrl',
+        'client.getSharedAgentInspectorUrl'
       );
       return this.getSharedAgentInspectorUrl(agentId, t);
     },
     getSharedAgentInspectorUrl: function(agentId, t = undefined) {
       return request({
-        method: "GET",
+        method: 'GET',
         path: `/agents/${agentId}/shared`
       }).then(({ body }) => {
         if (_.isUndefined(t)) {
@@ -430,7 +442,7 @@ export default function createClient(tokenOrCfg) {
     },
     deleteSharedAgentInspectorUrl: function(agentId) {
       return request({
-        method: "DELETE",
+        method: 'DELETE',
         path: `/agents/${agentId}/shared`
       }).then(() => {
         debug(`Delete shared inspector link for agent "${agentId}".`);
@@ -444,7 +456,7 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to retrieve an agent decision tree with no agentId provided."
+            'Bad Request, unable to retrieve an agent decision tree with no agentId provided.'
           )
         );
       }
@@ -452,20 +464,20 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(posixTimestamp)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to retrieve an agent decision tree with an invalid timestamp provided."
+            'Bad Request, unable to retrieve an agent decision tree with an invalid timestamp provided.'
           )
         );
       }
 
       const agentDecisionTreeRequest = () =>
         request({
-          method: "GET",
+          method: 'GET',
           path: `/agents/${agentId}/decision/tree`,
           query: {
             t: posixTimestamp
           },
           headers: {
-            "x-craft-ai-tree-version": version
+            'x-craft-ai-tree-version': version
           }
         }).then(({ body }) => body);
 
@@ -475,7 +487,7 @@ export default function createClient(tokenOrCfg) {
       } else {
         const start = Date.now();
         return Promise.race([
-          agentDecisionTreeRequest().catch(error => {
+          agentDecisionTreeRequest().catch((error) => {
             const requestDuration = Date.now() - start;
             const expectedRetryDuration = requestDuration + 2000; // Let's add some margin
             const timeoutBeforeRetrying =
@@ -504,7 +516,7 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to compute an agent decision with no agentId provided."
+            'Bad Request, unable to compute an agent decision with no agentId provided.'
           )
         );
       }
@@ -512,20 +524,20 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(posixTimestamp)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to compute an agent decision with no or invalid timestamp provided."
+            'Bad Request, unable to compute an agent decision with no or invalid timestamp provided.'
           )
         );
       }
       if (_.isUndefined(contexts) || _.size(contexts) === 0) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            "Bad Request, unable to compute an agent decision with no context provided."
+            'Bad Request, unable to compute an agent decision with no context provided.'
           )
         );
       }
 
       return request({
-        method: "GET",
+        method: 'GET',
         path: `/agents/${agentId}/decision/tree`,
         query: {
           t: posixTimestamp
