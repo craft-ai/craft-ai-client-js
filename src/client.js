@@ -120,6 +120,53 @@ export default function createClient(tokenOrCfg) {
         return body;
       });
     },
+    createAgents: function(agentsList = undefined) {
+      const verification_results = agentsList.map(agent => {
+        let agent_res = {};
+        let error_count = 0;
+        if (
+          _.isUndefined(agent.configuration) ||
+          !_.isObject(agent.configuration)
+        ) {
+          error_count++;
+          agent_res["configuration"] =
+            "Bad Request, unable to create an agent with no or invalid configuration provided.";
+        }
+
+        if (
+          !_.isUndefined(agent.id) &&
+          !AGENT_ID_ALLOWED_REGEXP.test(agent.id)
+        ) {
+          error_count++;
+          agent_res[
+            "id"
+          ] = `Bad Request, unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`;
+        }
+
+        agent_res["status"] =
+          error_count === 0 ? 200 : error_count === 2 ? 400 : 207;
+        return agent_res;
+      });
+
+      if (verification_results.filter(v => v.status > 200)) {
+        return Promise.reject(
+          new CraftAiBadRequesCraftAiBadRequestErrortError(
+            `Bad Request, unable to create at least one agent: ${JSON.stringify(
+              verification_results
+            )}`
+          )
+        );
+      }
+
+      return request({
+        method: "POST",
+        path: "/bulk/agents",
+        body: listAgents
+      }).then(({ body }) => {
+        debug(`Agents '${body.map(agent => agent.id)}' created.`);
+        return body;
+      });
+    },
     getAgent: function(agentId) {
       if (!AGENT_ID_ALLOWED_REGEXP.test(agentId)) {
         return Promise.reject(
