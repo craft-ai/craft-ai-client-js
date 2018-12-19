@@ -11,13 +11,16 @@ import {
 import { IN_BROWSER } from './constants';
 import { version } from '../package.json';
 
-const fetch = !IN_BROWSER && typeof fetch === 'undefined'
-  ? require('node-fetch')
-  : window.fetch;
+const fetch =
+  !IN_BROWSER && typeof fetch === 'undefined'
+    ? require('node-fetch')
+    : window.fetch;
 
 const debug = Debug('craft-ai:client');
 
-const USER_AGENT = `craft-ai-client-js/${version} [${IN_BROWSER ? navigator.userAgent : `Node.js ${process.version}`}]`;
+const USER_AGENT = `craft-ai-client-js/${version} [${
+  IN_BROWSER ? navigator.userAgent : `Node.js ${process.version}`
+}]`;
 
 debug(`Client user agent set to '${USER_AGENT}'`);
 
@@ -25,11 +28,14 @@ function parseBody(req, resBody) {
   let resBodyUtf8;
   try {
     resBodyUtf8 = resBody.toString('utf-8');
-  }
-  catch (err) {
-    debug(`Invalid response format from ${req.method} ${req.path}: ${resBody}`, err);
+  } catch (err) {
+    debug(
+      `Invalid response format from ${req.method} ${req.path}: ${resBody}`,
+      err
+    );
     throw new CraftAiInternalError(
-      'Internal Error, the craft ai server responded in an invalid format.', {
+      'Internal Error, the craft ai server responded in an invalid format.',
+      {
         request: req
       }
     );
@@ -38,21 +44,36 @@ function parseBody(req, resBody) {
   try {
     if (resBodyUtf8.length > 0) {
       resBodyJson = JSON.parse(resBodyUtf8);
-    }
-    else {
+    } else {
       resBodyJson = {};
     }
-  }
-  catch (err) {
-    debug(`Invalid json response from ${req.method} ${req.path}: ${resBody}`, err);
+  } catch (err) {
+    debug(
+      `Invalid json response from ${req.method} ${req.path}: ${resBody}`,
+      err
+    );
     throw new CraftAiInternalError(
-      'Internal Error, the craft ai server responded an invalid json document.', {
+      'Internal Error, the craft ai server responded an invalid json document.',
+      {
         more: resBodyUtf8,
         request: req
       }
     );
   }
   return resBodyJson;
+}
+
+function parseBulk(req, res, resBody) {
+  if (_.isArray(JSON.parse(resBody))) {
+    return {
+      body: parseBody(req, resBody)
+    };
+  } else {
+    throw new CraftAiBadRequestError({
+      message: parseBody(req, resBody).message,
+      request: req
+    });
+  }
 }
 
 function parseResponse(req, res, resBody) {
@@ -69,6 +90,8 @@ function parseResponse(req, res, resBody) {
         message: parseBody(req, resBody).message,
         request: req
       });
+    case 207:
+      return parseBulk(req, res, resBody);
     case 401:
     case 403:
       throw new CraftAiCredentialsError({
@@ -77,10 +100,7 @@ function parseResponse(req, res, resBody) {
       });
     case 400:
     case 404:
-      throw new CraftAiBadRequestError({
-        message: parseBody(req, resBody).message,
-        request: req
-      });
+      return parseBulk(req, res, resBody);
     case 413:
       throw new CraftAiBadRequestError({
         message: 'Given payload is too large',
@@ -108,13 +128,11 @@ function parseResponse(req, res, resBody) {
 function createHttpAgent(proxy = undefined) {
   if (IN_BROWSER) {
     return undefined;
-  }
-  else if (proxy) {
+  } else if (proxy) {
     const HttpProxyAgent = require('http-proxy-agent');
 
     return new HttpProxyAgent(proxy);
-  }
-  else {
+  } else {
     const http = require('http');
 
     return new http.Agent({
@@ -126,13 +144,11 @@ function createHttpAgent(proxy = undefined) {
 function createHttpsAgent(proxy = undefined) {
   if (IN_BROWSER) {
     return undefined;
-  }
-  else if (proxy) {
+  } else if (proxy) {
     const HttpsProxyAgent = require('https-proxy-agent');
 
     return new HttpsProxyAgent(proxy);
-  }
-  else {
+  } else {
     const https = require('https');
 
     return new https.Agent({
@@ -143,9 +159,9 @@ function createHttpsAgent(proxy = undefined) {
 
 export default function createRequest(cfg) {
   const defaultHeaders = {
-    'Authorization': `Bearer ${cfg.token}`,
+    Authorization: `Bearer ${cfg.token}`,
     'Content-Type': 'application/json; charset=utf-8',
-    'Accept': 'application/json'
+    Accept: 'application/json'
   };
 
   if (!IN_BROWSER) {
@@ -156,7 +172,10 @@ export default function createRequest(cfg) {
 
   const baseUrl = `${cfg.url}/api/v1/${cfg.owner}/${cfg.project}`;
 
-  const agent = baseUrl.slice(0, 5) === 'https' ? createHttpsAgent(cfg.proxy) : createHttpAgent(cfg.proxy);
+  const agent =
+    baseUrl.slice(0, 5) === 'https'
+      ? createHttpsAgent(cfg.proxy)
+      : createHttpAgent(cfg.proxy);
 
   return (req) => {
     req = _.defaults(req || {}, {
@@ -171,7 +190,7 @@ export default function createRequest(cfg) {
     req.url = req.url || `${baseUrl}${req.path}`;
 
     const queryStr = _(req.query)
-      .map((value, key) => ([key, value]))
+      .map((value, key) => [key, value])
       .filter(([key, value]) => !_.isUndefined(value))
       .map((keyVal) => keyVal.join('='))
       .join('&');
@@ -186,20 +205,27 @@ export default function createRequest(cfg) {
     return fetch(req.url, req)
       .catch((err) => {
         debug(`Network error while executing ${req.method} ${req.path}`, err);
-        return Promise.reject(new CraftAiNetworkError({
-          more: err.message
-        }));
-      })
-      .then((res) => res.text()
-        .catch((err) => {
-          debug(`Invalid response from ${req.method} ${req.path}`, err);
-
-          throw new CraftAiInternalError('Internal Error, the craft ai server responded an invalid response, see err.more for details.', {
-            request: req,
+        return Promise.reject(
+          new CraftAiNetworkError({
             more: err.message
-          });
-        })
-        .then((resBody) => parseResponse(req, res, resBody))
+          })
+        );
+      })
+      .then((res) =>
+        res
+          .text()
+          .catch((err) => {
+            debug(`Invalid response from ${req.method} ${req.path}`, err);
+
+            throw new CraftAiInternalError(
+              'Internal Error, the craft ai server responded an invalid response, see err.more for details.',
+              {
+                request: req,
+                more: err.message
+              }
+            );
+          })
+          .then((resBody) => parseResponse(req, res, resBody))
       );
   };
 }
