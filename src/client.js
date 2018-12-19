@@ -121,50 +121,51 @@ export default function createClient(tokenOrCfg) {
       });
     },
     createAgents: function(agentsList = undefined) {
-      const verification_results = agentsList.map((agent) => {
-        let agent_res = {};
-        let errors = [];
-        if (
-          _.isUndefined(agent.configuration) ||
-          !_.isObject(agent.configuration)
-        ) {
-          errors.push(
-            'unable to create an agent with no or invalid configuration provided.'
-          );
-        }
+      // const verification_results = agentsList.map((agent) => {
+      //   let agent_res = {};
+      //   let errors = [];
+      //   if (
+      //     _.isUndefined(agent.configuration) ||
+      //     !_.isObject(agent.configuration)
+      //   ) {
+      //     errors.push(
+      //       'unable to create an agent with no or invalid configuration provided.'
+      //     );
+      //   }
 
-        if (
-          !_.isUndefined(agent.id) &&
-          !AGENT_ID_ALLOWED_REGEXP.test(agent.id)
-        ) {
-          errors.push(
-            `unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
-          );
-        }
+      //   if (
+      //     !_.isUndefined(agent.id) &&
+      //     !AGENT_ID_ALLOWED_REGEXP.test(agent.id)
+      //   ) {
+      //     errors.push(
+      //       `unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+      //     );
+      //   }
 
-        agent_res['status'] =
-          errors.length === 0 ? 200 : errors.length === 2 ? 400 : 207;
-        agent_res['error'] = 'BadRequestError';
-        agent_res['message'] = errors.join(' | ');
-        return agent_res;
-      });
+      //   agent_res['status'] =
+      //     errors.length === 0 ? 200 : errors.length === 2 ? 400 : 207;
+      //   if (agent_res.status > 200) {
+      //     agent_res['error'] = 'BadRequestError';
+      //     agent_res['message'] = errors.join(' | ');
+      //   }
+      //   return agent_res;
+      // });
 
-      if (verification_results.filter((v) => v.status > 200).length > 0) {
-        return Promise.reject(
-          new CraftAiBadRequestError(
-            `Bad Request, unable to create at least one agent: ${JSON.stringify(
-              verification_results
-            )}`
-          )
-        );
-      }
+      // if (verification_results.filter((v) => v.status > 200).length > 0) {
+      //   return Promise.reject(
+      //     new CraftAiBadRequestError(
+      //       `Bad Request, unable to create at least one agent: ${JSON.stringify(
+      //         verification_results
+      //       )}`
+      //     )
+      //   );
+      // }
 
       return request({
         method: 'POST',
         path: '/bulk/agents',
         body: agentsList
       }).then(({ body }) => {
-        debug(`Agents '${body.map((agent) => agent.id)}' created.`);
         return body;
       });
     },
