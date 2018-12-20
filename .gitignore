@@ -8,3 +8,5 @@ gh-pages
 
 # Packaging scripts artifacts
 *.bak
+.eslintrc
+.prettierrc
