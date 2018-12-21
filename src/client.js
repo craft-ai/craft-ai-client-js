@@ -207,14 +207,12 @@ export default function createClient(tokenOrCfg) {
       });
     },
     deleteAgents: function(agentsList) {
-      const verification_results = agentsList.map((agent) => {
-        if (_.isUndefined(agent.id)) {
-          return {
-            status: 200,
-            id:
-              'Bad Request, unable to delete an agent with no agentId provided.'
-          };
-        }
+      return request({
+        method: 'DELETE',
+        path: '/bulk/agents',
+        body: agentsList
+      }).then(({ body }) => {
+        return body;
       });
     },
     destroyAgent: function(agentId) {

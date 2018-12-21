@@ -20,6 +20,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
     });
   }
 
+  // CREATEAGENTS
   it('should succeed when using valid configurations and generated ids', function() {
     return client
       .createAgents([
@@ -60,59 +61,6 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
           testAgentIntegrity(agent, agent.id, CONFIGURATION_1);
           return client.deleteAgent(agent.id);
         });
-      });
-  });
-
-  // test with wrong id
-
-  // ATTENTION A BIEN UTILISER LA FUNCTION TEST AGENT INTEGRITY
-
-  it('should 200 then 400 when using the same id twice', function() {
-    const agentId = 'francis_cabrel';
-    return client
-      .createAgents([{ id: agentId, configuration: CONFIGURATION_1 }])
-      .then((agentsList0) => {
-        agentsList0.map((agent) =>
-          testAgentIntegrity(agent, agentId, CONFIGURATION_1)
-        );
-      })
-      .then(() => {
-        client
-          .createAgents([{ id: agentId, configuration: CONFIGURATION_1 }])
-          .then((agentsList1) => {
-            agentsList1.map((agent) => {
-              expect(agent).to.be.ok;
-              expect(agent.id).to.be.equal(agentId);
-              expect(agent.status).to.be.equal(400);
-            });
-          });
-      })
-      .then(() => client.deleteAgent(agentId));
-  });
-
-  it('should return array of 200 and 400 if has mixed results', function() {
-    return client
-      .createAgents([
-        { id: 'encore_et_encore', configuration: CONFIGURATION_1 }
-      ])
-      .then((agentsList0) => {
-        agentsList0.map((agent) =>
-          testAgentIntegrity(agent, agent.id, CONFIGURATION_1)
-        );
-        client
-          .createAgents([
-            { id: 'encore_et_encore', configuration: CONFIGURATION_1 },
-            { id: 'petite_marie', configuration: CONFIGURATION_1 }
-          ])
-          .then((agentsList1) => {
-            const agent0 = agentsList1[0];
-            const agent1 = agentsList1[1];
-            expect(agent0.id).to.be.equal('encore_et_encore');
-            expect(agent1.id).to.be.equal('petite_marie');
-            expect(agent0.status).to.be.equal(400);
-            expect(agent0.error).to.be.equal('ContextError');
-            agentsList1.map(({ id }) => client.deleteAgent(id));
-          });
       });
   });
 
@@ -168,5 +116,96 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
 
         client.deleteAgent(agent0.id);
       });
+  });
+
+  it('should 200 then 400 when using the same id twice', function() {
+    const agentId = 'francis_cabrel';
+    return client
+      .createAgents([{ id: agentId, configuration: CONFIGURATION_1 }])
+      .then((agentsList0) => {
+        agentsList0.map((agent) =>
+          testAgentIntegrity(agent, agentId, CONFIGURATION_1)
+        );
+      })
+      .then(() => {
+        client
+          .createAgents([{ id: agentId, configuration: CONFIGURATION_1 }])
+          .then((agentsList1) => {
+            agentsList1.map((agent) => {
+              expect(agent).to.be.ok;
+              expect(agent.id).to.be.equal(agentId);
+              expect(agent.status).to.be.equal(400);
+            });
+          });
+      })
+      .then(() => client.deleteAgent(agentId));
+  });
+
+  it('should return array of 200 and 400 if has mixed results', function() {
+    return client
+      .createAgents([
+        { id: 'encore_et_encore', configuration: CONFIGURATION_1 }
+      ])
+      .then((agentsList0) => {
+        agentsList0.map((agent) =>
+          testAgentIntegrity(agent, agent.id, CONFIGURATION_1)
+        );
+        client
+          .createAgents([
+            { id: 'encore_et_encore', configuration: CONFIGURATION_1 },
+            { id: 'petite_marie', configuration: CONFIGURATION_1 }
+          ])
+          .then((agentsList1) => {
+            const agent0 = agentsList1[0];
+            const agent1 = agentsList1[1];
+            expect(agent0.id).to.be.equal('encore_et_encore');
+            expect(agent1.id).to.be.equal('petite_marie');
+            expect(agent0.status).to.be.equal(400);
+            expect(agent0.error).to.be.equal('ContextError');
+            agentsList1.map(({ id }) => client.deleteAgent(id));
+          });
+      });
+  });
+
+  // DELETEAGENTS
+  it('should succeed when using valid ids.', function() {
+    const agentIds = [
+      { id: 'wild_horses' },
+      { id: 'way_to_rome' },
+      { id: 'postcards' }
+    ];
+    return client
+      .createAgents(
+        agentIds.map(({ id }) => {
+          return { id, configuration: CONFIGURATION_1 };
+        })
+      )
+      .then((agentsList0) => {
+        agentsList0.map((agent, idx) => {
+          testAgentIntegrity(agent, agentIds[idx].id, CONFIGURATION_1);
+        });
+        return client.deleteAgents(agentIds).then((agentsList1) => {
+          agentsList1.map((agent, idx) => {
+            expect(agent.id).to.be.equal(agentIds[idx].id);
+            expect(agent.configuration).to.be.deep.equal(CONFIGURATION_1);
+          });
+          return client.deleteAgents(agentIds).then((agentsList2) => {
+            agentsList2.map((agent, idx) => {
+              expect(agent.id).to.be.equal(agentIds[idx].id);
+              expect(agent.configuration).to.be.equal(undefined);
+            });
+          });
+        });
+      });
+  });
+
+  // undefined id
+  it.only('should handle unvalid id', function() {
+    const agentIds = [{ id: '7$ shopping' }, {}];
+    return client.deleteAgents(agentIds).then((del_res) => {
+      expect(del_res[0]).to.be.deep.equal(agentIds[0]);
+      expect(del_res[1].status).to.be.equal(400);
+      expect(del_res[1].error).to.be.equal('ContextError');
+    });
   });
 });
