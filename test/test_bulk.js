@@ -36,67 +36,77 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
   });
 
   it('should succeed when using valid configurations and a specified id', function() {
-    return client
-      .createAgents([
-        { id: 'press_f', configuration: CONFIGURATION_1 },
-        { configuration: CONFIGURATION_1 }
-      ])
-      .then((res_list) => {
-        res_list.map((agent) => {
-          testAgentIntegrity(agent, agent.id, CONFIGURATION_1);
-          return client.deleteAgent(agent.id);
+    return client.deleteAgents([{ id: 'press_f' }]).then(() => {
+      return client
+        .createAgents([
+          { id: 'press_f', configuration: CONFIGURATION_1 },
+          { configuration: CONFIGURATION_1 }
+        ])
+        .then((res_list) => {
+          res_list.map((agent) => {
+            testAgentIntegrity(agent, agent.id, CONFIGURATION_1);
+            return client.deleteAgent(agent.id);
+          });
         });
-      });
+    });
   });
 
   it('should succeed when using valid configurations and specified ids', function() {
     return client
-      .createAgents([
-        { id: 'press_f', configuration: CONFIGURATION_1 },
-        { id: 't0', configuration: CONFIGURATION_1 },
-        { id: 'pay_respects', configuration: CONFIGURATION_1 }
-      ])
-      .then((res_list) => {
-        res_list.map((agent) => {
-          testAgentIntegrity(agent, agent.id, CONFIGURATION_1);
-          return client.deleteAgent(agent.id);
-        });
+      .deleteAgents([{ id: 'press_f' }, { id: 't0' }, { id: 'pay_respects' }])
+      .then(() => {
+        return client
+          .createAgents([
+            { id: 'press_f', configuration: CONFIGURATION_1 },
+            { id: 't0', configuration: CONFIGURATION_1 },
+            { id: 'pay_respects', configuration: CONFIGURATION_1 }
+          ])
+          .then((res_list) => {
+            res_list.map((agent) => {
+              testAgentIntegrity(agent, agent.id, CONFIGURATION_1);
+              return client.deleteAgent(agent.id);
+            });
+          });
       });
   });
 
   it('should handle invalid configuration', function() {
-    return client
-      .createAgents([
-        { id: 'le_monde_est_sourd', configuration: CONFIGURATION_1 },
-        { configuration: INVALID_CONFIGURATION_1 }
-      ])
-      .then((agentsList) => {
-        const agent0 = agentsList[0];
-        testAgentIntegrity(agent0, 'le_monde_est_sourd', CONFIGURATION_1);
+    return client.deleteAgents([{ id: 'le_monde_est_sourd' }]).then(() => {
+      return client
+        .createAgents([
+          { id: 'le_monde_est_sourd', configuration: CONFIGURATION_1 },
+          { configuration: INVALID_CONFIGURATION_1 }
+        ])
+        .then((agentsList) => {
+          const agent0 = agentsList[0];
+          testAgentIntegrity(agent0, 'le_monde_est_sourd', CONFIGURATION_1);
 
-        const agent1 = agentsList[1];
-        expect(agent1.status).to.be.equal(400);
-        expect(agent1.error).to.be.equal('ContextError');
-        agentsList.map(({ id }) => client.deleteAgent(id));
-      });
+          const agent1 = agentsList[1];
+          expect(agent1.status).to.be.equal(400);
+          expect(agent1.error).to.be.equal('ContextError');
+          agentsList.map(({ id }) => client.deleteAgent(id));
+        });
+    });
   });
 
   it('should handle undefined configuration', function() {
-    return client
-      .createAgents([
-        { id: 'leila_et_les_chasseurs', configuration: CONFIGURATION_1 },
-        { configuration: undefined }
-      ])
-      .then((agentsList) => {
-        const agent0 = agentsList[0];
-        testAgentIntegrity(agent0, 'leila_et_les_chasseurs', CONFIGURATION_1);
+    return client.deleteAgents([{ id: 'leila_et_les_chasseurs' }]).then(() => {
+      return client
+        .createAgents([
+          { id: 'leila_et_les_chasseurs', configuration: CONFIGURATION_1 },
+          { configuration: undefined }
+        ])
+        .then((agentsList) => {
+          const agent0 = agentsList[0];
+          testAgentIntegrity(agent0, 'leila_et_les_chasseurs', CONFIGURATION_1);
 
-        const agent1 = agentsList[1];
-        expect(agent1.status).to.be.equal(400);
-        expect(agent1.error).to.be.equal('ContextError');
+          const agent1 = agentsList[1];
+          expect(agent1.status).to.be.equal(400);
+          expect(agent1.error).to.be.equal('ContextError');
 
-        agentsList.map(({ id }) => client.deleteAgent(id));
-      });
+          agentsList.map(({ id }) => client.deleteAgent(id));
+        });
+    });
   });
 
   it('should handle invalid id', function() {
@@ -120,49 +130,55 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
 
   it('should 200 then 400 when using the same id twice', function() {
     const agentId = 'francis_cabrel';
-    return client
-      .createAgents([{ id: agentId, configuration: CONFIGURATION_1 }])
-      .then((agentsList0) => {
-        agentsList0.map((agent) =>
-          testAgentIntegrity(agent, agentId, CONFIGURATION_1)
-        );
-      })
-      .then(() => {
-        client
-          .createAgents([{ id: agentId, configuration: CONFIGURATION_1 }])
-          .then((agentsList1) => {
-            agentsList1.map((agent) => {
-              expect(agent).to.be.ok;
-              expect(agent.id).to.be.equal(agentId);
-              expect(agent.status).to.be.equal(400);
+    return client.deleteAgents([{ id: agentId }]).then(() => {
+      return client
+        .createAgents([{ id: agentId, configuration: CONFIGURATION_1 }])
+        .then((agentsList0) => {
+          agentsList0.map((agent) =>
+            testAgentIntegrity(agent, agentId, CONFIGURATION_1)
+          );
+        })
+        .then(() => {
+          client
+            .createAgents([{ id: agentId, configuration: CONFIGURATION_1 }])
+            .then((agentsList1) => {
+              agentsList1.map((agent) => {
+                expect(agent).to.be.ok;
+                expect(agent.id).to.be.equal(agentId);
+                expect(agent.status).to.be.equal(400);
+              });
             });
-          });
-      })
-      .then(() => client.deleteAgent(agentId));
+        })
+        .then(() => client.deleteAgent(agentId));
+    });
   });
 
   it('should return array of 200 and 400 if has mixed results', function() {
     return client
-      .createAgents([
-        { id: 'encore_et_encore', configuration: CONFIGURATION_1 }
-      ])
-      .then((agentsList0) => {
-        agentsList0.map((agent) =>
-          testAgentIntegrity(agent, agent.id, CONFIGURATION_1)
-        );
-        client
+      .deleteAgents([{ id: 'encore_et_encore' }, { id: 'petite_marie' }])
+      .then(() => {
+        return client
           .createAgents([
-            { id: 'encore_et_encore', configuration: CONFIGURATION_1 },
-            { id: 'petite_marie', configuration: CONFIGURATION_1 }
+            { id: 'encore_et_encore', configuration: CONFIGURATION_1 }
           ])
-          .then((agentsList1) => {
-            const agent0 = agentsList1[0];
-            const agent1 = agentsList1[1];
-            expect(agent0.id).to.be.equal('encore_et_encore');
-            expect(agent1.id).to.be.equal('petite_marie');
-            expect(agent0.status).to.be.equal(400);
-            expect(agent0.error).to.be.equal('ContextError');
-            agentsList1.map(({ id }) => client.deleteAgent(id));
+          .then((agentsList0) => {
+            agentsList0.map((agent) =>
+              testAgentIntegrity(agent, agent.id, CONFIGURATION_1)
+            );
+            client
+              .createAgents([
+                { id: 'encore_et_encore', configuration: CONFIGURATION_1 },
+                { id: 'petite_marie', configuration: CONFIGURATION_1 }
+              ])
+              .then((agentsList1) => {
+                const agent0 = agentsList1[0];
+                const agent1 = agentsList1[1];
+                expect(agent0.id).to.be.equal('encore_et_encore');
+                expect(agent1.id).to.be.equal('petite_marie');
+                expect(agent0.status).to.be.equal(400);
+                expect(agent0.error).to.be.equal('ContextError');
+                agentsList1.map(({ id }) => client.deleteAgent(id));
+              });
           });
       });
   });
@@ -174,33 +190,35 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
       { id: 'way_to_rome' },
       { id: 'postcards' }
     ];
-    return client
-      .createAgents(
-        agentIds.map(({ id }) => {
-          return { id, configuration: CONFIGURATION_1 };
-        })
-      )
-      .then((agentsList0) => {
-        agentsList0.map((agent, idx) => {
-          testAgentIntegrity(agent, agentIds[idx].id, CONFIGURATION_1);
-        });
-        return client.deleteAgents(agentIds).then((agentsList1) => {
-          agentsList1.map((agent, idx) => {
-            expect(agent.id).to.be.equal(agentIds[idx].id);
-            expect(agent.configuration).to.be.deep.equal(CONFIGURATION_1);
+    return client.deleteAgents(agentIds).then(() => {
+      return client
+        .createAgents(
+          agentIds.map(({ id }) => {
+            return { id, configuration: CONFIGURATION_1 };
+          })
+        )
+        .then((agentsList0) => {
+          agentsList0.map((agent, idx) => {
+            testAgentIntegrity(agent, agentIds[idx].id, CONFIGURATION_1);
           });
-          return client.deleteAgents(agentIds).then((agentsList2) => {
-            agentsList2.map((agent, idx) => {
+          return client.deleteAgents(agentIds).then((agentsList1) => {
+            agentsList1.map((agent, idx) => {
               expect(agent.id).to.be.equal(agentIds[idx].id);
-              expect(agent.configuration).to.be.equal(undefined);
+              expect(agent.configuration).to.be.deep.equal(CONFIGURATION_1);
+            });
+            return client.deleteAgents(agentIds).then((agentsList2) => {
+              agentsList2.map((agent, idx) => {
+                expect(agent.id).to.be.equal(agentIds[idx].id);
+                expect(agent.configuration).to.be.equal(undefined);
+              });
             });
           });
         });
-      });
+    });
   });
 
   // undefined id
-  it.only('should handle unvalid id', function() {
+  it('should handle unvalid id', function() {
     const agentIds = [{ id: '7$ shopping' }, {}];
     return client.deleteAgents(agentIds).then((del_res) => {
       expect(del_res[0]).to.be.deep.equal(agentIds[0]);
