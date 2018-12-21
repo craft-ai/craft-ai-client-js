@@ -121,46 +121,6 @@ export default function createClient(tokenOrCfg) {
       });
     },
     createAgents: function(agentsList = undefined) {
-      // const verification_results = agentsList.map((agent) => {
-      //   let agent_res = {};
-      //   let errors = [];
-      //   if (
-      //     _.isUndefined(agent.configuration) ||
-      //     !_.isObject(agent.configuration)
-      //   ) {
-      //     errors.push(
-      //       'unable to create an agent with no or invalid configuration provided.'
-      //     );
-      //   }
-
-      //   if (
-      //     !_.isUndefined(agent.id) &&
-      //     !AGENT_ID_ALLOWED_REGEXP.test(agent.id)
-      //   ) {
-      //     errors.push(
-      //       `unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
-      //     );
-      //   }
-
-      //   agent_res['status'] =
-      //     errors.length === 0 ? 200 : errors.length === 2 ? 400 : 207;
-      //   if (agent_res.status > 200) {
-      //     agent_res['error'] = 'BadRequestError';
-      //     agent_res['message'] = errors.join(' | ');
-      //   }
-      //   return agent_res;
-      // });
-
-      // if (verification_results.filter((v) => v.status > 200).length > 0) {
-      //   return Promise.reject(
-      //     new CraftAiBadRequestError(
-      //       `Bad Request, unable to create at least one agent: ${JSON.stringify(
-      //         verification_results
-      //       )}`
-      //     )
-      //   );
-      // }
-
       return request({
         method: 'POST',
         path: '/bulk/agents',
@@ -295,6 +255,56 @@ export default function createClient(tokenOrCfg) {
           debug(message);
           return { message };
         });
+    },
+    addAgentsContextOperations: function(agentsOperationsList) {
+      // if (_.isUndefined(agentsOperationsList)) {
+      //   return Promise.reject(
+      //     new CraftAiBadRequestError(
+      //       'Bad Request, unable to add agents context operations with no agent operations list provided.'
+      //     )
+      //   );
+      // }
+      // if (!_.isArray(agentsOperationsList)) {
+      //   return Promise.reject(
+      //     new CraftAiBadRequestError(
+      //       'Bad Request, agents context operations should be provided within an array.'
+      //     )
+      //   );
+      // }
+      // if (!agentsOperationsList.length) {
+      //   return Promise.reject(
+      //     new CraftAiBadRequestError(
+      //       'Bad Request, the array containing agents context operations is empty.'
+      //     )
+      //   );
+      // }
+      // const chunksize = 10;
+      // let chunkedData = [];
+      // let currentChunk = [];
+      // let currentChunkSize = 0;
+      // for (let agentOps of agentsOperationsList) {
+      //   if (agentOps.operations) {
+      //     if (agentOps.operations.length + currentChunkSize < chunksize) {
+      //       currentChunk.push(agentOps);
+      //       currentChunkSize += agentOps.length;
+      //     } else if (agentOps.operations.length > chunksize) {
+      //       // operation too big for a single chunk
+      //       let operations = agentOps.operations;
+      //       //use current function
+      //     } else {
+      //       chunkedData.push(currentChunk);
+      //       currentChunkSize = 0;
+      //       currentChunk = [];
+      //     }
+      //   } else {
+      //     currentChunk.push(agentOps); // if no operations -> post to handle the error
+      //   }
+      // }
+      // chunk size
+      // load a chunk
+      // if size is reached
+      // POST
+      // else add operations to chunk
     },
     getAgentContextOperations: function(
       agentId,
