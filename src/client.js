@@ -257,54 +257,99 @@ export default function createClient(tokenOrCfg) {
         });
     },
     addAgentsContextOperations: function(agentsOperationsList) {
-      // if (_.isUndefined(agentsOperationsList)) {
-      //   return Promise.reject(
-      //     new CraftAiBadRequestError(
-      //       'Bad Request, unable to add agents context operations with no agent operations list provided.'
-      //     )
-      //   );
-      // }
-      // if (!_.isArray(agentsOperationsList)) {
-      //   return Promise.reject(
-      //     new CraftAiBadRequestError(
-      //       'Bad Request, agents context operations should be provided within an array.'
-      //     )
-      //   );
-      // }
-      // if (!agentsOperationsList.length) {
-      //   return Promise.reject(
-      //     new CraftAiBadRequestError(
-      //       'Bad Request, the array containing agents context operations is empty.'
-      //     )
-      //   );
-      // }
-      // const chunksize = 10;
-      // let chunkedData = [];
-      // let currentChunk = [];
-      // let currentChunkSize = 0;
-      // for (let agentOps of agentsOperationsList) {
-      //   if (agentOps.operations) {
-      //     if (agentOps.operations.length + currentChunkSize < chunksize) {
-      //       currentChunk.push(agentOps);
-      //       currentChunkSize += agentOps.length;
-      //     } else if (agentOps.operations.length > chunksize) {
-      //       // operation too big for a single chunk
-      //       let operations = agentOps.operations;
-      //       //use current function
-      //     } else {
-      //       chunkedData.push(currentChunk);
-      //       currentChunkSize = 0;
-      //       currentChunk = [];
-      //     }
-      //   } else {
-      //     currentChunk.push(agentOps); // if no operations -> post to handle the error
-      //   }
-      // }
+      if (_.isUndefined(agentsOperationsList)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to add agents context operations with no agent operations list provided.'
+          )
+        );
+      }
+      if (!_.isArray(agentsOperationsList)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, agents context operations should be provided within an array.'
+          )
+        );
+      }
+      if (!agentsOperationsList.length) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, the array containing agents context operations is empty.'
+          )
+        );
+      }
+      const chunksize = 13; // limit
+      let chunkedData = [];
+      let currentChunk = [];
+      let currentChunkSize = 0;
+
+      for (let agent of agentsOperationsList) {
+        if (agent.operations && _.isArray(agent.operations)) {
+          if (currentChunkSize + agent.operations.length > chunksize) {
+            chunkedData.push(currentChunk);
+            currentChunkSize = 0;
+            currentChunk = [];
+          }
+
+          if (agent.operations.length > chunksize) {
+            chunkedData.push([agent]); // todo delete agent id (for debug only)
+            currentChunkSize = 0;
+          } else {
+            currentChunkSize += agent.operations.length;
+            currentChunk.push(agent); // todo delete agent id (for debug only)
+          }
+        }
+      }
+
+      chunkedData.push(currentChunk);
+      console.log('\n\nchunkedData\n', chunkedData);
+
+      chunkedData
+        .reduce(
+          (p, chunk) =>
+            p.then((prev_res) => {
+              console.log(prev_res);
+              if (chunk.length > 1) {
+                return request({
+                  method: 'POST',
+                  path: '/bulk/context',
+                  body: chunk
+                }).then(({ body }) => body);
+              } else {
+                return this.addAgentContextOperations(
+                  chunk[0].id,
+                  chunk[0].operations
+                ).then(({ message }) => {
+                  return [{ id: chunk[0].id, status: 201, message }];
+                });
+              }
+            }),
+          Promise.resolve()
+        )
+        .then((results) => {
+          console.log(results);
+          // const message = `Successfully added ${
+          //   operations.length
+          // } operation(s) to the agent ${cfg.owner}/${
+          //   cfg.project
+          // }/${agentId} context.`;
+          // debug(message);
+          // return { message };
+        });
+
       // chunk size
       // load a chunk
       // if size is reached
       // POST
       // else add operations to chunk
+
+      // return request({
+      //   method: 'POST',
+      //   path: '/bulk/context',
+      //   body: agentsOperationsList
+      // }).then(({ body }) => {
+      //   return body;
+      // });
     },
     getAgentContextOperations: function(
       agentId,
