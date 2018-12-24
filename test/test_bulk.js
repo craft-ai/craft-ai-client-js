@@ -1,5 +1,6 @@
 import CONFIGURATION_1 from './data/configuration_1.json';
-
+import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
+import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.json';
 import craftai from '../src';
 import INVALID_CONFIGURATION_1 from './data/invalid_configuration_1.json';
 
@@ -217,13 +218,98 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
     });
   });
 
-  // undefined id
-  it('should handle unvalid id', function() {
-    const agentIds = [{ id: '7$ shopping' }, {}];
+  it('should handle undefined id', function() {
+    const agentIds = [{ id: '7$ shopping' }, {}, { id: undefined }];
     return client.deleteAgents(agentIds).then((del_res) => {
       expect(del_res[0]).to.be.deep.equal(agentIds[0]);
       expect(del_res[1].status).to.be.equal(400);
       expect(del_res[1].error).to.be.equal('ContextError');
+      expect(del_res[2].status).to.be.equal(400);
+      expect(del_res[2].error).to.be.equal('ContextError');
     });
+  });
+
+  // ADDCONTEXT
+  it('should work with 2000 agents with small number of operations', function() {
+    const agentIds = Array.apply(null, Array(2000)).map((x, i) => {
+      return { id: `agent${i}` };
+    });
+    return client.deleteAgents(agentIds).then(() =>
+      client
+        .createAgents(
+          agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+        )
+        .then(() =>
+          client
+            .addAgentsContextOperations(
+              agentIds.map(({ id }) => ({
+                id,
+                operations: CONFIGURATION_1_OPERATIONS_1
+              }))
+            )
+            .then((result) => {
+              console.log('result', result);
+              agentIds.map((agent, idx) => {
+                expect(result[idx].id).to.be.equal(agent.id);
+                expect(result[idx].status).to.be.equal(201);
+              });
+              client.deleteAgents(agentIds);
+            })
+        )
+    );
+  });
+
+  it.only('should work with 2000 agents with small number of operations', function() {
+    const agentIds = Array.apply(null, Array(2000)).map((x, i) => {
+      return { id: `agent${i}` };
+    });
+    return client.deleteAgents(agentIds).then(() =>
+      client
+        .createAgents(
+          agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+        )
+        .then(() =>
+          client
+            .addAgentsContextOperations(
+              agentIds.map(({ id }) => ({
+                id,
+                operations: CONFIGURATION_1_OPERATIONS_2
+              }))
+            )
+            .then((result) => {
+              console.log('result', result);
+              agentIds.map((agent, idx) => {
+                expect(result[idx].id).to.be.equal(agent.id);
+                expect(result[idx].status).to.be.equal(201);
+              });
+              client.deleteAgents(agentIds);
+            })
+        )
+    );
+  });
+
+  it('should work with agents with different number of operations', function() {
+    const agentIds = [{ id: 'agent0' }, { id: 'agent1' }, { id: 'agent2' }];
+    return client.deleteAgents(agentIds).then(() =>
+      client
+        .createAgents(
+          agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+        )
+        .then(() =>
+          client
+            .addAgentsContextOperations([
+              { id: 'agent0', operations: CONFIGURATION_1_OPERATIONS_1 },
+              { id: 'agent1', operations: CONFIGURATION_1_OPERATIONS_2 },
+              { id: 'agent2', operations: CONFIGURATION_1_OPERATIONS_1 }
+            ])
+            .then((result) => {
+              agentIds.map((agent, idx) => {
+                expect(result[idx].id).to.be.equal(agent.id);
+                expect(result[idx].status).to.be.equal(201);
+              });
+              client.deleteAgents(agentIds);
+            })
+        )
+    );
   });
 });
