@@ -23,7 +23,10 @@
     "https-proxy-agent": false,
     "http-proxy-agent": false
   },
-  "keywords": ["ai", "craft-ai"],
+  "keywords": [
+    "ai",
+    "craft-ai"
+  ],
   "scripts": {
     "update_readme": "download https://www.craft.ai/content/api/js.md > README.md && git add README.md && git commit -m 'Updated README file'",
     "build": "babel src --out-dir lib",
