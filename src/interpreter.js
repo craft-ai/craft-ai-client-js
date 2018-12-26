@@ -129,7 +129,7 @@ function decideRecursion(node, context, configuration, output_values) {
 
   if (_.isUndefined(matchingChild)) {
     if (configuration.deactivate_missing_values == false) {
-      let predicted_value = _distribution(node, output_values.length);
+      let predicted_value = _distribution(node);
       // If it is a classification problem we return the class witht he highest
       // probability. Otherwise we return the computed mean value.
       if (_.isArray(predicted_value.distribution[0])) {
@@ -221,53 +221,46 @@ function checkContext(configuration) {
   };
 }
 
-function _distribution(node, nb_outputs) {
+function _distribution(node) {
   if (!(node.children && node.children.length)) {
-    let value_distribution = node.distribution;
+    let valueDistribution = node.distribution;
     // If there is no distribution attribute it means that it is
     // a classification problem. We therefore compute the distribution of
     // the classes in this leaf and return the weighted branch size.
-    if (!_.isUndefined(value_distribution)) {
-      let sum = _.sum(value_distribution);
-      return { distribution:_.map(value_distribution, (p) => p / sum), size: sum };
+    if (!_.isUndefined(valueDistribution)) {
+      let sum = _.sum(valueDistribution);
+      return { distribution: _.map(valueDistribution, (p) => p / sum), size: sum };
     }
     // Otherwise it is a regression problem, and we return the mean value 
     // of the leaf and the branch size.
-    return { distribution: node.value, size: node.nb_samples };
+    return { distribution: [node.value], size: node.nb_samples };
   }
 
   // If it is not a leaf, we recurse into the children and store the distributions
   // and sizes of each child branch.
-  let result = _.map(node.children, (child) => _distribution(child, nb_outputs))
+  let distSize = _.map(node.children, (child) => _distribution(child))
     .reduce((acc, r) => {
       acc.distributions.push(r.distribution);
       acc.sizes.push(r.size);
       return acc;
     }, { distributions: [], sizes: [] });
 
-  let total_size = _.sum(result.sizes);
+  return computeMean(distSize);
+}
 
-  // If the distribution is an Array object then it is a classification problem
-  // and the probabilty distribution of this node is computed.
-  // Otherwise it is a regression problem and the mean value of this node is 
-  // computed.
-  if (_.isArray(result.distribution[0])) {
-    let distribution = 
-    _.zip(result.distributions, result.sizes)
-      .map((zipped) => _.map(zipped[0], (elem) => elem * zipped[1] / total_size))
-      .reduce((sum, distribution) => 
-        _.zip(sum, distribution)
-          .map((zip) => 
-            (zip[0] || 0.) + zip[1]
-          ), new Array(nb_outputs));
-    
-    return { distribution: distribution, size: total_size };
-  } else {
-    let mean = _.zip(result.distributions, result.distributions.sizes)
-      .map((zipped) => zipped[0] * zipped[1])
-      .reduce(_.sum, 0.);
-    return { distribution: mean, size: total_size };
-  }
+export function computeMean(distSizes) {
+  let totalSize = _.sum(distSizes.sizes);
+  let multiplyByBranchRatio = 
+  _.zip(distSizes.distributions, distSizes.sizes)
+    .map((zipped) => _.map(zipped[0], (val) => val * zipped[1] / totalSize));
+  let sumArrays = _sumArrays(multiplyByBranchRatio);
+  return { distribution: sumArrays, size: totalSize };
+}
+
+function _sumArrays(arrays) {
+  return _.reduce(arrays, (acc_sum, array) => 
+    _.map(array, (val, i) => (acc_sum[i] || 0.) + val)
+    , new Array(arrays[0].length));
 }
 
 function _decide(configuration, trees, context) {
