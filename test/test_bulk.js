@@ -225,8 +225,8 @@ describe('BULK:', function() {
   });
 
   // ADDCONTEXT
-  it('ADDCONTEXT: should work with 100 agents with small number of operations', function() {
-    const agentIds = Array.apply(null, Array(100)).map((x, i) => ({
+  it('ADDCONTEXT: should work with 50 agents with small number of operations', function() {
+    const agentIds = Array.apply(null, Array(50)).map((x, i) => ({
       id: `agent${i}`
     }));
     return client.deleteAgents(agentIds).then(() =>
