@@ -1,18 +1,18 @@
 import _ from 'lodash';
 import context from './context';
-import parse from './parse';
 import isTimezone from './timezones';
+import parse from './parse';
+import { reduceDecisionRules } from './reducer';
 import { CraftAiDecisionError, CraftAiNullDecisionError, CraftAiUnknownError } from './errors';
 import { formatDecisionRules, formatProperty } from './formatter';
-import { reduceDecisionRules } from './reducer';
 
 const DECISION_FORMAT_VERSION = '1.1.0';
 
 const OPERATORS = {
-  'is'    : (context, value) => context === value,
-  '>='    : (context, value) => context * 1 >= value,
-  '<'     : (context, value) => context * 1 < value,
-  '[in['  : (context, value) => {
+  'is': (context, value) => context === value,
+  '>=': (context, value) => context * 1 >= value,
+  '<': (context, value) => context * 1 < value,
+  '[in[': (context, value) => {
     let context_val = context * 1;
     let from = value[0];
     let to = value[1];
@@ -212,7 +212,6 @@ function _decide(configuration, trees, context) {
               message: decision.error.message
             });
         }
-
       }
       return {
         [output]: decision

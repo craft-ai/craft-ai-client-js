@@ -1,10 +1,10 @@
 import CONFIGURATION_1 from './data/configuration_1.json';
-import CONFIGURATION_2 from './data/configuration_2.json';
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
+import CONFIGURATION_2 from './data/configuration_2.json';
 
-import craftai, { errors } from '../src';
 import parse from '../src/parse';
 import semver from 'semver';
+import craftai, { errors } from '../src';
 
 const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
 

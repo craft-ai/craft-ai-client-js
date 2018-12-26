@@ -4,7 +4,8 @@ import inherits from 'inherits';
 function CraftAiError(message, extraProperties) {
   if (typeof Error.captureStackTrace === 'function') {
     Error.captureStackTrace(this, this.constructor);
-  } else {
+  }
+  else {
     this.stack = (new Error()).stack || 'Cannot get a stacktrace, browser is too old';
   }
 

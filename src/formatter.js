@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { OPERATORS, TYPE_ANY, TYPES } from './constants';
 import Time from './time';
+import { OPERATORS, TYPE_ANY, TYPES } from './constants';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -34,7 +34,8 @@ const PROPERTY_FORMATTER = {
 
     if (seconds > 0) {
       return `${hoursStr}:${minutesStr}:${secondsStr}`;
-    } else {
+    }
+    else {
       return `${hoursStr}:${minutesStr}`;
     }
   },
@@ -90,7 +91,8 @@ const FORMATTER_FROM_DECISION_RULE = {
           return `'${property}' is ${operandFormatter(day_from)}`;
         }
         return operandFormatter(day_from);
-      } else {
+      }
+      else {
         if (property) {
           return `'${property}' from ${operandFormatter(
             day_from
@@ -110,7 +112,8 @@ const FORMATTER_FROM_DECISION_RULE = {
           return `'${property}' is ${operandFormatter(month_from)}`;
         }
         return operandFormatter(month_from);
-      } else if (month_to == 1) {
+      }
+      else if (month_to == 1) {
         // (Excluded) upper bound is january
         if (property) {
           return `'${property}' from ${operandFormatter(
@@ -118,7 +121,8 @@ const FORMATTER_FROM_DECISION_RULE = {
           )} to ${operandFormatter(12)}`;
         }
         return `${operandFormatter(month_from)} to ${operandFormatter(12)}`;
-      } else {
+      }
+      else {
         if (property) {
           return `'${property}' from ${operandFormatter(
             month_from

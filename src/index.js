@@ -1,10 +1,10 @@
 import createClient from './client';
-import * as interpreter from './interpreter';
 import DEFAULT from './defaults';
+import { deprecation } from './constants';
 import Time from './time';
 import * as errors from './errors';
+import * as interpreter from './interpreter';
 import * as Properties from './properties';
-import { deprecation } from './constants';
 
 export default createClient;
 

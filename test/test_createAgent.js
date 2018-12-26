@@ -1,7 +1,6 @@
 import CONFIGURATION_1 from './data/configuration_1.json';
-
-import craftai, { errors } from '../src';
 import INVALID_CONFIGURATION_1 from './data/invalid_configuration_1.json';
+import craftai, { errors } from '../src';
 
 describe('client.createAgent(<configuration>, [id])', function() {
   let client;

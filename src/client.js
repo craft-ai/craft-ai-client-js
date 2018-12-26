@@ -1,9 +1,9 @@
 import _ from 'lodash';
+import createRequest from './request';
 import Debug from 'debug';
 import { decide } from './interpreter';
 import DEFAULTS from './defaults';
 import jwtDecode from 'jwt-decode';
-import createRequest from './request';
 import Time from './time';
 import {
   AGENT_ID_ALLOWED_REGEXP,
@@ -355,7 +355,6 @@ export default function createClient(tokenOrCfg) {
               throw new CraftAiLongRequestTimeOutError();
             })
         ]);
-
       }
     },
     computeAgentDecision: function(agentId, t, ...contexts) {

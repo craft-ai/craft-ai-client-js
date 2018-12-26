@@ -1,7 +1,6 @@
-import craftai from '../src';
-
 import CONFIGURATION_1 from './data/configuration_1.json';
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
+import craftai from '../src';
 
 describe('client.getAgentStateHistory(<agentId>)', function() {
   let client;
