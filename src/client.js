@@ -285,22 +285,26 @@ export default function createClient(tokenOrCfg) {
 
       for (let agent of agentsOperationsList) {
         if (agent.operations && _.isArray(agent.operations)) {
-          if (currentChunkSize + agent.operations.length > chunksize) {
+          if (
+            currentChunkSize + agent.operations.length > chunksize &&
+            currentChunkSize.length
+          ) {
             chunkedData.push(currentChunk);
             currentChunkSize = 0;
             currentChunk = [];
           }
 
           if (agent.operations.length > chunksize) {
-            chunkedData.push([agent]); // todo delete agent id (for debug only)
+            chunkedData.push([agent]);
             currentChunkSize = 0;
           } else {
             currentChunkSize += agent.operations.length;
-            currentChunk.push(agent); // todo delete agent id (for debug only)
+            currentChunk.push(agent);
           }
         }
       }
-      chunkedData.push(currentChunk);
+
+      if (currentChunk.length) chunkedData.push(currentChunk);
 
       return Promise.all(
         chunkedData.map((chunk) => {
@@ -311,7 +315,6 @@ export default function createClient(tokenOrCfg) {
               body: chunk
             }).then(({ body }) => body);
           } else {
-            console.log('\n\n', chunk);
             return this.addAgentContextOperations(
               chunk[0].id,
               chunk[0].operations

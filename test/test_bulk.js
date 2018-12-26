@@ -248,7 +248,6 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
               }))
             )
             .then((result) => {
-              console.log('result', result);
               agentIds.map((agent, idx) => {
                 expect(result[idx].id).to.be.equal(agent.id);
                 expect(result[idx].status).to.be.equal(201);
@@ -259,8 +258,8 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
     );
   });
 
-  it.only('should work with 2000 agents with small number of operations', function() {
-    const agentIds = Array.apply(null, Array(2000)).map((x, i) => {
+  it('should work with 50 agents with large number of operations', function() {
+    const agentIds = Array.apply(null, Array(50)).map((x, i) => {
       return { id: `agent${i}` };
     });
     return client.deleteAgents(agentIds).then(() =>
@@ -277,7 +276,6 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
               }))
             )
             .then((result) => {
-              console.log('result', result);
               agentIds.map((agent, idx) => {
                 expect(result[idx].id).to.be.equal(agent.id);
                 expect(result[idx].status).to.be.equal(201);
