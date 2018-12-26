@@ -540,6 +540,15 @@ export default function createClient(tokenOrCfg) {
         ]);
       }
     },
+    getAgentsDecisionTrees: function(agentsList) {
+      return request({
+        method: 'POST',
+        path: '/bulk/decision_tree',
+        body: agentsList
+      }).then(({ body }) => {
+        return body;
+      });
+    },
     computeAgentDecision: function(agentId, t, ...contexts) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(

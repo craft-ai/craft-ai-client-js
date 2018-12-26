@@ -22,7 +22,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
   }
 
   // CREATEAGENTS
-  it('should succeed when using valid configurations and generated ids', function() {
+  it('CREATEAGENTS: should succeed when using valid configurations and generated ids', function() {
     return client
       .createAgents([
         { configuration: CONFIGURATION_1 },
@@ -36,7 +36,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
       });
   });
 
-  it('should succeed when using valid configurations and a specified id', function() {
+  it('CREATEAGENTS: should succeed when using valid configurations and a specified id', function() {
     return client.deleteAgents([{ id: 'press_f' }]).then(() => {
       return client
         .createAgents([
@@ -52,7 +52,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
     });
   });
 
-  it('should succeed when using valid configurations and specified ids', function() {
+  it('CREATEAGENTS: should succeed when using valid configurations and specified ids', function() {
     return client
       .deleteAgents([{ id: 'press_f' }, { id: 't0' }, { id: 'pay_respects' }])
       .then(() => {
@@ -71,7 +71,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
       });
   });
 
-  it('should handle invalid configuration', function() {
+  it('CREATEAGENTS: should handle invalid configuration', function() {
     return client.deleteAgents([{ id: 'le_monde_est_sourd' }]).then(() => {
       return client
         .createAgents([
@@ -90,7 +90,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
     });
   });
 
-  it('should handle undefined configuration', function() {
+  it('CREATEAGENTS: should handle undefined configuration', function() {
     return client.deleteAgents([{ id: 'leila_et_les_chasseurs' }]).then(() => {
       return client
         .createAgents([
@@ -110,7 +110,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
     });
   });
 
-  it('should handle invalid id', function() {
+  it('CREATEAGENTS: should handle invalid id', function() {
     return client
       .createAgents([
         { configuration: CONFIGURATION_1 },
@@ -129,7 +129,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
       });
   });
 
-  it('should 200 then 400 when using the same id twice', function() {
+  it('CREATEAGENTS: should 200 then 400 when using the same id twice', function() {
     const agentId = 'francis_cabrel';
     return client.deleteAgents([{ id: agentId }]).then(() => {
       return client
@@ -154,7 +154,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
     });
   });
 
-  it('should return array of 200 and 400 if has mixed results', function() {
+  it('CREATEAGENTS: should return array of 200 and 400 if has mixed results', function() {
     return client
       .deleteAgents([{ id: 'encore_et_encore' }, { id: 'petite_marie' }])
       .then(() => {
@@ -185,7 +185,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
   });
 
   // DELETEAGENTS
-  it('should succeed when using valid ids.', function() {
+  it('DELETEAGENTS: should succeed when using valid ids.', function() {
     const agentIds = [
       { id: 'wild_horses' },
       { id: 'way_to_rome' },
@@ -218,7 +218,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
     });
   });
 
-  it('should handle undefined id', function() {
+  it('DELETEAGENTS: should handle undefined id', function() {
     const agentIds = [{ id: '7$ shopping' }, {}, { id: undefined }];
     return client.deleteAgents(agentIds).then((del_res) => {
       expect(del_res[0]).to.be.deep.equal(agentIds[0]);
@@ -230,7 +230,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
   });
 
   // ADDCONTEXT
-  it('should work with 2000 agents with small number of operations', function() {
+  it('ADDCONTEXT: should work with 2000 agents with small number of operations', function() {
     const agentIds = Array.apply(null, Array(2000)).map((x, i) => {
       return { id: `agent${i}` };
     });
@@ -258,7 +258,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
     );
   });
 
-  it('should work with 50 agents with large number of operations', function() {
+  it('ADDCONTEXT: should work with 50 agents with large number of operations', function() {
     const agentIds = Array.apply(null, Array(50)).map((x, i) => {
       return { id: `agent${i}` };
     });
@@ -286,7 +286,7 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
     );
   });
 
-  it('should work with agents with different number of operations', function() {
+  it('ADDCONTEXT: should work with agents with different number of operations', function() {
     const agentIds = [{ id: 'agent0' }, { id: 'agent1' }, { id: 'agent2' }];
     return client.deleteAgents(agentIds).then(() =>
       client
@@ -307,6 +307,48 @@ describe('BULK: client.createAgents([{id, <configuration>}, {<configuration>}, .
               });
               client.deleteAgents(agentIds);
             })
+        )
+    );
+  });
+
+  // tester des agents invalides pour le context
+  // tester des agents invalides pour les compute decision trees
+
+  // GETAGENTSDECISIONTREES
+  it('GETAGENTSDECISIONTREES: should work with two valid agents', function() {
+    const agentIds = [{ id: 'charlotte_cardin' }, { id: 'ben_harper' }];
+    const timestamp = 1464601500;
+    return client.deleteAgents(agentIds).then(() =>
+      client
+        .createAgents(
+          agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+        )
+        .then(() =>
+          client
+            .addAgentsContextOperations(
+              agentIds.map(({ id }) => ({
+                id,
+                operations: CONFIGURATION_1_OPERATIONS_1
+              }))
+            )
+            .then(() =>
+              client
+                .getAgentsDecisionTrees(
+                  agentIds.map(({ id }) => ({ id, timestamp }))
+                )
+                .then((agentTrees) => {
+                  agentTrees.map((agent, idx) => {
+                    expect(agent.id).to.be.equal(agentIds[idx].id);
+                    expect(agent.timestamp).to.be.equal(timestamp);
+                    expect(agent).to.be.ok;
+                    const { _version, configuration, trees } = agent.tree;
+                    expect(trees).to.be.ok;
+                    expect(_version).to.be.ok;
+                    expect(configuration).to.be.deep.equal(CONFIGURATION_1);
+                  });
+                  return client.deleteAgents(agentIds);
+                })
+            )
         )
     );
   });
