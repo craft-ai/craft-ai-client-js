@@ -1,15 +1,15 @@
 import _ from 'lodash';
 import Debug from 'debug';
+import { IN_BROWSER } from './constants';
+import { version } from '../package.json';
 import {
   CraftAiBadRequestError,
   CraftAiCredentialsError,
   CraftAiInternalError,
-  CraftAiNetworkError,
   CraftAiLongRequestTimeOutError,
+  CraftAiNetworkError,
   CraftAiUnknownError
 } from './errors';
-import { IN_BROWSER } from './constants';
-import { version } from '../package.json';
 
 const fetch = !IN_BROWSER && typeof fetch === 'undefined'
   ? require('node-fetch')

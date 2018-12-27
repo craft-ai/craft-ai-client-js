@@ -1,7 +1,6 @@
-import craftai from '../src';
-
 import CONFIGURATION_1 from './data/configuration_1.json';
 import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.json';
+import craftai from '../src';
 
 describe('client.getAgentContextOperations(<agentId>)', function() {
   let client;

@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import moment from 'moment';
 import { CraftAiTimeError } from './errors';
+import moment from 'moment';
 import { timezones } from './timezones';
 
 // From 'moment/src/lib/parse/regex.js'

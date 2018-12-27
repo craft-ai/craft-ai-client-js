@@ -1,6 +1,6 @@
 import fs from 'fs';
-import path from 'path';
 import { interpreter } from '../src';
+import path from 'path';
 
 const EXPECTATIONS_DIR = path.join(__dirname, 'data/interpreter-test-suite/reduce_decision_rules');
 
@@ -17,7 +17,8 @@ describe('interpreter.reduceDecisionRules', () => {
         it(title, function() {
           if (expectation.error) {
             expect(() => interpreter.reduceDecisionRules(rules)).to.throw();
-          } else {
+          }
+          else {
             expect(interpreter.reduceDecisionRules(rules)).to.be.deep.equal(expectation.rules);
           }
         });

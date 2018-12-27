@@ -1,5 +1,5 @@
-import { formatDecisionRules, formatProperty as _formatProperty } from './formatter';
 import { reduceDecisionRules } from './reducer';
+import { formatProperty as _formatProperty, formatDecisionRules } from './formatter';
 import { deprecation, OPERATORS, TYPES } from './constants';
 
 export function reduceDecisionRule(decisionRules) {

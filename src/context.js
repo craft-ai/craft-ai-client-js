@@ -32,7 +32,8 @@ export default function createContext(configuration, ...args) {
           return context[k];
         }
       });
-    } else {
+    }
+    else {
       return _.mapValues(inputContext, (v, k) => {
         return _.isUndefined(arg[k]) ? context[k] : arg[k];
       });

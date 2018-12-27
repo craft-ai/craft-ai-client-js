@@ -17,7 +17,8 @@ describe('interpreter.formatDecisionRules', () => {
         it(title, function() {
           if (expectation.error) {
             expect(() => interpreter.formatDecisionRules(rules)).to.throw();
-          } else {
+          }
+          else {
             expect(interpreter.formatDecisionRules(rules)).to.be.deep.equal(expectation.string);
           }
         });

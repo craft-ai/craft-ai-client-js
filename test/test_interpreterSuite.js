@@ -17,7 +17,8 @@ describe('decide', () => {
     it(firstExpectation.title, function() {
       if (firstExpectation.error) {
         expect(() => interpreter.decide(firstTree, firstExpectation.context, firstExpectation.time ? new Time(firstExpectation.time.t, firstExpectation.time.tz) : {})).to.throw();
-      } else {
+      }
+      else {
         expect(interpreter.decide(firstTree, firstExpectation.context, firstExpectation.time ? new Time(firstExpectation.time.t, firstExpectation.time.tz) : {})).to.be.deep.equal(firstExpectation.output);
       }
     });
@@ -49,7 +50,8 @@ describe('interpreter.decide', () => {
                 throw e;
               }
             }
-          } else {
+          }
+          else {
             expect(interpreter.decide(json, expectation.context, expectation.time ? new Time(expectation.time.t, expectation.time.tz) : {})).to.be.deep.equal(expectation.output);
           }
         });
