@@ -101,6 +101,14 @@ export default function createClient(tokenOrCfg) {
           return body;
         });
     },
+    createAgents: function(agentsList = undefined) {
+      return request({
+        method: 'POST',
+        path: '/bulk/agents',
+        body: agentsList
+      })
+        .then(({ body }) => body);
+    },
     getAgent: function(agentId) {
       if (!AGENT_ID_ALLOWED_REGEXP.test(agentId)) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to get an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and cannot be the empty string.'));
@@ -132,6 +140,14 @@ export default function createClient(tokenOrCfg) {
           debug(`Agent '${agentId}' deleted`);
           return body;
         });
+    },
+    deleteAgents: function(agentsList) {
+      return request({
+        method: 'DELETE',
+        path: '/bulk/agents',
+        body: agentsList
+      })
+        .then(({ body }) => body);
     },
     destroyAgent: function(agentId) {
       deprecation('client.destroyAgent', 'client.deleteAgent');
@@ -193,6 +209,77 @@ export default function createClient(tokenOrCfg) {
           debug(message);
           return { message };
         });
+    },
+    addAgentsContextOperations: function(agentsOperationsList) {
+      if (_.isUndefined(agentsOperationsList)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to add agents context operations with no agent operations list provided.'
+          )
+        );
+      }
+      if (!_.isArray(agentsOperationsList)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, agents context operations should be provided within an array.'
+          )
+        );
+      }
+      if (!agentsOperationsList.length) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, the array containing agents context operations is empty.'
+          )
+        );
+      }
+      let chunkedData = [];
+      let currentChunk = [];
+      let currentChunkSize = 0;
+
+      for (let agent of agentsOperationsList) {
+        if (agent.operations && _.isArray(agent.operations)) {
+          if (
+            currentChunkSize + agent.operations.length > cfg.operationsChunksSize &&
+            currentChunkSize.length
+          ) {
+            chunkedData.push(currentChunk);
+            currentChunkSize = 0;
+            currentChunk = [];
+          }
+
+          if (agent.operations.length > cfg.operationsChunksSize) {
+            chunkedData.push([agent]);
+            currentChunkSize = 0;
+          } else {
+            currentChunkSize += agent.operations.length;
+            currentChunk.push(agent);
+          }
+        }
+      }
+
+      if (currentChunk.length) chunkedData.push(currentChunk);
+
+      return Promise.all(
+        chunkedData.map((chunk) => {
+          if (chunk.length > 1) {
+            return request({
+              method: 'POST',
+              path: '/bulk/context',
+              body: chunk
+            })
+            .then(({ body }) => body);
+          } else {
+            return this.addAgentContextOperations(
+              chunk[0].id,
+              chunk[0].operations
+            )
+            .then(({ message }) => [
+              { id: chunk[0].id, status: 201, message }
+            ]);
+          }
+        })
+      )
+      .then(_.flattenDeep);
     },
     getAgentContextOperations: function(agentId, start = undefined, end = undefined) {
       if (_.isUndefined(agentId)) {
@@ -356,6 +443,14 @@ export default function createClient(tokenOrCfg) {
             })
         ]);
       }
+    },
+    getAgentsDecisionTrees: function(agentsList) {
+      return request({
+        method: 'POST',
+        path: '/bulk/decision_tree',
+        body: agentsList
+      })
+        .then(({ body }) => body);
     },
     computeAgentDecision: function(agentId, t, ...contexts) {
       if (_.isUndefined(agentId)) {
