@@ -250,7 +250,8 @@ export default function createClient(tokenOrCfg) {
           if (agent.operations.length > cfg.operationsChunksSize) {
             chunkedData.push([agent]);
             currentChunkSize = 0;
-          } else {
+          }
+          else {
             currentChunkSize += agent.operations.length;
             currentChunk.push(agent);
           }
@@ -267,19 +268,20 @@ export default function createClient(tokenOrCfg) {
               path: '/bulk/context',
               body: chunk
             })
-            .then(({ body }) => body);
-          } else {
+              .then(({ body }) => body);
+          }
+          else {
             return this.addAgentContextOperations(
               chunk[0].id,
               chunk[0].operations
             )
-            .then(({ message }) => [
-              { id: chunk[0].id, status: 201, message }
-            ]);
+              .then(({ message }) => [
+                { id: chunk[0].id, status: 201, message }
+              ]);
           }
         })
       )
-      .then(_.flattenDeep);
+        .then(_.flattenDeep);
     },
     getAgentContextOperations: function(agentId, start = undefined, end = undefined) {
       if (_.isUndefined(agentId)) {
