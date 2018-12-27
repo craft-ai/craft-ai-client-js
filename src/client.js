@@ -30,6 +30,40 @@ function isUrl(url) {
   return SIMPLE_HTTP_URL_REGEX.test(url);
 }
 
+const isUnvalidId = (id) => !_.isUndefined(id) && !AGENT_ID_ALLOWED_REGEXP.test(id);
+const isUnvalidConfiguration = (configuration) => _.isUndefined(configuration) || !_.isObject(configuration);
+const areUnvalidOperations = (operations) => _.isUndefined(operations) || !_.isArray(operations);
+
+function testId(id) {
+  if (isUnvalidId(id)) {
+    throw new CraftAiBadRequestError(`Bad Request, unable to handle agent ${id} because it is an invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`);
+  }
+}
+
+function testConfiguration(configuration, id=undefined) {
+  if (isUnvalidConfiguration(configuration)) {
+    throw new CraftAiBadRequestError(`Bad Request, unable to create an agent with no or invalid configuration provided for agent ${id}.`);
+  }
+}
+
+function testOperations(operations, id=undefined) {
+  if (areUnvalidOperations(operations)) {
+    throw new CraftAiBadRequestError(`Bad Request, unable to handle operations for agent ${id}. Operations should be provided within an array.`);
+  }
+}
+
+function testBulkInput(bulkArray) {
+  if (_.isUndefined(bulkArray)) {
+      throw new CraftAiBadRequestError('Bad Request, unable to use bulk functionalities without list provided.');
+  }
+  if (!_.isArray(bulkArray)) {
+      throw new CraftAiBadRequestError('Bad Request, bulk inputs should be provided within an array.');
+  }
+  if (!bulkArray.length) {
+      throw new CraftAiBadRequestError('Bad Request, the array containing bulk inputs is empty.');
+  }
+};
+
 export default function createClient(tokenOrCfg) {
   let cfg = _.defaults(
     {},
@@ -80,11 +114,11 @@ export default function createClient(tokenOrCfg) {
   let instance = {
     cfg: cfg,
     createAgent: function(configuration, id = undefined) {
-      if (_.isUndefined(configuration) || !_.isObject(configuration)) {
+      if (isUnvalidConfiguration(configuration)) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to create an agent with no or invalid configuration provided.'));
       }
 
-      if (!_.isUndefined(id) && !AGENT_ID_ALLOWED_REGEXP.test(id)) {
+      if (isUnvalidId(id)) {
         return Promise.reject(new CraftAiBadRequestError(`Bad Request, unable to create an agent with invalid agent id. It must only contain characters in "a-zA-Z0-9_-" and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`));
       }
 
@@ -101,7 +135,13 @@ export default function createClient(tokenOrCfg) {
           return body;
         });
     },
-    createAgents: function(agentsList = undefined) {
+    createAgents: function(agentsList) {
+      testBulkInput(agentsList);
+      agentsList.map(({ id, configuration }) => {
+        testId(id);
+        testConfiguration(configuration);
+      });
+
       return request({
         method: 'POST',
         path: '/bulk/agents',
@@ -142,6 +182,9 @@ export default function createClient(tokenOrCfg) {
         });
     },
     deleteAgents: function(agentsList) {
+      testBulkInput(agentsList);
+      agentsList.map(({ id }) => testId(id));
+
       return request({
         method: 'DELETE',
         path: '/bulk/agents',
@@ -211,27 +254,12 @@ export default function createClient(tokenOrCfg) {
         });
     },
     addAgentsContextOperations: function(agentsOperationsList) {
-      if (_.isUndefined(agentsOperationsList)) {
-        return Promise.reject(
-          new CraftAiBadRequestError(
-            'Bad Request, unable to add agents context operations with no agent operations list provided.'
-          )
-        );
-      }
-      if (!_.isArray(agentsOperationsList)) {
-        return Promise.reject(
-          new CraftAiBadRequestError(
-            'Bad Request, agents context operations should be provided within an array.'
-          )
-        );
-      }
-      if (!agentsOperationsList.length) {
-        return Promise.reject(
-          new CraftAiBadRequestError(
-            'Bad Request, the array containing agents context operations is empty.'
-          )
-        );
-      }
+      testBulkInput(agentsOperationsList);
+      agentsOperationsList.map(({ id, operations }) => {
+        testId(id);
+        testOperations(operations);
+      });
+
       let chunkedData = [];
       let currentChunk = [];
       let currentChunkSize = 0;
@@ -447,6 +475,9 @@ export default function createClient(tokenOrCfg) {
       }
     },
     getAgentsDecisionTrees: function(agentsList) {
+      testBulkInput(agentsList);
+      agentsList.map(({ id }) => testId(id));
+
       return request({
         method: 'POST',
         path: '/bulk/decision_tree',

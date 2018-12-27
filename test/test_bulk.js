@@ -294,7 +294,7 @@ describe('BULK:', function() {
       );
   });
 
-  it('ADDCONTEXT: should work with agents with different number of operations', function() {
+  it('ADDCONTEXT: should succeed with agents with different number of operations', function() {
     const agentIds = [{ id: 'agent0' }, { id: 'agent1' }, { id: 'agent2' }];
     return client.deleteAgents(agentIds)
       .then(() =>
@@ -320,6 +320,36 @@ describe('BULK:', function() {
       );
   });
 
+  // it.only('ADDCONTEXT: should handle invalid agents', function() {
+  //   const agentIds = [{ id: 'hulk' }];
+  //   const agentWrongIds = [{ id: 'hulk' }, { id: 7 }, { id: undefined }, { id: 'john?doe' }];
+  //   return client.deleteAgents(agentIds)
+  //     .then(() =>
+  //       client
+  //         .createAgents(
+  //           agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+  //         )
+  //         .then((res) => {
+  //           console.log('here', res);
+  //           client
+  //             .addAgentsContextOperations(
+  //               agentWrongIds.map(({ id }) => ({
+  //                 id,
+  //                 operations: CONFIGURATION_1_OPERATIONS_1
+  //               }))
+  //             )
+  //             .then((result) => {
+  //               console.log('result', result);
+  //               agentIds.map((agent, idx) => {
+  //                 expect(result[idx].id).to.be.equal(agent.id);
+  //                 expect(result[idx].status).to.be.equal(201);
+  //               });
+  //               client.deleteAgents(agentIds);
+  //             });
+  //         }
+  //         )
+  //     );
+  // });
   // tester des agents invalides pour le context
   // tester des agents invalides pour les compute decision trees
 
