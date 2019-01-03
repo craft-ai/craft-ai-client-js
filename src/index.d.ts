@@ -14,7 +14,7 @@ export namespace Property {
 
   type Enum<T extends string> = [Property<'enum'>, T]
   type Continuous = [Property<'continuous'>, number]
-  type Timezone = [Property<'timezone'>, string]
+  type Timezone = [Property<'timezone'>, string | number]
   type DayOfMonth = [GeneratedProperty<'day_of_month'>, number]
   type DayOfWeek = [GeneratedProperty<'day_of_week'>, number]
   type MonthOfYear = [GeneratedProperty<'month_of_year'>, number]
@@ -238,7 +238,7 @@ export interface Client {
 
 export interface Time {
   timestamp: number
-  timezone: string
+  timezone: string | number
   time_of_day: number
   day_of_month: number
   month_of_year: number

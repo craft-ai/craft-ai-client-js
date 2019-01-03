@@ -1,15 +1,19 @@
 import _ from 'lodash';
 import { CraftAiTimeError } from './errors';
 import moment from 'moment';
-import { timezones } from './timezones';
+import isTimezone, { timezones } from './timezones';
 
 // From 'moment/src/lib/parse/regex.js'
 const OFFSET_REGEX = /Z|[+-]\d\d:?\d\d/gi; // +00:00 -00:00 +0000 -0000 or Z
 
-function tzFromOffset(offset) {
+export function tzFromOffset(offset) {
   if (_.isInteger(offset)) {
     const sign = offset >= 0 ? '+' : '-';
     const abs = Math.abs(offset);
+    // If the offset belongs to [-15, 15] it is considered to represent hours
+    // This reproduces Moment's utcOffset behaviour.
+    if (abs < 16)
+      return `${sign}${_.padStart(abs, 2, '0')}:00`;
     return `${sign}${_.padStart(Math.floor(abs / 60), 2, '0')}:${_.padStart(abs % 60, 2, '0')}`;
   }
   else {
@@ -63,12 +67,12 @@ export default function Time(t = undefined, tz = undefined) {
 
   if (tz) {
     // tz formats should be parseable by moment
-    if (timezones[tz]) {
-      m.utcOffset(timezones[tz]);
+    if (!isTimezone(tz)) {
+      throw new CraftAiTimeError(`Time error, the given timezone "${tz}" is invalid.
+      Please refer to the client's documentation to see accepted formats:
+      https://beta.craft.ai/doc/http#context-properties-types.`);
     }
-    else {
-      m.utcOffset(tz);
-    }
+    m.utcOffset(timezones[tz] || tz);
   }
 
   const minuteOffset =  m.utcOffset();

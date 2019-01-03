@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 const TIMEZONE_REGEX = /^([+-](2[0-3]|[01][0-9])(:?[0-5][0-9])?|Z)$/; // +/-00:00 -/+00 Z +/-0000
 
 export const timezones = {
@@ -34,9 +36,13 @@ export const timezones = {
 };
 
 const isTimezone = (value) => {
-  const resultRegexp = TIMEZONE_REGEX.test(value);
-  const resultAbbreviations = timezones[value] != undefined;
-  return resultRegexp || resultAbbreviations;
+  return _.isInteger(value)
+    ? value <= 840 && value >= -720
+    : _.isString(value) && (value in timezones || TIMEZONE_REGEX.test(value));
 };
+
+export function getTimezoneKey(configuration) {
+  return _.findKey(configuration, { 'type': 'timezone' });
+}
 
 export default isTimezone;
