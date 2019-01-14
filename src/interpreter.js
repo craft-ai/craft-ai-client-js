@@ -25,8 +25,7 @@ const OPERATORS = {
     else {
       return (context_val >= from || context_val < to);
     }
-  },
-  'is_null' : (context, value) => _.isNull(context) && _.isNull(value)
+  }
 };
 
 const VALUE_VALIDATOR = {
@@ -62,7 +61,9 @@ function reduceNodes(tree, fn, initialAccValue) {
 function decideRecursion(node, context, configuration, output_values) {
   // Leaf
   if (!(node.children && node.children.length)) {
-    if (node.predicted_value == null) {
+    // V2 compatibility, get 'prediction' object if it exists.
+    const prediction = (!_.isUndefined(node.prediction)) ? node.prediction : node;
+    if (prediction.predicted_value == null) {
       return {
         predicted_value: undefined,
         confidence: undefined,
@@ -75,13 +76,16 @@ function decideRecursion(node, context, configuration, output_values) {
     }
 
     let leafNode = {
-      predicted_value: node.predicted_value,
-      confidence: node.confidence || 0,
+      predicted_value: prediction.value,
+      confidence: prediction.confidence || 0,
       decision_rules: []
     };
 
-    if (!_.isUndefined(node.standard_deviation)) {
-      leafNode.standard_deviation = node.standard_deviation;
+    if (!_.isUndefined(prediction.distribution.standard_deviation)) {
+      leafNode.standard_deviation = prediction.distribution.standard_deviation;
+    }
+    else if (!_.isUndefined(prediction.standard_deviation)) {
+      leafNode.standard_deviation = prediction.standard_deviation;
     }
 
     return leafNode;
@@ -134,7 +138,10 @@ function decideRecursion(node, context, configuration, output_values) {
       // probability. Otherwise we return the computed mean value.
       if (_.isArray(predicted_value.distribution[0])) {
         // Compute the argmax function on the returned distribution
-        let argmax = predicted_value.distribution.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
+        let argmax 
+          = predicted_value.distribution
+            .map((x, i) => [x, i])
+            .reduce((r, a) => (a[0] > r[0] ? a : r))[1];
         predicted_value = output_values[argmax];
       }
       return {
@@ -142,7 +149,8 @@ function decideRecursion(node, context, configuration, output_values) {
         confidence: null,
         decision_rules: []
       };
-    } else { // TODO
+    }
+    else { // TODO
       // Should only happens when an unexpected value for an enum is encountered
       const operandList = _.uniq(_.map(_.values(node.children), (child) => child.decision_rule.operand));
       const property = _.head(node.children).decision_rule.property;
@@ -223,17 +231,17 @@ function checkContext(configuration) {
 
 function _distribution(node) {
   if (!(node.children && node.children.length)) {
-    let valueDistribution = node.distribution;
+    const prediction = (!_.isUndefined(node.prediction)) ? node.prediction : node;
+    let valueDistribution = prediction.distribution;
     // If there is no distribution attribute it means that it is
     // a classification problem. We therefore compute the distribution of
     // the classes in this leaf and return the weighted branch size.
     if (!_.isUndefined(valueDistribution)) {
-      let sum = _.sum(valueDistribution);
-      return { distribution: _.map(valueDistribution, (p) => p / sum), size: sum };
+      return { distribution: valueDistribution, size: prediction.nb_samples };
     }
     // Otherwise it is a regression problem, and we return the mean value 
     // of the leaf and the branch size.
-    return { distribution: [node.value], size: node.nb_samples };
+    return { distribution: [prediction.predicted_value], size: prediction.nb_samples };
   }
 
   // If it is not a leaf, we recurse into the children and store the distributions
@@ -260,7 +268,7 @@ export function computeMean(distSizes) {
 function _sumArrays(arrays) {
   return _.reduce(arrays, (acc_sum, array) => 
     _.map(array, (val, i) => (acc_sum[i] || 0.) + val)
-    , new Array(arrays[0].length));
+  , new Array(arrays[0].length));
 }
 
 function _decide(configuration, trees, context) {
