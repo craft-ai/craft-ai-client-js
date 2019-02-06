@@ -155,7 +155,7 @@ export default function createClient(tokenOrCfg) {
       })
         .then(({ body }) => body);
     },
-    addAgentContextOperations: function(agentId, operations) {
+    addAgentContextOperations: function(agentId, operations, chunksSize = cfg.operationsChunksSize) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(new CraftAiBadRequestError('Bad Request, unable to add agent context operations with no agentId provided.'));
       }
@@ -179,7 +179,7 @@ export default function createClient(tokenOrCfg) {
           timestamp: Time(timestamp).timestamp
         }))
         .orderBy('timestamp')
-        .chunk(cfg.operationsChunksSize)
+        .chunk(chunksSize)
         .reduce((p, chunk) => p.then(
           () => request({
             method: 'POST',
