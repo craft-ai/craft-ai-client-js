@@ -13,10 +13,14 @@ const DECISION_FORMAT_VERSION = '1.1.0';
 export function decide(tree, ...args) {
   const { _version, configuration, trees } = parse(tree);
   const ctx = configuration ? context(configuration, ...args) : _.extend({}, ...args);
-  if (semver.satisfies(_version, '>=1.0.0 || <2.0.0')) {
+  return _decide(configuration, trees, ctx, _version);
+}
+
+function _decide(configuration, trees, ctx, _version) {
+  if (semver.satisfies(_version, '>=1.0.0 <2.0.0')) {
     return decideV1(configuration, trees, ctx);
   } 
-  if (semver.satisfies(_version, '>=2.0.0 || <3.0.0')) {
+  if (semver.satisfies(_version, '>=2.0.0 <3.0.0')) {
     return decideV2(configuration, trees, ctx);
   }
   throw new CraftAiDecisionError(`Invalid decision tree format, "${_version}" is not a valid version.`);
@@ -67,7 +71,7 @@ export function getDecisionRulesProperties(tree) {
 }
 
 export function decideFromContextsArray(tree, contexts) {
-  const { configuration, trees } = parse(tree);
+  const { _version, configuration, trees } = parse(tree);
   return _.map(contexts, (contextsItem) => {
     let ctx;
     if (_.isArray(contextsItem)) {
@@ -77,7 +81,7 @@ export function decideFromContextsArray(tree, contexts) {
       ctx = context(configuration, contextsItem);
     }
     try {
-      return decide(configuration, trees, ctx);
+      return _decide(configuration, trees, ctx, _version);
     }
     catch (error) {
       if (error instanceof CraftAiNullDecisionError) {

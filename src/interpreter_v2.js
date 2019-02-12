@@ -71,7 +71,7 @@ function decideRecursion(node, context, configuration, output_values) {
     (child) => {
       const decision_rule = child.decision_rule;
       const property = decision_rule.property;
-      if (configuration.deactivate_missing_values == true) {
+      if (configuration.deactivate_missing_values == true && _.isUndefined(property)) {
         return {
           predicted_value: undefined,
           confidence: undefined,

@@ -1,4 +1,4 @@
-import { computeMean } from '../src/interpreter';
+import { computeMean } from '../src/interpreter_v2';
 
 describe('Interpreter.computeMean', function() {
   it('Probability distribution', function() {
