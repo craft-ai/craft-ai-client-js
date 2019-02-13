@@ -236,7 +236,7 @@ describe('BULK:', function() {
   });
 
   // ADDCONTEXT
-  it.only('ADDCONTEXT: should work with 50 agents with small number of operations', function() {
+  it('ADDCONTEXT: should work with 50 agents with small number of operations', function() {
     const agentIds = Array.apply(null, Array(50))
       .map((x, i) => ({
         id: `agent${i}`
@@ -263,6 +263,10 @@ describe('BULK:', function() {
                 client.deleteAgents(agentIds);
               })
           )
+          .catch((err) => {
+            console.log('errrrrrrrr', err);
+            Promise.reject(new Error('\n\nerrrrrrrrr', err));
+          })
       );
   });
 
@@ -294,7 +298,7 @@ describe('BULK:', function() {
               })
           )
           .catch((err) => {
-            console.log("EEERRRRRROOOOORRRR", err);
+            console.log('EEERRRRRROOOOORRRR', err);
             Promise.reject(new Error('\n\nERRRRRRRRRRR', err));
           })
       );
