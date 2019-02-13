@@ -334,6 +334,41 @@ describe('BULK:', function() {
       );
   });
 
+  it('ADDCONTEXT: should handle invalid agents', function() {
+    const agentIds = [{ id: 'john_doe' }];
+    const agentWrongIds = [{ id: 'john_doe' }, { id: 'john_doe_not_found' }, { id: 'john?doe' }];
+    return client.deleteAgents(agentWrongIds)
+      .then(() =>
+        client
+          .createAgents(
+            agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+          )
+          .then((res) => {
+            client
+              .addAgentsContextOperations(
+                agentWrongIds.map(({ id }) => ({
+                  id,
+                  operations: CONFIGURATION_1_OPERATIONS_1
+                }))
+              )
+              .then((result) => {
+                expect(result[0].id).to.be.equal(agentWrongIds[0].id);
+                expect(result[0].status).to.be.equal(201);
+                expect(result[1].id).to.be.equal(agentWrongIds[1].id);
+                expect(result[1].status).to.be.equal(404);
+                expect(result[1].error).to.be.equal('NotFound');
+                expect(result[2].id).to.be.equal(agentWrongIds[2].id);
+                expect(result[2].status).to.be.equal(500);
+                expect(result[2].error).to.be.equal('UnexpectedError');
+
+                client.deleteAgents(agentIds);
+              });
+          }
+          )
+      );
+  });
+
+
   // it.only('ADDCONTEXT: should handle invalid agents', function() {
   //   const agentIds = [{ id: 'hulk' }];
   //   const agentWrongIds = [{ id: 'hulk' }, { id: 7 }, { id: undefined }, { id: 'john?doe' }];

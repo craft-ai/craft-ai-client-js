@@ -246,7 +246,7 @@ export default function createClient(tokenOrCfg) {
     addAgentsContextOperations: function(agentsOperationsList) {
       testBulkInput(agentsOperationsList);
       agentsOperationsList.map(({ id, operations }) => {
-        testId(id);
+        // testId(id);
         testOperations(operations);
       });
 
