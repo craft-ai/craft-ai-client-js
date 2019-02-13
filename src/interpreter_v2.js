@@ -5,7 +5,7 @@ import { CraftAiDecisionError, CraftAiNullDecisionError, CraftAiUnknownError } f
 import { formatDecisionRules, formatProperty } from './formatter';
 import isTimezone, { getTimezoneKey } from './timezones';
 
-const DECISION_FORMAT_VERSION = '1.1.0';
+const DECISION_FORMAT_VERSION = '2.0.0';
 
 const OPERATORS = {
   'is': (context, value) => context === value,
