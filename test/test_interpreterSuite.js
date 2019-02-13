@@ -39,7 +39,7 @@ describe('interpreter.decide', () => {
         const expectations = require(path.join(EXPECTATIONS_DIR, version, treeFile));
 
         _.each(expectations, (expectation) => {
-          it.only(expectation.title, function() {
+          it(expectation.title, function() {
             if (expectation.error) {
               try {
                 interpreter.decide(json, expectation.context, expectation.time ? new Time(expectation.time.t, expectation.time.tz) : {});

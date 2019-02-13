@@ -2,7 +2,7 @@ import { computeMean } from '../src/interpreter_v2';
 
 describe('Interpreter.computeMean', function() {
   it('Probability distribution', function() {
-    let dist_sizes = {
+    let distSizes = {
       distributions: 
       [
         [0.1, 0.5, 0.4],
@@ -10,15 +10,15 @@ describe('Interpreter.computeMean', function() {
       ],
       sizes: [1, 1]
     };
-    let expected_size = 2;
-    let expected_distribution = [0.1, 0.5, 0.4];
-    let expected_result = {
-      distribution: expected_distribution,
-      size: expected_size
+    let expectedSize = 2;
+    let expectedDistribution = [0.1, 0.5, 0.4];
+    let expectedResult = {
+      distribution: expectedDistribution,
+      size: expectedSize
     };
-    expect(computeMean(dist_sizes)).to.be.deep.equal(expected_result);
+    expect(computeMean(distSizes)).to.be.deep.equal(expectedResult);
 
-    dist_sizes = {
+    distSizes = {
       distributions: 
       [
         [0.1, 0.5, 0.4],
@@ -26,15 +26,15 @@ describe('Interpreter.computeMean', function() {
       ],
       sizes: [0, 1000]
     };
-    expected_size = 1000;
-    expected_distribution = [0.1, 0.1, 0.8];
-    expected_result = {
-      distribution: expected_distribution,
-      size: expected_size
+    expectedSize = 1000;
+    expectedDistribution = [0.1, 0.1, 0.8];
+    expectedResult = {
+      distribution: expectedDistribution,
+      size: expectedSize
     };
-    expect(computeMean(dist_sizes)).to.be.deep.equal(expected_result);
+    expect(computeMean(distSizes)).to.be.deep.equal(expectedResult);
 
-    dist_sizes = {
+    distSizes = {
       distributions: 
       [
         [1.0, 0.0, 0.0, 0.0],
@@ -44,17 +44,17 @@ describe('Interpreter.computeMean', function() {
       ],
       sizes: [20, 40, 30, 10]
     };
-    expected_size = 100;
-    expected_distribution = [0.2, 0.4, 0.3, 0.1];
-    expected_result = {
-      distribution: expected_distribution,
-      size: expected_size
+    expectedSize = 100;
+    expectedDistribution = [0.2, 0.4, 0.3, 0.1];
+    expectedResult = {
+      distribution: expectedDistribution,
+      size: expectedSize
     };
-    expect(computeMean(dist_sizes)).to.be.deep.equal(expected_result);
+    expect(computeMean(distSizes)).to.be.deep.equal(expectedResult);
   });
 
   it('Mean distribution', function() {
-    let dist_sizes = {
+    let distSizes = {
       distributions: 
       [
         [10],
@@ -62,15 +62,15 @@ describe('Interpreter.computeMean', function() {
       ],
       sizes: [1, 1]
     };
-    let expected_size = 2;
-    let expected_distribution = [10];
-    let expected_result = {
-      distribution: expected_distribution,
-      size: expected_size
+    let expectedSize = 2;
+    let expectedDistribution = [10];
+    let expectedResult = {
+      distribution: expectedDistribution,
+      size: expectedSize
     };
-    expect(computeMean(dist_sizes)).to.be.deep.equal(expected_result);
+    expect(computeMean(distSizes)).to.be.deep.equal(expectedResult);
 
-    dist_sizes = {
+    distSizes = {
       distributions: 
       [
         [80],
@@ -78,15 +78,15 @@ describe('Interpreter.computeMean', function() {
       ],
       sizes: [0, 1000]
     };
-    expected_size = 1000;
-    expected_distribution = [70];
-    expected_result = {
-      distribution: expected_distribution,
-      size: expected_size
+    expectedSize = 1000;
+    expectedDistribution = [70];
+    expectedResult = {
+      distribution: expectedDistribution,
+      size: expectedSize
     };
-    expect(computeMean(dist_sizes)).to.be.deep.equal(expected_result);
+    expect(computeMean(distSizes)).to.be.deep.equal(expectedResult);
 
-    dist_sizes = {
+    distSizes = {
       distributions: 
       [
         [1],
@@ -96,12 +96,12 @@ describe('Interpreter.computeMean', function() {
       ],
       sizes: [1, 1, 1, 1]
     };
-    expected_size = 4;
-    expected_distribution = [2.5];
-    expected_result = {
-      distribution: expected_distribution,
-      size: expected_size
+    expectedSize = 4;
+    expectedDistribution = [2.5];
+    expectedResult = {
+      distribution: expectedDistribution,
+      size: expectedSize
     };
-    expect(computeMean(dist_sizes)).to.be.deep.equal(expected_result);
+    expect(computeMean(distSizes)).to.be.deep.equal(expectedResult);
   });
 });
