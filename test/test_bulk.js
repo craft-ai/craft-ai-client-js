@@ -263,11 +263,13 @@ describe('BULK:', function() {
                 client.deleteAgents(agentIds);
               })
           )
-          .catch((err) => {
-            console.log('errrrrrrrr', err);
-            Promise.reject(new Error('\n\nerrrrrrrrr', err));
-          })
-      );
+      )
+      .catch((err) => {
+        if (err.response) {
+          throw new Error(err.response.body.message);
+        }
+        throw err;
+      });
   });
 
   it('ADDCONTEXT: should work with 50 agents with large number of operations', function() {
@@ -297,11 +299,13 @@ describe('BULK:', function() {
                 client.deleteAgents(agentIds);
               })
           )
-          .catch((err) => {
-            console.log('EEERRRRRROOOOORRRR', err);
-            Promise.reject(new Error('\n\nERRRRRRRRRRR', err));
-          })
-      );
+      )
+      .catch((err) => {
+        if (err.response) {
+          throw new Error(err.response.body.message);
+        }
+        throw err;
+      });
   });
 
   it('ADDCONTEXT: should succeed with agents with different number of operations', function() {
