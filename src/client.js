@@ -40,13 +40,7 @@ function testId(id) {
   }
 }
 
-function testConfiguration(configuration, id=undefined) {
-  if (isUnvalidConfiguration(configuration)) {
-    throw new CraftAiBadRequestError(`Bad Request, unable to create an agent with no or invalid configuration provided for agent ${id}.`);
-  }
-}
-
-function testOperations(operations, id=undefined) {
+function testOperations(operations, id = undefined) {
   if (areUnvalidOperations(operations)) {
     throw new CraftAiBadRequestError(`Bad Request, unable to handle operations for agent ${id}. Operations should be provided within an array.`);
   }
@@ -54,15 +48,15 @@ function testOperations(operations, id=undefined) {
 
 function testBulkInput(bulkArray) {
   if (_.isUndefined(bulkArray)) {
-      throw new CraftAiBadRequestError('Bad Request, unable to use bulk functionalities without list provided.');
+    throw new CraftAiBadRequestError('Bad Request, unable to use bulk functionalities without list provided.');
   }
   if (!_.isArray(bulkArray)) {
-      throw new CraftAiBadRequestError('Bad Request, bulk inputs should be provided within an array.');
+    throw new CraftAiBadRequestError('Bad Request, bulk inputs should be provided within an array.');
   }
   if (!bulkArray.length) {
-      throw new CraftAiBadRequestError('Bad Request, the array containing bulk inputs is empty.');
+    throw new CraftAiBadRequestError('Bad Request, the array containing bulk inputs is empty.');
   }
-};
+}
 
 export default function createClient(tokenOrCfg) {
   let cfg = _.defaults(
@@ -137,10 +131,6 @@ export default function createClient(tokenOrCfg) {
     },
     createAgents: function(agentsList) {
       testBulkInput(agentsList);
-      agentsList.map(({ id, configuration }) => {
-        testId(id);
-        testConfiguration(configuration);
-      });
 
       return request({
         method: 'POST',
@@ -183,7 +173,7 @@ export default function createClient(tokenOrCfg) {
     },
     deleteAgents: function(agentsList) {
       testBulkInput(agentsList);
-      agentsList.map(({ id }) => testId(id));
+      // agentsList.map(({ id }) => testId(id));
 
       return request({
         method: 'DELETE',

@@ -74,7 +74,7 @@ describe('BULK:', function() {
   });
 
   it('CREATEAGENTS: should handle invalid configuration', function() {
-    return client.deleteAgents([{ id: 'le_monde_est_sourd' }])
+    return client.deleteAgents([{ id: 'le_monde_est_sourd' }, { id: 'partis_pour_rester' }])
       .then(() => {
         return client
           .createAgents([
@@ -93,7 +93,7 @@ describe('BULK:', function() {
   });
 
   it('CREATEAGENTS: should handle undefined configuration', function() {
-    return client.deleteAgents([{ id: 'leila_et_les_chasseurs' }])
+    return client.deleteAgents([{ id: 'leila_et_les_chasseurs' }, { id: 'la_robe_et_lechelle' }])
       .then(() => {
         return client
           .createAgents([
@@ -225,7 +225,9 @@ describe('BULK:', function() {
     const agentIds = [{ id: '7$ shopping' }, {}, { id: undefined }];
     return client.deleteAgents(agentIds)
       .then((del_res) => {
-        expect(del_res[0]).to.be.deep.equal(agentIds[0]);
+        expect(del_res[0].id).to.be.equal(agentIds[0].id);
+        expect(del_res[0].status).to.be.equal(400);
+        expect(del_res[0].error).to.be.equal('AgentError');
         expect(del_res[1].status).to.be.equal(400);
         expect(del_res[1].error).to.be.equal('ContextError');
         expect(del_res[2].status).to.be.equal(400);
