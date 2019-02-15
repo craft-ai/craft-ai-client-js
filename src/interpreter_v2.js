@@ -71,7 +71,7 @@ function decideRecursion(node, context, configuration, output_values) {
     (child) => {
       const decision_rule = child.decision_rule;
       const property = decision_rule.property;
-      if (configuration.deactivate_missing_values == true && _.isUndefined(property)) {
+      if (configuration.deactivate_missing_values && _.isUndefined(property)) {
         return {
           predicted_value: undefined,
           confidence: undefined,
@@ -81,21 +81,6 @@ function decideRecursion(node, context, configuration, output_values) {
           }
         };
       }
-
-      // TODO
-
-      // if (_.isUndefined(context[property])) {
-      //   // Should not happen
-      //   return {
-      //     predicted_value: undefined,
-      //     confidence: undefined,
-      //     error: {
-      //       name: 'CraftAiUnknownError',
-      //       message: `Unable to take decision: property '${property}' is missing from the given context.`
-      //     }
-      //   };
-      // }
-
       return OPERATORS[decision_rule.operator](context[property], decision_rule.operand);
     }
   );
@@ -124,7 +109,7 @@ function decideRecursion(node, context, configuration, output_values) {
         decision_rules: []
       };
     }
-    else { // TODO
+    else {
       // Should only happens when an unexpected value for an enum is encountered
       const operandList = _.uniq(_.map(_.values(node.children), (child) => child.decision_rule.operand));
       const property = _.head(node.children).decision_rule.property;
