@@ -33,7 +33,7 @@ describe('interpreter.decide', () => {
     _.each(treeFiles, (treeFile) => {
       describe(`"${treeFile}"`, function() {
         // Load the tree
-        const json = require(path.join(TREES_DIR, version, treeFile));
+        let json = require(path.join(TREES_DIR, version, treeFile));
 
         // Load the expectations for this tree.
         const expectations = require(path.join(EXPECTATIONS_DIR, version, treeFile));
@@ -56,6 +56,9 @@ describe('interpreter.decide', () => {
               }
             }
             else {
+              if (!_.isUndefined(expectation.configuration)) {
+                json.configuration = _.assign(json.configuration, expectation.configuration);
+              }
               expect(interpreter.decide(json, expectation.context, expectation.time ? new Time(expectation.time.t, expectation.time.tz) : {})).to.be.deep.equal(expectation.output);
             }
           });

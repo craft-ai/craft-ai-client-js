@@ -9,25 +9,25 @@ const DECISION_FORMAT_VERSION = '2.0.0';
 
 const OPERATORS = {
   'is': (context, value) => context === value,
-  '>=': (context, value) => context * 1 >= value,
-  '<': (context, value) => context * 1 < value,
+  '>=': (context, value) => !_.isNull(context) && context * 1 >= value,
+  '<': (context, value) => !_.isNull(context) && context * 1 < value,
   '[in[': (context, value) => {
     let context_val = context * 1;
     let from = value[0];
     let to = value[1];
     //the interval is not looping
     if (from < to) {
-      return (context_val >= from && context_val < to);
+      return (!_.isNull(context) && context_val >= from && context_val < to);
     }
     //the interval IS looping
     else {
-      return (context_val >= from || context_val < to);
+      return (!_.isNull(context) && (context_val >= from || context_val < to));
     }
   }
 };
 
 const VALUE_VALIDATOR = {
-  continuous: (value) => _.isFinite(value) || _.isNull(value),
+  continuous: (value) => _.isFinite(value),
   enum: (value) => _.isString(value),
   timezone: (value) => isTimezone(value),
   time_of_day: (value) => _.isFinite(value) && value >= 0 && value < 24,
@@ -71,7 +71,7 @@ function decideRecursion(node, context, configuration, output_values) {
     (child) => {
       const decision_rule = child.decision_rule;
       const property = decision_rule.property;
-      if (configuration.deactivate_missing_values && _.isUndefined(property)) {
+      if (configuration.deactivate_missing_values && _.isNull(property)) {
         return {
           predicted_value: undefined,
           confidence: undefined,
@@ -91,17 +91,21 @@ function decideRecursion(node, context, configuration, output_values) {
   }
 
   if (_.isUndefined(matchingChild)) {
-    if (configuration.deactivate_missing_values == false) {
-      let predicted_value = _distribution(node);
+    if (!configuration.deactivate_missing_values) {
+      let result  = _distribution(node);
+      let predicted_value = undefined;
       // If it is a classification problem we return the class witht he highest
       // probability. Otherwise we return the computed mean value.
-      if (_.isArray(predicted_value.distribution[0])) {
+      if (result.distribution.length > 1) {
         // Compute the argmax function on the returned distribution
         let argmax 
-          = predicted_value.distribution
+          = result.distribution
             .map((x, i) => [x, i])
             .reduce((r, a) => (a[0] > r[0] ? a : r))[1];
         predicted_value = output_values[argmax];
+      }
+      else {
+        predicted_value = result.distribution[0];
       }
       return {
         predicted_value: predicted_value,
@@ -167,7 +171,7 @@ function checkContext(configuration) {
         if (value === undefined) {
           missingProperties.push(property);
         }
-        else if (!validator(value)) {
+        else if (!validator(value) && !_.isNull(value) && configuration.deactivate_missing_values) {
           badProperties.push({ property, type, value });
         }
         return { badProperties, missingProperties };
@@ -195,7 +199,7 @@ function _distribution(node) {
     // If there is no distribution attribute it means that it is
     // a classification problem. We therefore compute the distribution of
     // the classes in this leaf and return the weighted branch size.
-    if (!_.isUndefined(valueDistribution)) {
+    if (_.isArray(valueDistribution)) {
       return { distribution: valueDistribution, size: prediction.nb_samples };
     }
     // Otherwise it is a regression problem, and we return the mean value 
