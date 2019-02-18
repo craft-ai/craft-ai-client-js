@@ -8,7 +8,14 @@ import isTimezone, { getTimezoneKey } from './timezones';
 const DECISION_FORMAT_VERSION = '2.0.0';
 
 const OPERATORS = {
-  'is': (context, value) => context === value,
+  'is': (context, value) => {
+    if (_.isObject(context) && _.isObject(value)) {
+      return _.isEmpty(context) && _.isEmpty(value);
+    }
+    else {
+      return context === value;
+    }
+  },
   '>=': (context, value) => !_.isNull(context) && context * 1 >= value,
   '<': (context, value) => !_.isNull(context) && context * 1 < value,
   '[in[': (context, value) => {
@@ -159,6 +166,7 @@ function checkContext(configuration) {
     return {
       property,
       type: configuration.context[property].type,
+      is_optional: configuration.context[property].is_optional,
       validator: VALUE_VALIDATOR[configuration.context[property].type] || otherValidator
     };
   });
@@ -166,12 +174,14 @@ function checkContext(configuration) {
   return (context) => {
     const { badProperties, missingProperties } = _.reduce(
       validators,
-      ({ badProperties, missingProperties }, { property, type, validator }) => {
+      ({ badProperties, missingProperties }, { property, type, is_optional, validator }) => {
         const value = context[property];
+        const isNullAuthorized = _.isNull(value) && !configuration.deactivate_missing_values;
+        const isOptionalAuthorized = _.isEmpty(value) && is_optional;
         if (value === undefined) {
           missingProperties.push(property);
         }
-        else if (!validator(value) && !_.isNull(value) && configuration.deactivate_missing_values) {
+        else if (!validator(value) && !isNullAuthorized && !isOptionalAuthorized) {
           badProperties.push({ property, type, value });
         }
         return { badProperties, missingProperties };
