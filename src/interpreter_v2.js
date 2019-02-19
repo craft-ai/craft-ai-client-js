@@ -30,7 +30,8 @@ const OPERATORS = {
     else {
       return (!_.isNull(context) && (context_val >= from || context_val < to));
     }
-  }
+  },
+  'in': (context, value) => value.indexOf(context) > -1
 };
 
 const VALUE_VALIDATOR = {
