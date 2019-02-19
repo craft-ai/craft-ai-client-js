@@ -15,7 +15,7 @@ export default function parse(input) {
   if (!semver.valid(version)) {
     throw new CraftAiDecisionError(`Invalid decision tree format, "${version}" is not a valid version.`);
   }
-  else if (semver.satisfies(version, '1.x')) {
+  else if (semver.satisfies(version, '>=1.0.0 <3.0.0')) {
     return json;
   }
   else {
