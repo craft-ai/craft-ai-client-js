@@ -43,7 +43,7 @@ const VALUE_VALIDATOR = {
   month_of_year: (value) => _.isInteger(value)  && value >= 1 && value <= 12
 };
 
-function decideRecursion(node, context, configuration, output_values) {
+function decideRecursion(node, context, configuration, outputType, outputValues) {
   // Leaf
   if (!(node.children && node.children.length)) {
     const prediction = node.prediction;
@@ -99,17 +99,17 @@ function decideRecursion(node, context, configuration, output_values) {
 
   if (_.isUndefined(matchingChild)) {
     if (!configuration.deactivate_missing_values) {
-      let result  = _distribution(node);
-      let predicted_value = undefined;
+      let result = _distribution(node);
+      let predicted_value;
       // If it is a classification problem we return the class witht he highest
       // probability. Otherwise we return the computed mean value.
-      if (result.distribution.length > 1) {
+      if (outputType === 'enum') {
         // Compute the argmax function on the returned distribution
         let argmax 
           = result.distribution
             .map((x, i) => [x, i])
             .reduce((r, a) => (a[0] > r[0] ? a : r))[1];
-        predicted_value = output_values[argmax];
+        predicted_value = outputValues[argmax];
       }
       else {
         predicted_value = result.distribution[0];
@@ -141,7 +141,7 @@ function decideRecursion(node, context, configuration, output_values) {
     }
   }
   // matching child found: recurse !
-  const result = decideRecursion(matchingChild, context, configuration, output_values);
+  const result = decideRecursion(matchingChild, context, configuration, outputType, outputValues);
 
   let finalResult = _.extend(result, {
     decision_rules: [matchingChild.decision_rule].concat(result.decision_rules)
@@ -256,7 +256,8 @@ function decide(configuration, trees, context) {
     _version: DECISION_FORMAT_VERSION,
     context,
     output: _.assign(..._.map(configuration.output, (output) => {
-      let decision = decideRecursion(trees[output], context, configuration, trees[output].output_values);
+      const outputType = configuration.context[output].type;
+      let decision = decideRecursion(trees[output], context, configuration, outputType, trees[output].output_values);
       if (decision.error) {
         switch (decision.error.name) {
           case 'CraftAiNullDecisionError':
