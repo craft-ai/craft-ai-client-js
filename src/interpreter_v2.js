@@ -99,23 +99,20 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
 
   if (_.isUndefined(matchingChild)) {
     if (!configuration.deactivate_missing_values) {
-      let result = _distribution(node);
-      let predicted_value;
-      // If it is a classification problem we return the class witht he highest
-      // probability. Otherwise we return the computed mean value.
+      let { value } = _distribution(node);
+      // If it is a classification problem we return the class with the highest
+      // probability. Otherwise, if the current output type is continuous/periodic
+      // then the returned value corresponds to the subtree weighted output values.
       if (outputType === 'enum') {
-        // Compute the argmax function on the returned distribution
+        // Compute the argmax function on the returned distribution:
         let argmax 
-          = result.distribution
+          = value
             .map((x, i) => [x, i])
             .reduce((r, a) => (a[0] > r[0] ? a : r))[1];
-        predicted_value = outputValues[argmax];
-      }
-      else {
-        predicted_value = result.distribution[0];
+        value = outputValues[argmax];
       }
       return {
-        predicted_value: predicted_value,
+        predicted_value: value,
         confidence: null,
         decision_rules: []
       };
@@ -204,38 +201,54 @@ function checkContext(configuration) {
 
 function _distribution(node) {
   if (!(node.children && node.children.length)) {
-    const prediction = (!_.isUndefined(node.prediction)) ? node.prediction : node;
-    let valueDistribution = prediction.distribution;
-    // If there is no distribution attribute it means that it is
+    // If the distribution attribute is an array it means that it is
     // a classification problem. We therefore compute the distribution of
-    // the classes in this leaf and return the weighted branch size.
-    if (_.isArray(valueDistribution)) {
-      return { distribution: valueDistribution, size: prediction.nb_samples };
+    // the classes in this leaf and return the branch size.
+    if (_.isArray(node.prediction.distribution)) {
+      return { value: node.prediction.distribution, size: node.prediction.nb_samples };
     }
     // Otherwise it is a regression problem, and we return the mean value 
     // of the leaf and the branch size.
-    return { distribution: [prediction.value], size: prediction.nb_samples };
+    return { value: node.prediction.value, size: node.prediction.nb_samples };
   }
 
   // If it is not a leaf, we recurse into the children and store the distributions
   // and sizes of each child branch.
-  let distSize = _.map(node.children, (child) => _distribution(child))
-    .reduce((acc, r) => {
-      acc.distributions.push(r.distribution);
-      acc.sizes.push(r.size);
+  const { values, sizes } = _.map(node.children, (child) => _distribution(child))
+    .reduce((acc, { value, size }) => {
+      acc.values.push(value);
+      acc.sizes.push(size);
       return acc;
-    }, { distributions: [], sizes: [] });
-
-  return computeMean(distSize);
+    }, { values: [], sizes: [] });
+  
+  if (_.isArray(values[0])) {
+    return computeMeanDistributions(values, sizes);
+  }
+  return computeMeanValues(values, sizes);
 }
 
-export function computeMean(distSizes) {
-  let totalSize = _.sum(distSizes.sizes);
+export function computeMeanValues(values, sizes) {
+  // Compute the weighted mean of the given array of values.
+  // Example, for values = [ 4, 3, 6 ], sizes = [1, 2, 1]
+  // This function computes (4*1 + 3*2 + 1*6) / (1+2+1) = 16/4 = 4 
+  let totalSize = _.sum(sizes);
+  const mean = 
+    _.zip(values, sizes)
+      .map((zipped) => zipped[0] * (1.0 * zipped[1]) / (1.0 * totalSize))
+      .reduce(_.add);
+  return { value: mean, size: totalSize };
+}
+
+export function computeMeanDistributions(values, sizes) {
+  // Compute the weighted mean of the given array of distributions (array of probabilities).
+  // Example, for values = [[ 4, 3, 6 ], [1, 2, 3], [3, 4, 5]], sizes = [1, 2, 1]
+  // This function computes ([ 4, 3, 6]*1 + [1, 2, 3]*2 + [3, 4, 5]*6) / (1+2+1) = ...
+  let totalSize = _.sum(sizes);
   let multiplyByBranchRatio = 
-  _.zip(distSizes.distributions, distSizes.sizes)
+  _.zip(values, sizes)
     .map((zipped) => _.map(zipped[0], (val) => val * zipped[1] / totalSize));
   let sumArrays = _sumArrays(multiplyByBranchRatio);
-  return { distribution: sumArrays, size: totalSize };
+  return { value: sumArrays, size: totalSize };
 }
 
 function _sumArrays(arrays) {
