@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - Missing values: it is now possible to handle missing values by adding `deactivate_missing_values: false` in the agent configuration. Missing values correspond to a `null` value in a given context.
     - Optional values: it is now possible to handle optional values by adding `is_optional: true` for a property in the agent configuration. Optional values are defined by `{}`, the empty Object, in a given context.
     - The multi-enum operator `ìn`.
+    - Boolean values
 
 ## [1.15.4](https://github.com/craft-ai/craft-ai-client-js/compare/v1.15.3...v1.15.4) - 2018-11-27 ##
 
