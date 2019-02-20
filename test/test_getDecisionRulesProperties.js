@@ -8,6 +8,7 @@ const DECISION_TREE_1_V2 = require('./data/interpreter-test-suite/decide/trees/v
 const DECISION_TREE_2_V2 = require('./data/interpreter-test-suite/decide/trees/v2/continuous.json');
 const DECISION_TREE_3_V2 = require('./data/interpreter-test-suite/decide/trees/v2/oneColor.json');
 const DECISION_TREE_4_V2 = require('./data/interpreter-test-suite/decide/trees/v2/optional_branch_enum.json');
+const DECISION_TREE_5_V2 = require('./data/interpreter-test-suite/decide/trees/v2/boolean_operator.json');
 
 const INVALID_DECISION_TREE_1 = require('./data/interpreter-test-suite/decide/trees/v1/emptyArray.json');
 
@@ -99,6 +100,20 @@ describe('interpreter.getDecisionRulesProperties(<tree>)', function() {
       {
         'property': 'continuous1',
         'type': 'continuous'
+      }
+    ]);
+  });
+
+  it('can list the properties used in a tree\'s decision rules (boolean operator)', function() {
+    expect(interpreter.getDecisionRulesProperties(DECISION_TREE_5_V2)).to.be.deep.equal([
+      {
+        'property': 'presence', 
+        'type': 'boolean'
+      },
+      {
+        'property': 'timeOfDay',
+        'type': 'time_of_day',
+        'is_generated': true
       }
     ]);
   });

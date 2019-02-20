@@ -37,6 +37,7 @@ const OPERATORS = {
 const VALUE_VALIDATOR = {
   continuous: (value) => _.isFinite(value),
   enum: (value) => _.isString(value),
+  boolean: (value) => _.isBoolean(value),
   timezone: (value) => isTimezone(value),
   time_of_day: (value) => _.isFinite(value) && value >= 0 && value < 24,
   day_of_week: (value) => _.isInteger(value)  && value >= 0 && value <= 6,
@@ -104,7 +105,7 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
       // If it is a classification problem we return the class with the highest
       // probability. Otherwise, if the current output type is continuous/periodic
       // then the returned value corresponds to the subtree weighted output values.
-      if (outputType === 'enum') {
+      if (outputType === 'enum' || outputType === 'boolean') {
         // Compute the argmax function on the returned distribution:
         let argmax 
           = value
