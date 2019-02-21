@@ -64,11 +64,15 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
     let leafNode = {
       predicted_value: prediction.value,
       confidence: prediction.confidence || 0,
-      decision_rules: []
+      decision_rules: [],
+      nb_samples: prediction.nb_samples
     };
-
+    
     if (!_.isUndefined(prediction.distribution.standard_deviation)) {
       leafNode.standard_deviation = prediction.distribution.standard_deviation;
+    }
+    else {
+      leafNode.distribution = prediction.distribution;
     }
 
     return leafNode;
@@ -101,7 +105,8 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
 
   if (_.isUndefined(matchingChild)) {
     if (!configuration.deactivate_missing_values) {
-      let { value } = _distribution(node);
+      const { value, size } = _distribution(node);
+      let finalResult = {};
       // If it is a classification problem we return the class with the highest
       // probability. Otherwise, if the current output type is continuous/periodic
       // then the returned value corresponds to the subtree weighted output values.
@@ -111,13 +116,23 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
           = value
             .map((x, i) => [x, i])
             .reduce((r, a) => (a[0] > r[0] ? a : r))[1];
-        value = outputValues[argmax];
+        
+        const predicted_value = outputValues[argmax];
+        finalResult = {
+          predicted_value: predicted_value,
+          distribution: value
+        };
       }
-      return {
-        predicted_value: value,
+      else {
+        finalResult = {
+          predicted_value: value
+        };
+      }
+      return _.extend(finalResult, {
         confidence: null,
-        decision_rules: []
-      };
+        decision_rules: [],
+        nb_samples: size 
+      });
     }
     else {
       // Should only happens when an unexpected value for an enum is encountered
