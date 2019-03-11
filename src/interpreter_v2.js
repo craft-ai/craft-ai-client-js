@@ -70,6 +70,14 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
     
     if (!_.isUndefined(prediction.distribution.standard_deviation)) {
       leafNode.standard_deviation = prediction.distribution.standard_deviation;
+      const min_value = prediction.distribution.min;
+      const max_value = prediction.distribution.max;
+      if (!_.isUndefined(min_value)) {
+        leafNode.min = min_value;
+      }
+      if (!_.isUndefined(max_value)) {
+        leafNode.max = max_value;
+      }
     }
     else {
       leafNode.distribution = prediction.distribution;
