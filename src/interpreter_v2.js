@@ -113,7 +113,7 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
 
   if (_.isUndefined(matchingChild)) {
     if (!configuration.deactivate_missing_values) {
-      const { value, size } = _distribution(node);
+      const { value, standard_deviation, size } = distribution(node);
       let finalResult = {};
       // If it is a classification problem we return the class with the highest
       // probability. Otherwise, if the current output type is continuous/periodic
@@ -133,7 +133,8 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
       }
       else {
         finalResult = {
-          predicted_value: value
+          predicted_value: value,
+          standard_deviation: standard_deviation
         };
       }
       return _.extend(finalResult, {
@@ -224,44 +225,105 @@ function checkContext(configuration) {
   };
 }
 
-function _distribution(node) {
+function distribution(node) {
   if (!(node.children && node.children.length)) {
     // If the distribution attribute is an array it means that it is
     // a classification problem. We therefore compute the distribution of
     // the classes in this leaf and return the branch size.
     if (_.isArray(node.prediction.distribution)) {
-      return { value: node.prediction.distribution, size: node.prediction.nb_samples };
+      return {
+        value: node.prediction.distribution,
+        size: node.prediction.nb_samples
+      };
     }
     // Otherwise it is a regression problem, and we return the mean value 
-    // of the leaf and the branch size.
-    return { value: node.prediction.value, size: node.prediction.nb_samples };
+    // of the leaf, the standard_deviation and the branch size.
+    return {
+      value: node.prediction.value,
+      standard_deviation: node.prediction.distribution.standard_deviation,
+      size: node.prediction.nb_samples
+    };
   }
 
   // If it is not a leaf, we recurse into the children and store the distributions
   // and sizes of each child branch.
-  const { values, sizes } = _.map(node.children, (child) => _distribution(child))
-    .reduce((acc, { value, size }) => {
+  const { values, stds, sizes } = _.map(node.children, (child) => distribution(child))
+    .reduce((acc, { value, standard_deviation, size }) => {
       acc.values.push(value);
       acc.sizes.push(size);
+      if (!_.isUndefined(standard_deviation)) {
+        acc.stds.push(standard_deviation);
+      }
       return acc;
-    }, { values: [], sizes: [] });
-  
+    }, {
+      values: [],
+      stds: [],
+      sizes: [] 
+    });
+
   if (_.isArray(values[0])) {
     return computeMeanDistributions(values, sizes);
   }
-  return computeMeanValues(values, sizes);
+  return computeMeanValues(values, sizes, stds);
 }
 
-export function computeMeanValues(values, sizes) {
+export function computeMeanValues(values, sizes, stds) {
   // Compute the weighted mean of the given array of values.
   // Example, for values = [ 4, 3, 6 ], sizes = [1, 2, 1]
-  // This function computes (4*1 + 3*2 + 1*6) / (1+2+1) = 16/4 = 4 
-  let totalSize = _.sum(sizes);
-  const mean = 
-    _.zip(values, sizes)
-      .map((zipped) => zipped[0] * (1.0 * zipped[1]) / (1.0 * totalSize))
-      .reduce(_.add);
-  return { value: mean, size: totalSize };
+  // This function computes (4*1 + 3*2 + 1*6) / (1+2+1) = 16/4 = 4
+  // If no standard deviation array is given, use classical weighted mean formula:
+  if (_.isUndefined(stds)) {
+    let totalSize = _.sum(sizes);
+    const newMean =
+      _.zip(values, sizes)
+        .map(([mean, size]) => mean * (1.0 * size) / (1.0 * totalSize))
+        .reduce(_.add);
+    return {
+      value: newMean,
+      size: totalSize
+    };
+  }
+  // Otherwise, to compute the weighted standard deviation the following formula is used:
+  // https://math.stackexchange.com/questions/2238086/calculate-variance-of-a-subset
+  const { mean, variance, size } = 
+    _.zip(values, stds, sizes)
+      .map(([mean, std, size]) => {
+        return {
+          mean: mean,
+          variance: std * std,
+          size: size
+        };
+      })
+      .reduce((acc, { mean, variance, size }) => {
+        if (_.isUndefined(acc.mean)) {
+          return {
+            mean: mean,
+            variance: variance,
+            size: size
+          };
+        }
+        const totalSize = 1.0 * (acc.size + size);
+        const newVariance = (1.0 / (totalSize - 1)) * (
+          (acc.size - 1) * acc.variance
+          + (size - 1) * variance
+          + ((acc.size * size) / totalSize) * (acc.mean - mean) * (acc.mean - mean)
+        );
+        const newMean = (1.0 / totalSize) * (acc.size * acc.mean + size * mean);
+        return {
+          mean: newMean,
+          variance: newVariance,
+          size: totalSize
+        };
+      }, {
+        mean: undefined,
+        variance: undefined,
+        size: undefined
+      });
+  return { 
+    value: mean,
+    standard_deviation: Math.sqrt(variance),
+    size: size
+  };
 }
 
 export function computeMeanDistributions(values, sizes) {
