@@ -72,7 +72,6 @@ describe('Interpreter.computeMean', function() {
     };
     expect(computeMeanValues(values, sizes)).to.be.deep.equal(expectedResult);
 
-
     values = [1., 2., 3., 4.];
     sizes = [1, 1, 1, 1];
 
@@ -83,5 +82,64 @@ describe('Interpreter.computeMean', function() {
       size: expectedSize
     };
     expect(computeMeanValues(values, sizes)).to.be.deep.equal(expectedResult);
+
+    values = [4., 5.];
+    let stds = [1.0, 2.0];
+    sizes = [3, 5];
+
+    expectedSize = 8;
+    expectedValue = 37.0 / 8.0;
+    let expectedStd = Math.sqrt((18.0 + 15.0 / 8.0) / 7.0);
+    expectedResult = {
+      value: expectedValue,
+      standard_deviation: expectedStd,
+      size: expectedSize
+    };
+    let result = computeMeanValues(values, sizes, stds);
+    expect(result.value).to.be.equal(expectedValue);
+    expect(result.size).to.be.equal(expectedSize);
+    expect(result.standard_deviation).to.be.closeTo(expectedStd, 0.00001);
+
+    values = [0.0, 5.];
+    stds = [0.0, 2.0];
+    sizes = [0, 5];
+
+    expectedSize = 5.0;
+    expectedValue = 5.0;
+    expectedStd = 2.0;
+    expectedResult = {
+      value: expectedValue,
+      standard_deviation: expectedStd,
+      size: expectedSize
+    };
+    result = computeMeanValues(values, sizes, stds);
+    expect(result.value).to.be.equal(expectedValue);
+    expect(result.size).to.be.equal(expectedSize);
+    expect(result.standard_deviation).to.be.closeTo(expectedStd, 0.00001);
+
+    values = [5.0, 0.0];
+    stds = [2.0, 0.0];
+    sizes = [5, 0];
+    result = computeMeanValues(values, sizes, stds);
+    expect(result.value).to.be.equal(expectedValue);
+    expect(result.size).to.be.equal(expectedSize);
+    expect(result.standard_deviation).to.be.closeTo(expectedStd, 0.00001);
+
+    values = [1.0, 5.];
+    stds = [15.0, 2.0];
+    sizes = [1, 5];
+
+    expectedSize = 6.0;
+    expectedValue = 26.0 / 6.0;
+    expectedStd = Math.sqrt((16.0 + 80.0 / 6.0) / 5.0);
+    expectedResult = {
+      value: expectedValue,
+      standard_deviation: expectedStd,
+      size: expectedSize
+    };
+    result = computeMeanValues(values, sizes, stds);
+    expect(result.value).to.be.equal(expectedValue);
+    expect(result.size).to.be.equal(expectedSize);
+    expect(result.standard_deviation).to.be.closeTo(expectedStd, 0.00001);
   });
 });
