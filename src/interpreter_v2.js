@@ -303,6 +303,13 @@ export function computeMeanValues(values, sizes, stds) {
           };
         }
         const totalSize = 1.0 * (acc.size + size);
+        if (!totalSize > 0.0) {
+          return {
+            mean: acc.mean,
+            variance: acc.variance,
+            size: acc.size
+          };
+        }
         const newVariance = (1.0 / (totalSize - 1)) * (
           (acc.size - 1) * acc.variance
           + (size - 1) * variance

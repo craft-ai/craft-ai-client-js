@@ -141,5 +141,22 @@ describe('Interpreter.computeMean', function() {
     expect(result.value).to.be.equal(expectedValue);
     expect(result.size).to.be.equal(expectedSize);
     expect(result.standard_deviation).to.be.closeTo(expectedStd, 0.00001);
+
+    values = [0.0, 0.0, 0.0, 0.0, 1.0];
+    stds = [0.0, 0.0, 0.0, 0.0, 2.0];
+    sizes = [0, 0, 0, 0, 20];
+
+    expectedSize = 20.0;
+    expectedValue = 1.0;
+    expectedStd = 2.0;
+    expectedResult = {
+      value: expectedValue,
+      standard_deviation: expectedStd,
+      size: expectedSize
+    };
+    result = computeMeanValues(values, sizes, stds);
+    expect(result.value).to.be.equal(expectedValue);
+    expect(result.size).to.be.equal(expectedSize);
+    expect(result.standard_deviation).to.be.closeTo(expectedStd, 0.00001);
   });
 });
