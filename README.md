@@ -865,116 +865,137 @@ client.getAgentDecisionTree(
   console.log(tree);
   /* Outputted tree is the following
   {
-    "_version": "1.1.0",
-    "trees": {
-      "lightbulbState": {
-        "children": [
+    "_version":"2.0.0",
+    "trees":{
+      "lightbulbState":{
+        "output_values":["OFF", "ON"],
+        "children":[
           {
-            "children": [
+            "children":[
               {
-                "confidence": 0.6774609088897705,
-                "decision_rule": {
-                  "operand": 0.5,
-                  "operator": "<",
-                  "property": "peopleCount"
+                "prediction":{
+                  "confidence":0.6774609088897705,
+                  "distribution":[0.8, 0.2],
+                  "value":"OFF",
+                  "nb_samples": 5
                 },
-                "predicted_value": "OFF"
+                "decision_rule":{
+                  "operand":0.5,
+                  "operator":"<",
+                  "property":"peopleCount"
+                }
               },
               {
-                "confidence": 0.8630361557006836,
-                "decision_rule": {
-                  "operand": 0.5,
-                  "operator": ">=",
-                  "property": "peopleCount"
+                "prediction":{
+                  "confidence":0.8630361557006836,
+                  "distribution":[0.1, 0.9],
+                  "value":"ON",
+                  "nb_samples": 10
                 },
-                "predicted_value": "ON"
-              }
-            ],
-            "decision_rule": {
-              "operand": [
-                5,
-                5.6666665
-              ],
-              "operator": "[in[",
-              "property": "timeOfDay"
-            }
-          },
-          {
-            "children": [
-              {
-                "confidence": 0.9947378635406494,
-                "decision_rule": {
-                  "operand": [
-                    5.6666665,
-                    20.666666
-                  ],
-                  "operator": "[in[",
-                  "property": "timeOfDay"
-                },
-                "predicted_value": "OFF"
-              },
-              {
-                "children": [
-                  {
-                    "confidence": 0.969236433506012,
-                    "decision_rule": {
-                      "operand": 1,
-                      "operator": "<",
-                      "property": "peopleCount"
-                    },
-                    "predicted_value": "OFF"
-                  },
-                  {
-                    "confidence": 0.8630361557006836,
-                    "decision_rule": {
-                      "operand": 1,
-                      "operator": ">=",
-                      "property": "peopleCount"
-                    },
-                    "predicted_value": "ON"
-                  }
-                ],
-                "decision_rule": {
-                  "operand": [
-                    20.666666,
-                    5
-                  ],
-                  "operator": "[in[",
-                  "property": "timeOfDay"
+                "decision_rule":{
+                  "operand":0.5,
+                  "operator":">=",
+                  "property":"peopleCount"
                 }
               }
             ],
-            "decision_rule": {
-              "operand": [
+            "decision_rule":{
+              "operand":[
+                5,
+                5.6666665
+              ],
+              "operator":"[in[",
+              "property":"timeOfDay"
+            }
+          },
+          {
+            "children":[
+              {
+                "prediction":{
+                  "confidence":0.9947378635406494,
+                  "distribution":[1.0, 0.0],
+                  "value":"ON",
+                  "nb_samples": 10
+                },
+                "decision_rule":{
+                  "operand":[
+                    5.6666665,
+                    20.666666
+                  ],
+                  "operator":"[in[",
+                  "property":"timeOfDay"
+                }
+              },
+              {
+                "children":[
+                  {
+                    "prediction":{
+                      "confidence":0.969236433506012,
+                      "distribution":[0.95, 0.05],
+                      "value":"OFF",
+                      "nb_samples": 10
+                    },
+                    "decision_rule":{
+                      "operand":1,
+                      "operator":"<",
+                      "property":"peopleCount"
+                    }
+                  },
+                  {
+                    "prediction":{
+                      "confidence":0.8630361557006836,
+                      "distribution":[0.2, 0.8],
+                      "value":"ON",
+                      "nb_samples": 15
+                    },
+                    "decision_rule":{
+                      "operand":1,
+                      "operator":">=",
+                      "property":"peopleCount"
+                    }
+                  }
+                ],
+                "decision_rule":{
+                  "operand":[
+                    20.666666,
+                    5
+                  ],
+                  "operator":"[in[",
+                  "property":"timeOfDay"
+                }
+              }
+            ],
+            "decision_rule":{
+              "operand":[
                 5.6666665,
                 5
               ],
-              "operator": "[in[",
-              "property": "timeOfDay"
+              "operator":"[in[",
+              "property":"timeOfDay"
             }
           }
         ]
       }
     },
-    "configuration": {
-      "time_quantum": 600,
-      "learning_period": 9000000,
-      "context": {
-        "peopleCount": {
-          "type": "continuous"
+    "configuration":{
+      "time_quantum":600,
+      "learning_period":9000000,
+      "context":{
+        "peopleCount":{
+          "type":"continuous"
         },
-        "timeOfDay": {
-          "type": "time_of_day",
-          "is_generated": true
+        "timeOfDay":{
+          "type":"time_of_day",
+          "is_generated":True
         },
-        "timezone": {
-          "type": "timezone"
+        "timezone":{
+          "type":"timezone"
         },
-        "lightbulbState": {
-          "type": "enum"
+        "lightbulbState":{
+          "type":"enum"
         }
       },
-      "output": [
+      "output":[
         "lightbulbState"
       ]
     }
@@ -1083,6 +1104,8 @@ A computed `decision` on an `enum` type would look like:
     lightbulbState: {
       predicted_value: 'ON',
       confidence: 0.9937745256361138, // The confidence in the decision
+      nb_samples: 25,
+      distribution: [0.05, 0.95],
       decision_rules: [ // The ordered list of decision_rules that were validated to reach this decision
         {
           property: 'timeOfDay',
@@ -1104,10 +1127,27 @@ A `decision` for a numerical output type would look like:
 
 ```js
   output: {
+    lightbulbState: {
+      predicted_value: "OFF",
+      confidence: ...,
+      distribution: [ ... ],
+      nb_samples: 25,
+      decision_rules: [ ... ]
+    }
+  }
+```
+
+A `decision` for a categorical output type would look like:
+
+```js
+  output: {
     lightbulbIntensity: {
       predicted_value: 10.5,
       standard_deviation: 1.25,
       confidence: ...,
+      min: 8.0,
+      max: 11,
+      nb_samples: 25,
       decision_rules: [ ... ]
     }
   }
@@ -1119,7 +1159,9 @@ A `decision` in a case where the tree cannot make a prediction:
   decision: {
     lightbulbState: {
       predicted_value: null, // No decision
+      distribution : [ ... ], // Normalized distribution of the output classes.
       confidence: 0, // Zero confidence if the decision is null
+      nb_samples: 25,
       decision_rules: [ ... ]
     }
   },
@@ -1153,7 +1195,6 @@ const decisions = craftai.interpreter.decideFromContextsArray(tree, [
 ```
 
 Results for `craftai.interpreter.decideFromContextsArray` would look like:
-
 ```js
 [
   {
@@ -1165,6 +1206,8 @@ Results for `craftai.interpreter.decideFromContextsArray` would look like:
     output: { // The decision itself
       lightbulbState: {
         predicted_value: 'ON',
+        distribution: [0.0, 1.0],
+        nb_samples: 20,
         confidence: 0.9937745256361138, // The confidence in the decision
         decision_rules: [ // The ordered list of decision_rules that were validated to reach this decision
           {
@@ -1190,6 +1233,8 @@ Results for `craftai.interpreter.decideFromContextsArray` would look like:
     output: {
       lightbulbState: {
         predicted_value: 'ON',
+        distribution: [0.0, 1.0],
+        nb_samples: 20,
         confidence: 0.9937745256361138,
         decision_rules: [
           {
@@ -1215,6 +1260,8 @@ Results for `craftai.interpreter.decideFromContextsArray` would look like:
     output: {
       lightbulbState: {
         predicted_value: 'OFF',
+        distribution: [0.95, 0.05],
+        nb_samples: 12,
         confidence: 0.9545537233352661,
         decision_rules: [ // The ordered list of decision_rules that were validated to reach this decision
           {
