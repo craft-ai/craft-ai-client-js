@@ -225,7 +225,7 @@ function checkContext(configuration) {
   };
 }
 
-function distribution(node) {
+export function distribution(node) {
   if (!(node.children && node.children.length)) {
     // If the distribution attribute is an array it means that it is
     // a classification problem. We therefore compute the distribution of
@@ -241,33 +241,39 @@ function distribution(node) {
     return {
       value: node.prediction.value,
       standard_deviation: node.prediction.distribution.standard_deviation,
-      size: node.prediction.nb_samples
+      size: node.prediction.nb_samples,
+      min: node.prediction.distribution.min,
+      max: node.prediction.distribution.max
     };
   }
 
   // If it is not a leaf, we recurse into the children and store the distributions
   // and sizes of each child branch.
-  const { values, stds, sizes } = _.map(node.children, (child) => distribution(child))
-    .reduce((acc, { value, standard_deviation, size }) => {
+  const { values, stds, sizes, mins, maxs } = _.map(node.children, (child) => distribution(child))
+    .reduce((acc, { value, standard_deviation, size, min, max }) => {
       acc.values.push(value);
       acc.sizes.push(size);
       if (!_.isUndefined(standard_deviation)) {
         acc.stds.push(standard_deviation);
+        acc.mins.push(min);
+        acc.maxs.push(max);
       }
       return acc;
     }, {
       values: [],
       stds: [],
-      sizes: [] 
+      sizes: [],
+      mins: [],
+      maxs: []
     });
 
   if (_.isArray(values[0])) {
     return computeMeanDistributions(values, sizes);
   }
-  return computeMeanValues(values, sizes, stds);
+  return computeMeanValues(values, sizes, stds, mins, maxs);
 }
 
-export function computeMeanValues(values, sizes, stds) {
+export function computeMeanValues(values, sizes, stds, mins, maxs) {
   // Compute the weighted mean of the given array of values.
   // Example, for values = [ 4, 3, 6 ], sizes = [1, 2, 1]
   // This function computes (4*1 + 3*2 + 1*6) / (1+2+1) = 16/4 = 4
@@ -285,21 +291,25 @@ export function computeMeanValues(values, sizes, stds) {
   }
   // Otherwise, to compute the weighted standard deviation the following formula is used:
   // https://math.stackexchange.com/questions/2238086/calculate-variance-of-a-subset
-  const { mean, variance, size } = 
-    _.zip(values, stds, sizes)
-      .map(([mean, std, size]) => {
+  const { mean, variance, size, min, max } = 
+    _.zip(values, stds, sizes, mins, maxs)
+      .map(([mean, std, size, min, max]) => {
         return {
           mean: mean,
           variance: std * std,
-          size: size
+          size: size,
+          min: min,
+          max: max
         };
       })
-      .reduce((acc, { mean, variance, size }) => {
+      .reduce((acc, { mean, variance, size, min, max }) => {
         if (_.isUndefined(acc.mean)) {
           return {
             mean: mean,
             variance: variance,
-            size: size
+            size: size,
+            min: min,
+            max: max
           };
         }
         const totalSize = 1.0 * (acc.size + size);
@@ -316,20 +326,28 @@ export function computeMeanValues(values, sizes, stds) {
           + ((acc.size * size) / totalSize) * (acc.mean - mean) * (acc.mean - mean)
         );
         const newMean = (1.0 / totalSize) * (acc.size * acc.mean + size * mean);
+        const newMin = min < acc.min ? min : acc.min;
+        const newMax = max > acc.max ? max : acc.max;
         return {
           mean: newMean,
           variance: newVariance,
-          size: totalSize
+          size: totalSize,
+          min: newMin,
+          max: newMax
         };
       }, {
         mean: undefined,
         variance: undefined,
-        size: undefined
+        size: undefined,
+        min: undefined,
+        max: undefined
       });
   return { 
     value: mean,
     standard_deviation: Math.sqrt(variance),
-    size: size
+    size: size,
+    min: min,
+    max: max
   };
 }
 

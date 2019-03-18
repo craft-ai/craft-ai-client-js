@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import context from './context';
 import { decide as decideV1 } from './interpreter_v1';
-import { decide as decideV2 } from './interpreter_v2';
 import parse from './parse';
 import { reduceDecisionRules } from './reducer';
 import semver from 'semver';
 import { CraftAiDecisionError, CraftAiNullDecisionError } from './errors';
+import { decide as decideV2, distribution } from './interpreter_v2';
 import { formatDecisionRules, formatProperty } from './formatter';
 
 const DECISION_FORMAT_VERSION = '1.1.0';
@@ -48,7 +48,6 @@ function reduceNodes(tree, fn, initialAccValue) {
 
 export function getDecisionRulesProperties(tree) {
   const { configuration, trees } = parse(tree);
-
   return _(trees)
     .values()
     .reduce(
@@ -99,4 +98,4 @@ export function decideFromContextsArray(tree, contexts) {
   });
 }
 
-export { formatDecisionRules, formatProperty, reduceDecisionRules };
+export { formatDecisionRules, formatProperty, reduceDecisionRules, distribution };
