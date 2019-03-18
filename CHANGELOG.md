@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Predictions now return the number of samples in the leaf and its distribution if it is a classification problem.
 - Predictions now return min and max information for continuous output values.
 - For continuous output values, it is now possible to get the mean and standard deviation values from any node in a tree.
+- For continuous output values, it is now possible to get the min and max values from any node in a tree.
 
 ## [1.15.4](https://github.com/craft-ai/craft-ai-client-js/compare/v1.15.3...v1.15.4) - 2018-11-27 ##
 
