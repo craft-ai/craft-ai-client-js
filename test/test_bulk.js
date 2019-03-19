@@ -3,6 +3,7 @@ import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.js
 import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.json';
 import craftai from '../src';
 import INVALID_CONFIGURATION_1 from './data/invalid_configuration_1.json';
+import INVALID_CONFIGURATION_1_OPERATIONS_1 from './data/invalid_configuration_1_operations_1.json';
 
 describe('BULK:', function() {
   let client;
@@ -22,10 +23,12 @@ describe('BULK:', function() {
       });
   }
 
-  // CREATEAGENTS
-  it.only('CREATEAGENTS: should succeed when using valid configurations and generated ids', function() {
+  const TS0 = CONFIGURATION_1_OPERATIONS_1[CONFIGURATION_1_OPERATIONS_1.length - 1].timestamp;
+
+  // createAgentBulk
+  it('createAgentBulk: should succeed when using valid configurations and generated ids', function() {
     return client
-      .createAgents([
+      .createAgentBulk([
         { configuration: CONFIGURATION_1 },
         { configuration: CONFIGURATION_1 }
       ])
@@ -37,11 +40,11 @@ describe('BULK:', function() {
       });
   });
 
-  it.only('CREATEAGENTS: should succeed when using valid configurations and a specified id', function() {
-    return client.deleteAgents([{ id: 'press_f' }])
+  it('createAgentBulk: should succeed when using valid configurations and a specified id', function() {
+    return client.deleteAgentBulk([{ id: 'press_f' }])
       .then(() => {
         return client
-          .createAgents([
+          .createAgentBulk([
             { id: 'press_f', configuration: CONFIGURATION_1 },
             { configuration: CONFIGURATION_1 }
           ])
@@ -54,12 +57,12 @@ describe('BULK:', function() {
       });
   });
 
-  it.only('CREATEAGENTS: should succeed when using valid configurations and specified ids', function() {
+  it('createAgentBulk: should succeed when using valid configurations and specified ids', function() {
     return client
-      .deleteAgents([{ id: 'press_f' }, { id: 't0' }, { id: 'pay_respects' }])
+      .deleteAgentBulk([{ id: 'press_f' }, { id: 't0' }, { id: 'pay_respects' }])
       .then(() => {
         return client
-          .createAgents([
+          .createAgentBulk([
             { id: 'press_f', configuration: CONFIGURATION_1 },
             { id: 't0', configuration: CONFIGURATION_1 },
             { id: 'pay_respects', configuration: CONFIGURATION_1 }
@@ -73,15 +76,15 @@ describe('BULK:', function() {
       });
   });
 
-  it.only('CREATEAGENTS: should handle invalid configuration', function() {
+  it('createAgentBulk: should handle invalid configuration', function() {
     return client
-      .deleteAgents([
+      .deleteAgentBulk([
         { id: 'le_monde_est_sourd' },
         { id: 'partis_pour_rester' }
       ])
       .then(() => {
         return client
-          .createAgents([
+          .createAgentBulk([
             { id: 'le_monde_est_sourd', configuration: CONFIGURATION_1 },
             { id: 'partis_pour_rester', configuration: INVALID_CONFIGURATION_1 }
           ])
@@ -96,15 +99,15 @@ describe('BULK:', function() {
       });
   });
 
-  it.only('CREATEAGENTS: should handle undefined configuration', function() {
+  it('createAgentBulk: should handle undefined configuration', function() {
     return client
-      .deleteAgents([
+      .deleteAgentBulk([
         { id: 'leila_et_les_chasseurs' },
         { id: 'la_robe_et_lechelle' }
       ])
       .then(() => {
         return client
-          .createAgents([
+          .createAgentBulk([
             { id: 'leila_et_les_chasseurs', configuration: CONFIGURATION_1 },
             { id: 'la_robe_et_lechelle', configuration: undefined }
           ])
@@ -123,9 +126,9 @@ describe('BULK:', function() {
       });
   });
 
-  it.only('CREATEAGENTS: should handle invalid id', function() {
+  it('createAgentBulk: should handle invalid id', function() {
     return client
-      .createAgents([
+      .createAgentBulk([
         { configuration: CONFIGURATION_1 },
         { id: 'francis?cabrel', configuration: CONFIGURATION_1 }
       ])
@@ -142,12 +145,12 @@ describe('BULK:', function() {
       });
   });
 
-  it.only('CREATEAGENTS: should 200 then 400 when using the same id twice', function() {
+  it('createAgentBulk: should 200 then 400 when using the same id twice', function() {
     const agentId = 'francis_cabrel';
-    return client.deleteAgents([{ id: agentId }])
+    return client.deleteAgentBulk([{ id: agentId }])
       .then(() => {
         return client
-          .createAgents([{ id: agentId, configuration: CONFIGURATION_1 }])
+          .createAgentBulk([{ id: agentId, configuration: CONFIGURATION_1 }])
           .then((agentsList0) => {
             agentsList0.map((agent) =>
               testAgentIntegrity(agent, agentId, CONFIGURATION_1)
@@ -155,7 +158,7 @@ describe('BULK:', function() {
           })
           .then(() => {
             client
-              .createAgents([{ id: agentId, configuration: CONFIGURATION_1 }])
+              .createAgentBulk([{ id: agentId, configuration: CONFIGURATION_1 }])
               .then((agentsList1) => {
                 agentsList1.map((agent) => {
                   expect(agent).to.be.ok;
@@ -168,12 +171,12 @@ describe('BULK:', function() {
       });
   });
 
-  it.only('CREATEAGENTS: should return array of 200 and 400 if has mixed results', function() {
+  it('createAgentBulk: should return array of 200 and 400 if has mixed results', function() {
     return client
-      .deleteAgents([{ id: 'encore_et_encore' }, { id: 'petite_marie' }])
+      .deleteAgentBulk([{ id: 'encore_et_encore' }, { id: 'petite_marie' }])
       .then(() =>
         client
-          .createAgents([
+          .createAgentBulk([
             { id: 'encore_et_encore', configuration: CONFIGURATION_1 }
           ])
           .then((agentsList0) => {
@@ -181,7 +184,7 @@ describe('BULK:', function() {
               testAgentIntegrity(agent, agent.id, CONFIGURATION_1)
             );
             client
-              .createAgents([
+              .createAgentBulk([
                 { id: 'encore_et_encore', configuration: CONFIGURATION_1 },
                 { id: 'petite_marie', configuration: CONFIGURATION_1 }
               ])
@@ -198,30 +201,30 @@ describe('BULK:', function() {
       );
   });
 
-  // DELETEAGENTS
-  it.only('DELETEAGENTS: should succeed when using valid ids.', function() {
+  // deleteAgentBulk
+  it('deleteAgentBulk: should succeed when using valid ids.', function() {
     const agentIds = [
       { id: 'wild_horses' },
       { id: 'way_to_rome' },
       { id: 'postcards' }
     ];
-    return client.deleteAgents(agentIds)
+    return client.deleteAgentBulk(agentIds)
       .then(() =>
         client
-          .createAgents(
+          .createAgentBulk(
             agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
           )
           .then((agentsList0) => {
             agentsList0.map((agent, idx) => {
               testAgentIntegrity(agent, agentIds[idx].id, CONFIGURATION_1);
             });
-            return client.deleteAgents(agentIds)
+            return client.deleteAgentBulk(agentIds)
               .then((agentsList1) => {
                 agentsList1.map((agent, idx) => {
                   expect(agent.id).to.be.equal(agentIds[idx].id);
                   expect(agent.configuration).to.be.deep.equal(CONFIGURATION_1);
                 });
-                return client.deleteAgents(agentIds)
+                return client.deleteAgentBulk(agentIds)
                   .then((agentsList2) => {
                     agentsList2.map((agent, idx) => {
                       expect(agent.id).to.be.equal(agentIds[idx].id);
@@ -233,9 +236,9 @@ describe('BULK:', function() {
       );
   });
 
-  it.only('DELETEAGENTS: should handle undefined id', function() {
+  it('deleteAgentBulk: should handle undefined id', function() {
     const agentIds = [{ id: '7$ shopping' }, {}, { id: undefined }];
-    return client.deleteAgents(agentIds)
+    return client.deleteAgentBulk(agentIds)
       .then((del_res) => {
         expect(del_res[0].id).to.be.equal(agentIds[0].id);
         expect(del_res[0].status).to.be.equal(400);
@@ -247,22 +250,22 @@ describe('BULK:', function() {
       });
   });
 
-  // ADDCONTEXT
-  it.only('ADDCONTEXT: should work with 10 agents with small number of operations', function() {
+  // addAgentContextOperationsBulk
+  it('addAgentContextOperationsBulk: should work with 10 agents with small number of operations', function() {
     const agentIds = Array.apply(null, Array(10))
       .map((x, i) => ({
         id: `agent${i}`
       }));
     return client
-      .deleteAgents(agentIds)
+      .deleteAgentBulk(agentIds)
       .then(() =>
         client
-          .createAgents(
+          .createAgentBulk(
             agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
           )
           .then(() =>
             client
-              .addAgentsContextOperations(
+              .addAgentContextOperationsBulk(
                 agentIds.map(({ id }) => ({
                   id,
                   operations: CONFIGURATION_1_OPERATIONS_1
@@ -273,7 +276,7 @@ describe('BULK:', function() {
                   expect(result[idx].id).to.be.equal(agent.id);
                   expect(result[idx].status).to.be.equal(201);
                 });
-                client.deleteAgents(agentIds);
+                client.deleteAgentBulk(agentIds);
               })
           )
       )
@@ -285,21 +288,21 @@ describe('BULK:', function() {
       });
   });
 
-  it.only('ADDCONTEXT: should work with 10 agents with large number of operations', function() {
+  it('addAgentContextOperationsBulk: should work with 10 agents with large number of operations', function() {
     const agentIds = Array.apply(null, Array(10))
       .map((x, i) => ({
         id: `agent${i}`
       }));
     return client
-      .deleteAgents(agentIds)
+      .deleteAgentBulk(agentIds)
       .then(() =>
         client
-          .createAgents(
+          .createAgentBulk(
             agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
           )
           .then(() =>
             client
-              .addAgentsContextOperations(
+              .addAgentContextOperationsBulk(
                 agentIds.map(({ id }) => ({
                   id,
                   operations: CONFIGURATION_1_OPERATIONS_2
@@ -310,7 +313,7 @@ describe('BULK:', function() {
                   expect(result[idx].id).to.be.equal(agent.id);
                   expect(result[idx].status).to.be.equal(201);
                 });
-                client.deleteAgents(agentIds);
+                client.deleteAgentBulk(agentIds);
               })
           )
       )
@@ -322,17 +325,17 @@ describe('BULK:', function() {
       });
   });
 
-  it.only('ADDCONTEXT: should succeed with agents with different number of operations', function() {
+  it('addAgentContextOperationsBulk: should succeed with agents with different number of operations', function() {
     const agentIds = [{ id: 'agent0' }, { id: 'agent1' }, { id: 'agent2' }];
-    return client.deleteAgents(agentIds)
+    return client.deleteAgentBulk(agentIds)
       .then(() =>
         client
-          .createAgents(
+          .createAgentBulk(
             agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
           )
           .then(() =>
             client
-              .addAgentsContextOperations([
+              .addAgentContextOperationsBulk([
                 { id: 'agent0', operations: CONFIGURATION_1_OPERATIONS_1 }, // S
                 { id: 'agent1', operations: CONFIGURATION_1_OPERATIONS_2 }, // large
                 { id: 'agent2', operations: CONFIGURATION_1_OPERATIONS_1 } // S
@@ -342,28 +345,28 @@ describe('BULK:', function() {
                 expect(result[1].id).to.be.equal('agent0');
                 expect(result[2].id).to.be.equal('agent2');
                 result.map(({ status }) => expect(status).to.be.equal(201));
-                client.deleteAgents(agentIds);
+                client.deleteAgentBulk(agentIds);
               })
           )
       );
   });
 
-  it.only('ADDCONTEXT: should handle invalid agents', function() {
+  it('addAgentContextOperationsBulk: should handle invalid agents', function() {
     const agentIds = [{ id: 'john_doe' }];
     const agentWrongIds = [
-      { id: 'john_doe' },
+      ...agentIds,
       { id: 'john_doe_not_found' },
       { id: 'john?doe' }
     ];
-    return client.deleteAgents(agentWrongIds)
+    return client.deleteAgentBulk(agentWrongIds)
       .then(() =>
         client
-          .createAgents(
+          .createAgentBulk(
             agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
           )
           .then((res) => {
             client
-              .addAgentsContextOperations(
+              .addAgentContextOperationsBulk(
                 agentWrongIds.map(({ id }) => ({
                   id,
                   operations: CONFIGURATION_1_OPERATIONS_1
@@ -379,58 +382,50 @@ describe('BULK:', function() {
                 expect(result[2].status).to.be.equal(500);
                 expect(result[2].error).to.be.equal('UnexpectedError');
   
-                client.deleteAgents(agentIds);
+                client.deleteAgentBulk(agentIds);
               });
           })
       );
   });
 
-  // it.only('ADDCONTEXT: should handle invalid agents', function() {
-  //   const agentIds = [{ id: 'hulk' }];
-  //   const agentWrongIds = [{ id: 'hulk' }, { id: 7 }, { id: undefined }, { id: 'john?doe' }];
-  //   return client.deleteAgents(agentIds)
-  //     .then(() =>
-  //       client
-  //         .createAgents(
-  //           agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
-  //         )
-  //         .then((res) => {
-  //           console.log('here', res);
-  //           client
-  //             .addAgentsContextOperations(
-  //               agentWrongIds.map(({ id }) => ({
-  //                 id,
-  //                 operations: CONFIGURATION_1_OPERATIONS_1
-  //               }))
-  //             )
-  //             .then((result) => {
-  //               console.log('result', result);
-  //               agentIds.map((agent, idx) => {
-  //                 expect(result[idx].id).to.be.equal(agent.id);
-  //                 expect(result[idx].status).to.be.equal(201);
-  //               });
-  //               client.deleteAgents(agentIds);
-  //             });
-  //         }
-  //         )
-  //     );
-  // });
-  // tester des agents invalides pour le context
-  // tester des agents invalides pour les compute decision trees
+  it('addAgentContextOperationsBulk: should handle invalid context', function() {
+    const agentIds = [{ id: 'John_Lemon' }, { id: 'Insane_Bane' }];
+    return client.deleteAgentBulk(agentIds)
+      .then(() => 
+        client.createAgentBulk(
+          agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+        )
+          .then((res) => {
+            client.addAgentContextOperationsBulk(
+              agentIds.map(({ id }) => ({
+                id,
+                operations: INVALID_CONFIGURATION_1_OPERATIONS_1
+              }))
+            )
+              .then((results) => {
+                results.map((agent_res, idx) => {
+                  expect(agent_res.id).to.be.equal(agentIds[idx].id);
+                  expect(agent_res.status).to.be.equal(400);
+                  expect(agent_res.error).to.be.equal('InvalidPropertyValue');
+                });
+              });
+            client.deleteAgentBulk(agentIds);
+          })
+      );
+  });
 
-  // GETAGENTSDECISIONTREES
-  it.only('GETAGENTSDECISIONTREES: should work with two valid agents', function() {
+  // getAgentDecisionTreeBulk
+  it('getAgentDecisionTreeBulk: should work with two valid agents', function() {
     const agentIds = [{ id: 'charlotte_cardin' }, { id: 'ben_harper' }];
-    const timestamp = 1464601500;
-    return client.deleteAgents(agentIds)
+    return client.deleteAgentBulk(agentIds)
       .then(() =>
         client
-          .createAgents(
+          .createAgentBulk(
             agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
           )
           .then(() =>
             client
-              .addAgentsContextOperations(
+              .addAgentContextOperationsBulk(
                 agentIds.map(({ id }) => ({
                   id,
                   operations: CONFIGURATION_1_OPERATIONS_1
@@ -438,20 +433,142 @@ describe('BULK:', function() {
               )
               .then(() =>
                 client
-                  .getAgentsDecisionTrees(
-                    agentIds.map(({ id }) => ({ id, timestamp }))
+                  .getAgentDecisionTreeBulk(
+                    agentIds.map(({ id }) => ({ id, timestamp: TS0 }))
                   )
                   .then((agentTrees) => {
                     agentTrees.map((agent, idx) => {
                       expect(agent.id).to.be.equal(agentIds[idx].id);
-                      expect(agent.timestamp).to.be.equal(timestamp);
+                      expect(agent.timestamp).to.be.equal(TS0);
                       expect(agent).to.be.ok;
                       const { _version, configuration, trees } = agent.tree;
                       expect(trees).to.be.ok;
                       expect(_version).to.be.ok;
                       expect(configuration).to.be.deep.equal(CONFIGURATION_1);
                     });
-                    return client.deleteAgents(agentIds);
+                    return client.deleteAgentBulk(agentIds);
+                  })
+              )
+          )
+      );
+  });
+
+  it('getAgentDecisionTreeBulk: should handle unvalid agents ids', function() {
+    const agentIds = [{ id: 'twenty_one' }, { id: 'pilots' }];
+    const agentWrongIds = [...agentIds, { id: 'w3!rD_[D' }];
+    return client.deleteAgentBulk(agentIds)
+      .then(() =>
+        client
+          .createAgentBulk(
+            agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+          )
+          .then(() =>
+            client
+              .addAgentContextOperationsBulk(
+                agentIds.map(({ id }) => ({
+                  id,
+                  operations: CONFIGURATION_1_OPERATIONS_1
+                }))
+              )
+              .then(() =>
+                client
+                  .getAgentDecisionTreeBulk(
+                    agentWrongIds.map(({ id }) => ({ id, timestamp: TS0 }))
+                  )
+                  .then((agentTrees) => {
+                    agentTrees.map((agent, idx) => {
+                      expect(agent.id).to.be.equal(agentWrongIds[idx].id);
+                      expect(agent.timestamp).to.be.equal(TS0);
+                    });
+                    agentIds.map((agent, idx) => {
+                      expect(agentTrees[idx]).to.be.ok;
+                      const { _version, configuration, trees } = agentTrees[idx].tree;
+                      expect(trees).to.be.ok;
+                      expect(_version).to.be.ok;
+                      expect(configuration).to.be.deep.equal(CONFIGURATION_1);
+                    });
+                    expect(agentTrees[2].status).to.be.equal(400);
+                    expect(agentTrees[2].error).to.be.equal('AgentError');
+
+                    return client.deleteAgentBulk(agentIds);
+                  })
+              )
+          )
+      );
+  });
+
+  it('getAgentDecisionTreeBulk: should handle several timestamps', function() {
+    const agentId = 'tom_walker';
+    const timestamps = [TS0, TS0 + 1000, TS0 + 2000];
+    return client.deleteAgent(agentId)
+      .then(() =>
+        client
+          .createAgentBulk([{
+            id: agentId, configuration: CONFIGURATION_1 
+          }])
+          .then(() =>
+            client
+              .addAgentContextOperationsBulk([{ 
+                id: agentId, 
+                operations: CONFIGURATION_1_OPERATIONS_1
+              }])
+              .then(() =>
+                client
+                  .getAgentDecisionTreeBulk(
+                    timestamps.map((timestamp) => ({ id: agentId, timestamp }))
+                  )
+                  .then((agentTrees) => {
+                    agentTrees.map((agent, idx) => {
+                      expect(agent.id).to.be.equal(agentId);
+                      expect(agent.timestamp).to.be.equal(timestamps[idx]);
+                      expect(agent).to.be.ok;
+                      const { _version, configuration, trees } = agent.tree;
+                      expect(trees).to.be.ok;
+                      expect(_version).to.be.ok;
+                      expect(configuration).to.be.deep.equal(CONFIGURATION_1);
+                    });
+
+                    return client.deleteAgent(agentId);
+                  })
+              )
+          )
+      );
+  });
+
+
+  it('getAgentDecisionTreeBulk: should handle invalid timestamps', function() {
+    const agentId = 'tom_walker';
+    const timestamps = [TS0, 'INVALID_TIMESTAMP'];
+    return client.deleteAgent(agentId)
+      .then(() =>
+        client
+          .createAgentBulk([{
+            id: agentId, configuration: CONFIGURATION_1 
+          }])
+          .then(() =>
+            client
+              .addAgentContextOperationsBulk([{ 
+                id: agentId, 
+                operations: CONFIGURATION_1_OPERATIONS_1
+              }])
+              .then(() =>
+                client
+                  .getAgentDecisionTreeBulk(
+                    timestamps.map((timestamp) => ({ id: agentId, timestamp }))
+                  )
+                  .then((agentTrees) => {
+                    agentTrees.map((agent, idx) => {
+                      expect(agent.id).to.be.equal(agentId);
+                      expect(agent.timestamp).to.be.equal(timestamps[idx]);
+                    });
+                    const { _version, configuration, trees } = agentTrees[0].tree;
+                    expect(trees).to.be.ok;
+                    expect(_version).to.be.ok;
+                    expect(configuration).to.be.deep.equal(CONFIGURATION_1);
+                    expect(agentTrees[1].status).to.be.equal(400);
+                    expect(agentTrees[1].error).to.be.equal('ContextError');
+
+                    return client.deleteAgent(agentId);
                   })
               )
           )

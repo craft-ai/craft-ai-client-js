@@ -37,13 +37,13 @@ const isUnvalidConfiguration = (configuration) =>
 const areUnvalidOperations = (operations) =>
   _.isUndefined(operations) || !_.isArray(operations);
 
-function testId(id) {
-  if (isUnvalidId(id)) {
-    throw new CraftAiBadRequestError(
-      `Bad Request, unable to handle agent ${id} because it is an invalid agent id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
-    );
-  }
-}
+// function testId(id) {
+//   if (isUnvalidId(id)) {
+//     throw new CraftAiBadRequestError(
+//       `Bad Request, unable to handle agent ${id} because it is an invalid agent id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+//     );
+//   }
+// }
 
 function testOperations(operations, id = undefined) {
   if (areUnvalidOperations(operations)) {
@@ -53,7 +53,7 @@ function testOperations(operations, id = undefined) {
   }
 }
 
-function testBulkInput(bulkArray) {
+function testInputBulk(bulkArray) {
   if (_.isUndefined(bulkArray)) {
     throw new CraftAiBadRequestError(
       'Bad Request, unable to use bulk functionalities without list provided.'
@@ -164,8 +164,8 @@ export default function createClient(tokenOrCfg) {
           return body;
         });
     },
-    createAgents: function(agentsList) {
-      testBulkInput(agentsList);
+    createAgentBulk: function(agentsList) {
+      testInputBulk(agentsList);
 
       return request({
         method: 'POST',
@@ -214,8 +214,8 @@ export default function createClient(tokenOrCfg) {
           return body;
         });
     },
-    deleteAgents: function(agentsList) {
-      testBulkInput(agentsList);
+    deleteAgentBulk: function(agentsList) {
+      testInputBulk(agentsList);
       // agentsList.map(({ id }) => testId(id));
 
       return request({
@@ -307,8 +307,8 @@ export default function createClient(tokenOrCfg) {
           return { message };
         });
     },
-    addAgentsContextOperations: function(agentsOperationsList) {
-      testBulkInput(agentsOperationsList);
+    addAgentContextOperationsBulk: function(agentsOperationsList) {
+      testInputBulk(agentsOperationsList);
       agentsOperationsList.map(({ id, operations }) => {
         // testId(id);
         testOperations(operations);
@@ -594,9 +594,8 @@ export default function createClient(tokenOrCfg) {
         ]);
       }
     },
-    getAgentsDecisionTrees: function(agentsList) {
-      testBulkInput(agentsList);
-      agentsList.map(({ id }) => testId(id));
+    getAgentDecisionTreeBulk: function(agentsList) {
+      testInputBulk(agentsList);
 
       return request({
         method: 'POST',

@@ -55,6 +55,18 @@ function parseBody(req, resBody) {
   return resBodyJson;
 }
 
+function parseBulk(req, res, resBody) {
+  if (_.isArray(JSON.parse(resBody))) {
+    return { body: parseBody(req, resBody) };
+  }
+  else {
+    throw new CraftAiBadRequestError({
+      message: parseBody(req, resBody).message,
+      request: req
+    });
+  }
+}
+
 function parseResponse(req, res, resBody) {
   switch (res.status) {
     case 200:
@@ -69,6 +81,8 @@ function parseResponse(req, res, resBody) {
         message: parseBody(req, resBody).message,
         request: req
       });
+    case 207:
+      return parseBulk(req, res, resBody);
     case 401:
     case 403:
       throw new CraftAiCredentialsError({
@@ -77,10 +91,7 @@ function parseResponse(req, res, resBody) {
       });
     case 400:
     case 404:
-      throw new CraftAiBadRequestError({
-        message: parseBody(req, resBody).message,
-        request: req
-      });
+      return parseBulk(req, res, resBody);
     case 413:
       throw new CraftAiBadRequestError({
         message: 'Given payload is too large',
