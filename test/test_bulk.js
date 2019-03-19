@@ -241,8 +241,8 @@ describe("BULK:", function() {
   });
 
   // ADDCONTEXT
-  it("ADDCONTEXT: should work with 50 agents with small number of operations", function() {
-    const agentIds = Array.apply(null, Array(50)).map((x, i) => ({
+  it("ADDCONTEXT: should work with 10 agents with small number of operations", function() {
+    const agentIds = Array.apply(null, Array(10)).map((x, i) => ({
       id: `agent${i}`
     }));
     return client
@@ -277,8 +277,8 @@ describe("BULK:", function() {
       });
   });
 
-  it("ADDCONTEXT: should work with 50 agents with large number of operations", function() {
-    const agentIds = Array.apply(null, Array(50)).map((x, i) => ({
+  it("ADDCONTEXT: should work with 10 agents with large number of operations", function() {
+    const agentIds = Array.apply(null, Array(10)).map((x, i) => ({
       id: `agent${i}`
     }));
     return client
