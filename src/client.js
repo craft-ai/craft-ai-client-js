@@ -37,23 +37,7 @@ const isUnvalidConfiguration = (configuration) =>
 const areUnvalidOperations = (operations) =>
   _.isUndefined(operations) || !_.isArray(operations);
 
-// function testId(id) {
-//   if (isUnvalidId(id)) {
-//     throw new CraftAiBadRequestError(
-//       `Bad Request, unable to handle agent ${id} because it is an invalid agent id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
-//     );
-//   }
-// }
-
-function testOperations(operations, id = undefined) {
-  if (areUnvalidOperations(operations)) {
-    throw new CraftAiBadRequestError(
-      `Bad Request, unable to handle operations for agent ${id}. Operations should be provided within an array.`
-    );
-  }
-}
-
-function testInputBulk(bulkArray) {
+function checkBulkParameters(bulkArray) {
   if (_.isUndefined(bulkArray)) {
     throw new CraftAiBadRequestError(
       'Bad Request, unable to use bulk functionalities without list provided.'
@@ -91,7 +75,7 @@ export default function createClient(tokenOrCfg) {
     cfg.owner = cfg.owner || owner;
     cfg.project = cfg.project || project;
     cfg.url = cfg.url || platform;
-  } 
+  }
   catch (e) {
     throw new CraftAiCredentialsError();
   }
@@ -165,7 +149,7 @@ export default function createClient(tokenOrCfg) {
         });
     },
     createAgentBulk: function(agentsList) {
-      testInputBulk(agentsList);
+      checkBulkParameters(agentsList);
 
       return request({
         method: 'POST',
@@ -215,8 +199,7 @@ export default function createClient(tokenOrCfg) {
         });
     },
     deleteAgentBulk: function(agentsList) {
-      testInputBulk(agentsList);
-      // agentsList.map(({ id }) => testId(id));
+      checkBulkParameters(agentsList);
 
       return request({
         method: 'DELETE',
@@ -308,10 +291,13 @@ export default function createClient(tokenOrCfg) {
         });
     },
     addAgentContextOperationsBulk: function(agentsOperationsList) {
-      testInputBulk(agentsOperationsList);
+      checkBulkParameters(agentsOperationsList);
       agentsOperationsList.map(({ id, operations }) => {
-        // testId(id);
-        testOperations(operations);
+        if (areUnvalidOperations(operations)) {
+          throw new CraftAiBadRequestError(
+            `Bad Request, unable to handle operations for agent ${id}. Operations should be provided within an array.`
+          );
+        }
       });
 
       let chunkedData = [];
@@ -341,7 +327,9 @@ export default function createClient(tokenOrCfg) {
         }
       }
 
-      if (currentChunk.length) chunkedData.push(currentChunk);
+      if (currentChunk.length) {
+        chunkedData.push(currentChunk);
+      }
 
       return Promise.all(
         chunkedData.map((chunk) => {
@@ -508,7 +496,7 @@ export default function createClient(tokenOrCfg) {
         .then(({ body }) => {
           if (_.isUndefined(t)) {
             return body.shortUrl;
-          } 
+          }
           else {
             let posixTimestamp = Time(t).timestamp;
             return `${body.shortUrl}?t=${posixTimestamp}`;
@@ -561,7 +549,7 @@ export default function createClient(tokenOrCfg) {
       if (!cfg.decisionTreeRetrievalTimeout) {
         // Don't retry
         return agentDecisionTreeRequest();
-      } 
+      }
       else {
         const start = Date.now();
         return Promise.race([
@@ -595,7 +583,7 @@ export default function createClient(tokenOrCfg) {
       }
     },
     getAgentDecisionTreeBulk: function(agentsList) {
-      testInputBulk(agentsList);
+      checkBulkParameters(agentsList);
 
       return request({
         method: 'POST',
