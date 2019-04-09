@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/npm/v/craft-ai.svg?style=flat-square)](https://npmjs.org/package/craft-ai) [![Build](https://img.shields.io/travis/craft-ai/craft-ai-client-js/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-client-js) [![License](https://img.shields.io/badge/license-BSD--3--Clause-42358A.svg?style=flat-square)](LICENSE) [![Dependencies](https://img.shields.io/david/craft-ai/craft-ai-client-js.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-client-js) [![Dev Dependencies](https://img.shields.io/david/dev/craft-ai/craft-ai-client-js.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-client-js#info=devDependencies)
 
-[**craft ai** cognitive automation API](http://craft.ai) leverages explainable Artificial Intelligence to 10x your knowledge workers productivity. craft ai is the first high level AI API enabling Automated Machine Learning at the individual level that generates explainable predictive models on the fly.
+[**craft ai**'s Explainable AI API](http://craft.ai) enables product & operational teams to quickly deploy and run explainable AIs. craft ai decodes your data streams to deliver self-learning services.
 
 ## Get Started!
 
@@ -12,7 +12,7 @@ If you're reading this you are probably already registered with **craft ai**, if
 
 ### 1 - Create a project
 
-Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/projects`](https://beta.craft.ai/projects), and press **Create a project**.
+Once your account is setup, let's create your first **project**! Go in the 'Projects' tab in the **craft ai** control center at [`https://beta.craft.ai/inspector`](https://beta.craft.ai/inspector), and press **Create a project**.
 
 Once it's done, you can click on your newly created project to retrieve its tokens. There are two types of tokens: **read** and **write**. You'll need the **write** token to create, update and delete your agent.
 
@@ -102,7 +102,7 @@ client.createAgent(
   console.log('Agent ' + agent.id + ' successfully created!');
 })
 .catch(function(error) {
-  console.err('Error!', error);
+  console.error('Error!', error);
 });
 ```
 
@@ -122,7 +122,7 @@ client.deleteAgent(AGENT_ID)
   console.log('Agent ' + agent.id + ' successfully created!');
 })
 .catch(function(error) {
-  console.err('Error!', error);
+  console.error('Error!', error);
 });
 ```
 
@@ -131,6 +131,8 @@ _For further information, check the ['create agent' reference documentation](#cr
 ### 4 - Add context operations
 
 We have now created our first agent but it is not able to do much, yet. To learn a decision model it needs to be provided with data, in **craft ai** these are called context operations.
+
+Please note that only value changes are sent, thus if an operation doesn't contain a value, the previous known value is used.
 
 In the following we add 8 operations:
 
@@ -142,6 +144,7 @@ In the following we add 8 operations:
 6. At 19:23, 2 persons enter the room;
 7. At 22:35, the light is turned on;
 8. At 23:06, everyone leaves the room and the light is turned off.
+
 
 ```js
 const AGENT_ID = 'my_first_agent';
@@ -219,7 +222,7 @@ client.deleteAgent(AGENT_ID)
   console.log('Successfully added initial operations to agent ' + agent.id + '.');
 })
 .catch(function(error) {
-  console.err('Error!', error);
+  console.error('Error!', error);
 });
 ```
 
@@ -257,7 +260,7 @@ client.deleteAgent(AGENT_ID)
   console.log('Decision tree retrieved!', tree);
 })
 .catch(function(error) {
-  console.err('Error!', error);
+  console.error('Error!', error);
 });
 ```
 
@@ -299,7 +302,7 @@ client.deleteAgent(AGENT_ID)
   console.log('The anticipated lightbulb state is "' + res.output.lightbulbState.predicted_value + '".');
 })
 .catch(function(error) {
-  console.err('Error!', error);
+  console.error('Error!', error);
 });
 ```
 
