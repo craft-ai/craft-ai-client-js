@@ -998,6 +998,212 @@ client.getAgentDecisionTree(
 
 > :information_source: To take a decision, first compute the decision tree then use the **offline interpreter**.
 
+### Bulk
+
+The craft ai API includes a bulk route which provides a programmatic option to perform asynchronous operations on agents. It lets the user create, delete, add context operations and compute decision tree for several agents at once.
+
+> :warning: the bulk API is a quite advanced feature. It comes on top of the basic routes to create, delete, add context operations and compute decision tree. If messages are not self-explanatory, please refer to the basic routes that does the same operation for a single agent.
+
+
+
+#### Bulk - Create
+
+To create several agents at once, use the method `createAgentBulk` as the following:
+
+```js
+const agent_ID_1 = 'my_first_agent';
+const agent_ID_2 = 'my_second_agent';
+
+const configuration_1 = {
+    context: {
+      peopleCount: {
+        type: 'continuous'
+      },
+      timeOfDay: {
+        type: 'time_of_day'
+      },
+      timezone: {
+        type: 'timezone'
+      },
+      lightbulbState: {
+        type: 'enum'
+      }
+    },
+    output: [ 'lightbulbState' ]
+  };
+const configuration_2 = { /* ... */ };
+
+const createBulkPayload = [
+  {id: agent_ID_1, configuration: configuration_1}, 
+  {id: agent_ID_2, configuration: configuration_2}
+];
+
+client.createAgentBulk(createBulkPayload)
+  .then(function(agents) {
+    console.log(agents);
+  })
+  .catch(function(error) {
+    console.error('Error!', error);
+  }) 
+```
+
+The variable `agents` is an **array of responses**. If an agent has been successfully created, the corresponding response is an object similar to the classic `createAgent()` response. When there are **mixed results**, `agents` should looks like:
+
+```js
+[ 
+  { id: 'my_first_agent',   // creation failed
+    status: 400,
+    error: 'errorId',
+    message: 'error-message' },
+  { configuration:          // creation succeed
+    { time_quantum: 100,
+      learning_period: 1500000,
+      context: [Object],
+      output: [Object] },
+    id: 'my_second_agent',
+    _version: '2.0.0' } 
+]
+```
+
+#### Bulk - Delete
+
+```js
+const agent_ID_1 = 'my_first_agent';
+const agent_ID_2 = 'my_second_agent';
+
+const deleteBulkPayload = [
+  { id: agent_ID_1 },
+  { id: agent_ID_2 }
+];
+
+client.deleteAgentBulk(deleteBulkPayload)
+.then(function(deletedAgents) {
+  console.log(agents);
+})
+.catch(function(error) {
+  console.error('Error!', error);
+});
+```
+The variable `deletedAgents` is an **array of responses**. If an agent has been successfully deleted, the corresponding response is an object similar to the classic `deleteAgent()` response. When there are **mixed results**, `deletedAgents` should looks like:
+
+```js
+[ 
+  { id: 'my_first_agent',       // deletion succeed
+    configuration: 
+     { time_quantum: 100,
+       learning_period: 1500000,
+       context: [Object],
+       output: [Object] },
+    creationDate: 1557492944277,
+    lastContextUpdate: 1557492944277,
+    lastTreeUpdate: 1557492944277,
+    _version: '2.0.0' },
+  { id: 'my_unknown_agent' },   // deletion succeed 
+  { id: 'my_second_agent',      // deletion failed
+    status: 400,
+    error: 'errorId',
+    message: 'error-message' } 
+]
+```
+
+#### Bulk - Add context Operations
+
+```js
+const agent_ID_1 = 'my_first_agent';
+const agent_ID_2 = 'my_second_agent';
+
+const operations_agent_1 = [{
+        timestamp: 1469410200,
+        context: {
+          timezone: '+02:00',
+          peopleCount: 0,
+          lightbulbState: 'OFF'
+        }
+      },
+      {
+        timestamp: 1469415720,
+        context: {
+          peopleCount: 1,
+          lightbulbState: 'ON'
+        }
+      },
+      {
+        timestamp: 1469416500,
+        context: {
+          peopleCount: 2
+        }
+      },
+      {
+        timestamp: 1469417460,
+        context: {
+          lightbulbState: 'OFF'
+        }
+      }];
+const operations_agent_2 = [ /* ... */ ];
+
+const contextOperationBulkPayload = [
+  { id: agent_ID_1, operations: operations_agent_1},
+  { id: agent_ID_2, operations: operations_agent_2}
+];
+
+client.addAgentContextOperationsBulk(contextOperationBulkPayload)
+.then(function(agents) {
+  console.log(agents);
+})
+.catch(function(error) {
+  console.error('Error!', error);
+});
+```
+
+The variable `agents` is an **array of responses**. If an agent has successfully received operations, the corresponding response is an object similar to the classic `addAgentContextOperations()` response. When there are **mixed results**, `agents` should looks like:
+
+```js
+[ 
+  { id: 'my_first_agent',     // add operations failed
+    status: 500,
+    error: 'errorId',
+    message: 'error-message' },
+  { id: 'my_second_agent',      // add operations succeed
+    message: 'Successfully added XX operation(s) to the agent "{owner}/{project}/my_second_agent" context.',
+    status: 201 } 
+]
+```
+
+#### Bulk - Compute decision trees
+
+```js
+const agent_ID_1 = 'my_first_agent';
+const agent_ID_2 = 'my_second_agent';
+
+const decisionTreePayload =  [
+  { id: agent_ID_1 },
+  { id: agent_ID_2 }
+];
+
+client.getAgentDecisionTreeBulk(decisionTreePayload)
+.then(function(trees) {
+  console.log(trees);
+})
+.catch(function(error) {
+  console.error('Error!', error);
+});
+```
+
+The variable `trees` is an **array of responses**. If an agent's model has successfully been created, the corresponding response is an object similar to the classic `getAgentDecisionTree()` response. When there are **mixed results**, `trees` should looks like:
+
+```js
+[ 
+  { id: 'my_first_agent',       // computation failed
+    (...)
+    status: 400,
+    error: 'errorId',
+    message: 'error-message' },
+  { id: 'my_second_agent',        // computation succeed
+    timestamp: 1464601500,
+    tree: { _version: '1.1.0', trees: [Object], configuration: [Object] } } 
+]
+```
+
 ### Advanced client configuration ###
 
 The simple configuration to create the `client` is just the token. For special needs, additional advanced configuration can be provided.
@@ -1293,3 +1499,4 @@ Results for `craftai.interpreter.getDecisionRulesProperties` would look like:
 ## Logging ##
 
 The **craft ai** client is using [visionmedia/debug](https://www.npmjs.com/package/debug) under the namespace `'craft-ai:client:*'`, please refer to their documentation for further information.
+

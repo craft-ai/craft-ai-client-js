@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.16.0...HEAD) ##
 
+### Added ###
+
+- Bulk update. The client now contains `createAgentBulk`, `deleteAgentBulk`, `addAgentContextOperationsBulk` and `getAgentDecisionTreeBulk` methods to create, delete, add operations or retrieve trees to several agents at a time.
+
 ## [1.16.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.15.4...v1.16.0) - 2019-04-09 ##
 
 ### Added ###
