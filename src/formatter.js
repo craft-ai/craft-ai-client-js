@@ -56,10 +56,21 @@ const PROPERTY_FORMATTER = {
 
 export function formatProperty(type, value = undefined) {
   const formatter = PROPERTY_FORMATTER[type] || PROPERTY_FORMATTER[TYPE_ANY];
-  if (value !== undefined) {
+  const extendedFormatter = (value) => {
+    // A `null` value corresponds to a null/MVs branch
+    if (_.isNull(value)) {
+      return 'null';
+    }
+    // The empty object `{}` corresponds to an optional branch
+    else if (_.isPlainObject(value) && _.isEmpty(value)) {
+      return 'N/A';
+    }
     return formatter(value);
+  };
+  if (!_.isUndefined(value)) {
+    return extendedFormatter(value);
   }
-  return formatter;
+  return extendedFormatter;
 }
 
 const FORMATTER_FROM_DECISION_RULE = {
