@@ -1,7 +1,8 @@
 import CONFIGURATION_MV from './data/configuration_mv.json';
 import CONFIGURATION_MV_OPERATIONS from './data/configuration_mv_operations.json';
-
 import craftai from '../src';
+import parse from '../src/parse';
+import semver from 'semver';
 
 const CONFIGURATION_MV_OPERATIONS_FROM = _.first(CONFIGURATION_MV_OPERATIONS).timestamp;
 const CONFIGURATION_MV_OPERATIONS_TO = _.last(CONFIGURATION_MV_OPERATIONS).timestamp;
@@ -39,7 +40,14 @@ describe('client.addAgentContextOperations(<agentId>, <operations>) with missing
 
   it('should succeed when using operations', function() {
     return client.addAgentContextOperations(agents[0].id, CONFIGURATION_MV_OPERATIONS)
-      .then(() => {
+      .then(() => client.getAgentDecisionTree(agents[0].id, CONFIGURATION_MV_OPERATIONS_TO, '2'))
+      .then((treeJson) => {
+        expect(treeJson).to.be.ok;
+        const { _version, configuration, trees } = parse(treeJson);
+        expect(trees).to.be.ok;
+        expect(_version).to.be.ok;
+        expect(semver.major(_version)).to.be.equal(2);
+        expect(configuration).to.be.deep.equal(CONFIGURATION_MV);
         return client.getAgentContext(agents[0].id, CONFIGURATION_MV_OPERATIONS_TO + 100);
       })
       .then((context) => {
