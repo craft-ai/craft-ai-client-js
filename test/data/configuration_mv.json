@@ -1,0 +1,20 @@
+{
+    "context": {
+      "presence": {
+        "type": "enum",
+        "is_optional": true
+      },
+      "lightIntensity": {
+        "type": "continuous"
+      },
+      "lightbulbColor": {
+        "type": "enum"
+      }
+    },
+    "output": [
+      "lightbulbColor"
+    ],
+    "time_quantum": 100,
+    "learning_period": 1500000,
+    "deactivate_missing_values": false
+  }
