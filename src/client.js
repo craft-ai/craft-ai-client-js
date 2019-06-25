@@ -592,6 +592,31 @@ export default function createClient(tokenOrCfg) {
       })
         .then(({ body }) => body);
     },
+    getGroupDecisionTree: function(
+      agentList, 
+      options = {
+        t: undefined,
+        configuration: undefined
+      }
+    ) {
+      if (!_.isArrayLike(agentList)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to retrieve an agent decision tree with no agentList provided.'
+          )
+        );
+      }
+      return request({
+        method: 'POST',
+        path: '/groups/decision_tree',
+        body: {
+          agents: agentList,
+          timestamp: options.t,
+          configuration: options.configuration
+        }
+      })
+        .then(({ body }) => body);
+    },
     computeAgentDecision: function(agentId, t, ...contexts) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(
