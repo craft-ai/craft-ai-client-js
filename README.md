@@ -340,14 +340,93 @@ Each agent has a configuration defining:
 
 #### Context properties types
 
-##### Base types: `enum` and `continuous`
+##### Base types: `enum`, `continuous` and `boolean`
 
-`enum` and `continuous` are the two base **craft ai** types:
+`enum`, `continuous` and `boolean` are the three base **craft ai** types:
 
 - an `enum` property is a string;
 - a `continuous` property is a real number.
+- a `boolean` property is a boolean value: `true` or `false`
 
 > :warning: the absolute value of a `continuous` property must be less than 10<sup>20</sup>.
+
+#### Missing Values
+
+If one of these properties value is **missing**, this latter can be handled if the key *deactivate_missing_values: false* is added to the agent configuration. In this configuration, you can send a `null` value for a context attribute value to tell **craft ai** that the value is missing. **craft ai** will take into account as much as possible from this incomplete context.
+
+A context with a missing value looks like:
+```json
+{
+  "timestamp": 1469415720,
+  "context": {
+    "timezone": "+02:00",
+    "temperature": null,
+    "lightbulbState": "OFF"
+  }
+}
+```
+
+And its associated configuration would be:
+```json
+{
+  "context": {
+    "timezone": {
+      "type": "enum"
+    },
+    "temperature": {
+      "type": "continuous"
+    },
+    "lightbulbState": {
+      "type": "enum"
+    }
+  },
+  "output": ["lightbulbState"],
+  "time_quantum": 100,
+  "learning_period": 108000,
+  "deactivate_missing_values": false
+}
+```
+
+#### Optional Values
+
+An `enum`, `continuous` or `boolean` property is defined as *optional* if this latter is explicitely known as being non applicable. For instance, a sensor measuring the ambient temperature can sometimes be *offline* on purpose, and this behavior must be considered as normal and not as a missing property. To tackle this kind of problem, we introduce *optional* values. A property is be defined as optional by adding `is_optional: true` to the types properties in your configuration. Then, in a context, an **optional** value is defined as `{}`, the empty JSON Object:
+
+A context with an optional value looks like:
+```json
+{
+  {
+      "timestamp": 1469415720,
+      "context": {
+        "timezone": "+02:00",
+        "temperature": {},
+        "lightbulbState": "OFF"
+      }
+  },
+  ...
+}
+```
+
+And its associated configuration would be:
+```json
+{
+  "context": {
+    "timezone": {
+      "type": "enum"
+    },
+    "temperature": {
+      "type": "continuous",
+      "is_optional": true
+    },
+    "lightbulbState": {
+      "type": "enum"
+    }
+  },
+  "output": ["lightbulbState"],
+  "time_quantum": 100,
+  "learning_period": 108000,
+  "deactivate_missing_values": false
+}
+```
 
 ##### Time types: `timezone`, `time_of_day`, `day_of_week`, `day_of_month` and `month_of_year`
 
@@ -418,11 +497,7 @@ Each agent has a configuration defining:
 
 ##### Examples
 
-Let's take a look at the following configuration. It is designed to model the **color**
-of a lightbulb (the `lightbulbColor` property, defined as an output) depending
-on the **outside light intensity** (the `lightIntensity` property), the **time
-of the day** (the `time` property) and the **day of the week** (the `day`
-property).
+Let's take a look at the following configuration. It is designed to model the **color** of a lightbulb (the `lightbulbColor` property, defined as an output) depending on the **outside light intensity** (the `lightIntensity` property), the **TV status** (the `TVactivated` property) the **time of the day** (the `time` property) and the **day of the week** (the `day` property). Since `TVactivated` doesn't make any sense if the TV isn't here, we also specify this property as `is_optional: true`.
 
 `day` and `time` values will be generated automatically, hence the need for
 `timezone`, the current Time Zone, to compute their value from given
@@ -442,6 +517,10 @@ the decision model.
   "context": {
     "lightIntensity": {
       "type": "continuous"
+    },
+    "TVactivated": {
+      "type": "boolean",
+      "is_optional": true
     },
     "time": {
       "type": "time_of_day"
@@ -475,6 +554,9 @@ provided continuously.
     },
     "lightIntensity": {
       "type": "continuous"
+    },
+      "TVactivated": {
+      "type": "boolean"
     },
     "lightbulbColor": {
       "type": "enum"
@@ -868,116 +950,137 @@ client.getAgentDecisionTree(
   console.log(tree);
   /* Outputted tree is the following
   {
-    "_version": "1.1.0",
-    "trees": {
-      "lightbulbState": {
-        "children": [
+    "_version":"2.0.0",
+    "trees":{
+      "lightbulbState":{
+        "output_values":["OFF", "ON"],
+        "children":[
           {
-            "children": [
+            "children":[
               {
-                "confidence": 0.6774609088897705,
-                "decision_rule": {
-                  "operand": 0.5,
-                  "operator": "<",
-                  "property": "peopleCount"
+                "prediction":{
+                  "confidence":0.6774609088897705,
+                  "distribution":[0.8, 0.2],
+                  "value":"OFF",
+                  "nb_samples": 5
                 },
-                "predicted_value": "OFF"
+                "decision_rule":{
+                  "operand":0.5,
+                  "operator":"<",
+                  "property":"peopleCount"
+                }
               },
               {
-                "confidence": 0.8630361557006836,
-                "decision_rule": {
-                  "operand": 0.5,
-                  "operator": ">=",
-                  "property": "peopleCount"
+                "prediction":{
+                  "confidence":0.8630361557006836,
+                  "distribution":[0.1, 0.9],
+                  "value":"ON",
+                  "nb_samples": 10
                 },
-                "predicted_value": "ON"
-              }
-            ],
-            "decision_rule": {
-              "operand": [
-                5,
-                5.6666665
-              ],
-              "operator": "[in[",
-              "property": "timeOfDay"
-            }
-          },
-          {
-            "children": [
-              {
-                "confidence": 0.9947378635406494,
-                "decision_rule": {
-                  "operand": [
-                    5.6666665,
-                    20.666666
-                  ],
-                  "operator": "[in[",
-                  "property": "timeOfDay"
-                },
-                "predicted_value": "OFF"
-              },
-              {
-                "children": [
-                  {
-                    "confidence": 0.969236433506012,
-                    "decision_rule": {
-                      "operand": 1,
-                      "operator": "<",
-                      "property": "peopleCount"
-                    },
-                    "predicted_value": "OFF"
-                  },
-                  {
-                    "confidence": 0.8630361557006836,
-                    "decision_rule": {
-                      "operand": 1,
-                      "operator": ">=",
-                      "property": "peopleCount"
-                    },
-                    "predicted_value": "ON"
-                  }
-                ],
-                "decision_rule": {
-                  "operand": [
-                    20.666666,
-                    5
-                  ],
-                  "operator": "[in[",
-                  "property": "timeOfDay"
+                "decision_rule":{
+                  "operand":0.5,
+                  "operator":">=",
+                  "property":"peopleCount"
                 }
               }
             ],
-            "decision_rule": {
-              "operand": [
+            "decision_rule":{
+              "operand":[
+                5,
+                5.6666665
+              ],
+              "operator":"[in[",
+              "property":"timeOfDay"
+            }
+          },
+          {
+            "children":[
+              {
+                "prediction":{
+                  "confidence":0.9947378635406494,
+                  "distribution":[1.0, 0.0],
+                  "value":"ON",
+                  "nb_samples": 10
+                },
+                "decision_rule":{
+                  "operand":[
+                    5.6666665,
+                    20.666666
+                  ],
+                  "operator":"[in[",
+                  "property":"timeOfDay"
+                }
+              },
+              {
+                "children":[
+                  {
+                    "prediction":{
+                      "confidence":0.969236433506012,
+                      "distribution":[0.95, 0.05],
+                      "value":"OFF",
+                      "nb_samples": 10
+                    },
+                    "decision_rule":{
+                      "operand":1,
+                      "operator":"<",
+                      "property":"peopleCount"
+                    }
+                  },
+                  {
+                    "prediction":{
+                      "confidence":0.8630361557006836,
+                      "distribution":[0.2, 0.8],
+                      "value":"ON",
+                      "nb_samples": 15
+                    },
+                    "decision_rule":{
+                      "operand":1,
+                      "operator":">=",
+                      "property":"peopleCount"
+                    }
+                  }
+                ],
+                "decision_rule":{
+                  "operand":[
+                    20.666666,
+                    5
+                  ],
+                  "operator":"[in[",
+                  "property":"timeOfDay"
+                }
+              }
+            ],
+            "decision_rule":{
+              "operand":[
                 5.6666665,
                 5
               ],
-              "operator": "[in[",
-              "property": "timeOfDay"
+              "operator":"[in[",
+              "property":"timeOfDay"
             }
           }
         ]
       }
     },
-    "configuration": {
-      "time_quantum": 600,
-      "learning_period": 9000000,
-      "context": {
-        "peopleCount": {
-          "type": "continuous"
+    "configuration":{
+      "time_quantum":600,
+      "learning_period":9000000,
+      "context":{
+        "peopleCount":{
+          "type":"continuous"
         },
-        "timeOfDay": {
-          "type": "time_of_day",
-          "is_generated": true
+        "timeOfDay":{
+          "type":"time_of_day",
+          "is_generated":true
         },
-        "timezone": {
-          "type": "timezone"
+        "timezone":{
+          "type":"timezone"
         },
-        "lightbulbState": {
-          "type": "enum"
+        "lightbulbState":{
+          "type":"enum"
         }
       },
-      "output": [
+      "output":[
         "lightbulbState"
       ]
     }
@@ -1000,7 +1103,7 @@ client.getAgentDecisionTree(
 
 ### Bulk
 
-The craft ai API includes a bulk route which provides a programmatic option to perform asynchronous operations on agents. It lets the user create, delete, add context operations and compute decision tree for several agents at once.
+The craft ai API includes a bulk route which provides a programmatic option to perform asynchronous operations on agents. It allows the user to create, delete, add operations and compute decision trees for several agents at once.
 
 > :warning: the bulk API is a quite advanced feature. It comes on top of the basic routes to create, delete, add context operations and compute decision tree. If messages are not self-explanatory, please refer to the basic routes that does the same operation for a single agent.
 
@@ -1034,7 +1137,7 @@ const configuration_1 = {
 const configuration_2 = { /* ... */ };
 
 const createBulkPayload = [
-  {id: agent_ID_1, configuration: configuration_1}, 
+  {id: agent_ID_1, configuration: configuration_1},
   {id: agent_ID_2, configuration: configuration_2}
 ];
 
@@ -1044,13 +1147,13 @@ client.createAgentBulk(createBulkPayload)
   })
   .catch(function(error) {
     console.error('Error!', error);
-  }) 
+  })
 ```
 
 The variable `agents` is an **array of responses**. If an agent has been successfully created, the corresponding response is an object similar to the classic `createAgent()` response. When there are **mixed results**, `agents` should looks like:
 
 ```js
-[ 
+[
   { id: 'my_first_agent',   // creation failed
     status: 400,
     error: 'errorId',
@@ -1061,7 +1164,7 @@ The variable `agents` is an **array of responses**. If an agent has been success
       context: [Object],
       output: [Object] },
     id: 'my_second_agent',
-    _version: '2.0.0' } 
+    _version: '2.0.0' }
 ]
 ```
 
@@ -1087,9 +1190,9 @@ client.deleteAgentBulk(deleteBulkPayload)
 The variable `deletedAgents` is an **array of responses**. If an agent has been successfully deleted, the corresponding response is an object similar to the classic `deleteAgent()` response. When there are **mixed results**, `deletedAgents` should looks like:
 
 ```js
-[ 
+[
   { id: 'my_first_agent',       // deletion succeed
-    configuration: 
+    configuration:
      { time_quantum: 100,
        learning_period: 1500000,
        context: [Object],
@@ -1098,11 +1201,11 @@ The variable `deletedAgents` is an **array of responses**. If an agent has been 
     lastContextUpdate: 1557492944277,
     lastTreeUpdate: 1557492944277,
     _version: '2.0.0' },
-  { id: 'my_unknown_agent' },   // deletion succeed 
+  { id: 'my_unknown_agent' },   // deletion succeed
   { id: 'my_second_agent',      // deletion failed
     status: 400,
     error: 'errorId',
-    message: 'error-message' } 
+    message: 'error-message' }
 ]
 ```
 
@@ -1158,14 +1261,14 @@ client.addAgentContextOperationsBulk(contextOperationBulkPayload)
 The variable `agents` is an **array of responses**. If an agent has successfully received operations, the corresponding response is an object similar to the classic `addAgentContextOperations()` response. When there are **mixed results**, `agents` should looks like:
 
 ```js
-[ 
+[
   { id: 'my_first_agent',     // add operations failed
     status: 500,
     error: 'errorId',
     message: 'error-message' },
   { id: 'my_second_agent',      // add operations succeed
     message: 'Successfully added XX operation(s) to the agent "{owner}/{project}/my_second_agent" context.',
-    status: 201 } 
+    status: 201 }
 ]
 ```
 
@@ -1192,7 +1295,7 @@ client.getAgentDecisionTreeBulk(decisionTreePayload)
 The variable `trees` is an **array of responses**. If an agent's model has successfully been created, the corresponding response is an object similar to the classic `getAgentDecisionTree()` response. When there are **mixed results**, `trees` should looks like:
 
 ```js
-[ 
+[
   { id: 'my_first_agent',       // computation failed
     (...)
     status: 400,
@@ -1200,7 +1303,7 @@ The variable `trees` is an **array of responses**. If an agent's model has succe
     message: 'error-message' },
   { id: 'my_second_agent',        // computation succeed
     timestamp: 1464601500,
-    tree: { _version: '1.1.0', trees: [Object], configuration: [Object] } } 
+    tree: { _version: '1.1.0', trees: [Object], configuration: [Object] } }
 ]
 ```
 
@@ -1303,7 +1406,9 @@ A computed `decision` on an `enum` type would look like:
           operator: '>=',
           operand: 2
         }
-      ]
+      ],
+      nb_samples: 25,
+      distribution: [0.05, 0.95]
     }
   }
 }
@@ -1313,14 +1418,32 @@ A `decision` for a numerical output type would look like:
 
 ```js
   output: {
-    lightbulbIntensity: {
-      predicted_value: 10.5,
-      standard_deviation: 1.25,
+    lightbulbState: {
+      predicted_value: "OFF",
       confidence: ...,
+      distribution: [ ... ],
+      nb_samples: 25,
       decision_rules: [ ... ]
     }
   }
 ```
+
+A `decision` for a categorical output type would look like:
+
+```js
+  output: {
+    lightbulbIntensity: {
+      predicted_value: 10.5,
+      standard_deviation: 1.25,
+      confidence: ...,
+      min: 8.0,
+      max: 11,
+      nb_samples: 25,
+      decision_rules: [ ... ]
+    }
+  }
+```
+
 
 A `decision` in a case where the tree cannot make a prediction:
 
@@ -1328,7 +1451,9 @@ A `decision` in a case where the tree cannot make a prediction:
   decision: {
     lightbulbState: {
       predicted_value: null, // No decision
+      distribution : [ ... ], // Distribution of the output classes normalized by the number of samples in the reached node.
       confidence: 0, // Zero confidence if the decision is null
+      nb_samples: 25,
       decision_rules: [ ... ]
     }
   },
@@ -1374,6 +1499,8 @@ Results for `craftai.interpreter.decideFromContextsArray` would look like:
     output: { // The decision itself
       lightbulbState: {
         predicted_value: 'ON',
+        distribution: [0.0, 1.0],
+        nb_samples: 20,
         confidence: 0.9937745256361138, // The confidence in the decision
         decision_rules: [ // The ordered list of decision_rules that were validated to reach this decision
           {
@@ -1399,6 +1526,8 @@ Results for `craftai.interpreter.decideFromContextsArray` would look like:
     output: {
       lightbulbState: {
         predicted_value: 'ON',
+        distribution: [0.0, 1.0],
+        nb_samples: 20,
         confidence: 0.9937745256361138,
         decision_rules: [
           {
@@ -1424,6 +1553,8 @@ Results for `craftai.interpreter.decideFromContextsArray` would look like:
     output: {
       lightbulbState: {
         predicted_value: 'OFF',
+        distribution: [0.95, 0.05],
+        nb_samples: 12,
         confidence: 0.9545537233352661,
         decision_rules: [ // The ordered list of decision_rules that were validated to reach this decision
           {
