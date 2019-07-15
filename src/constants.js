@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export const DEFAULT_DECISION_TREE_VERSION = '1';
+export const DEFAULT_DECISION_TREE_VERSION = '2';
 
 export const IN_BROWSER = typeof window !== 'undefined';
 
