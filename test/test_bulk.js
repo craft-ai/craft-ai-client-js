@@ -90,11 +90,13 @@ describe('BULK:', function() {
           ])
           .then((agentsList) => {
             const agent0 = agentsList[0];
-            testAgentIntegrity(agent0, 'le_monde_est_sourd', CONFIGURATION_1);
-            const agent1 = agentsList[1];
-            expect(agent1.status).to.be.equal(400);
-            expect(agent1.error).to.be.equal('ContextError');
-            agentsList.map(({ id }) => client.deleteAgent(id));
+            return testAgentIntegrity(agent0, 'le_monde_est_sourd', CONFIGURATION_1)
+              .then(() => {
+                const agent1 = agentsList[1];
+                expect(agent1.status).to.be.equal(400);
+                expect(agent1.error).to.be.equal('ContextError');
+                agentsList.map(({ id }) => client.deleteAgent(id));
+              });
           });
       });
   });
@@ -379,8 +381,8 @@ describe('BULK:', function() {
                 expect(result[1].status).to.be.equal(404);
                 expect(result[1].error).to.be.equal('NotFound');
                 expect(result[2].id).to.be.equal(agentWrongIds[2].id);
-                expect(result[2].status).to.be.equal(500);
-                expect(result[2].error).to.be.equal('UnexpectedError');
+                expect(result[2].status).to.be.equal(400);
+                expect(result[2].error).to.be.equal('AgentError');
   
                 client.deleteAgentBulk(agentIds);
               });
@@ -395,22 +397,21 @@ describe('BULK:', function() {
         client.createAgentBulk(
           agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
         )
-          .then((res) => {
-            client.addAgentContextOperationsBulk(
-              agentIds.map(({ id }) => ({
-                id,
-                operations: INVALID_CONFIGURATION_1_OPERATIONS_1
-              }))
-            )
-              .then((results) => {
-                results.map((agent_res, idx) => {
-                  expect(agent_res.id).to.be.equal(agentIds[idx].id);
-                  expect(agent_res.status).to.be.equal(400);
-                  expect(agent_res.error).to.be.equal('InvalidPropertyValue');
-                });
+          .then((res) => client.addAgentContextOperationsBulk(
+            agentIds.map(({ id }) => ({
+              id,
+              operations: INVALID_CONFIGURATION_1_OPERATIONS_1
+            }))
+          )
+            .then((results) => {
+              results.map((agent_res, idx) => {
+                expect(agent_res.id).to.be.equal(agentIds[idx].id);
+                expect(agent_res.status).to.be.equal(500);
+                expect(agent_res.error).to.be.equal('InvalidPropertyValue');
               });
-            client.deleteAgentBulk(agentIds);
-          })
+            })
+            .then(() => client.deleteAgentBulk(agentIds))
+          )
       );
   });
 
