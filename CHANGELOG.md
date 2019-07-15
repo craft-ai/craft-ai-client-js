@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.17.0...HEAD) ##
 
+### Added ###
+
+- New method to get a decision tree from a list of agent: `getGroupDecisionTree`
+
 ### Changed ###
 
 - Default tree version updated to v2.
