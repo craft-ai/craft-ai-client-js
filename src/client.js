@@ -599,6 +599,7 @@ export default function createClient(tokenOrCfg) {
         configuration: undefined
       }
     ) {
+      console.log(options.configuration);
       if (!_.isArrayLike(agentList)) {
         return Promise.reject(
           new CraftAiBadRequestError(
@@ -615,7 +616,10 @@ export default function createClient(tokenOrCfg) {
           configuration: options.configuration
         }
       })
-        .then(({ body }) => body);
+        .then(({ body }) => body)
+        .catch((err) => {
+          throw err;
+        });
     },
     computeAgentDecision: function(agentId, t, ...contexts) {
       if (_.isUndefined(agentId)) {

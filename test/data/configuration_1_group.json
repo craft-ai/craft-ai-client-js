@@ -1,0 +1,20 @@
+{
+  "context": {
+    "presence": {
+      "type": "enum"
+    },
+    "lightIntensity": {
+      "type": "continuous"
+    },
+    "lightbulbColor": {
+      "type": "enum"
+    }
+  },
+  "output": [
+    "lightbulbColor"
+  ],
+  "time_quantum": 600,
+  "learning_period": 1500000,
+  "tree_max_operations": 15000,
+  "operations_as_events": true
+}

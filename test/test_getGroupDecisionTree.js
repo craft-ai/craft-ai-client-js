@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import CONFIGURATION_1 from './data/configuration_1.json';
+import CONFIGURATION_1 from './data/configuration_1_group.json';
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
 import parse from '../src/parse';
 
@@ -46,8 +46,7 @@ describe('client.getGroupDecisionTree(<agentList>, <timestamp>, <configuration>)
     return client.getGroupDecisionTree(agentIdListWithNonExistingAgent)
       .then(() => new Error('Should not be reached'))
       .catch((err) => {
-        expect(err.error).to.be.equal('NotFound');
-        expect(err.status).to.be.equal(404);
+        expect(err).to.be.instanceof(errors.CraftAiBadRequestError);
       });
   });
 
@@ -76,13 +75,15 @@ describe('client.getGroupDecisionTree(<agentList>, <timestamp>, <configuration>)
     const CONFIGURATION_GROUP = _.cloneDeep(CONFIGURATION_1);
     CONFIGURATION_GROUP.context.lightIntensity.type = 'enum';
     return client.getGroupDecisionTree(agentIdList, { configuration: CONFIGURATION_GROUP })
-      .then(() => Promise.reject(new Error('Should not be reached')))
+      .then((res) => {
+        return Promise.reject(new Error('Should not be reached'));
+      })
       .catch((err) => expect(err).to.be.instanceof(errors.CraftAiBadRequestError));
   });
 
   it('Success when a good configuration is passed', () => {
     const CONFIGURATION_GROUP = _.cloneDeep(CONFIGURATION_1);
-    CONFIGURATION_GROUP.learning_period = 150;
+    CONFIGURATION_GROUP.learning_period = 15000;
     return client.getGroupDecisionTree(agentIdList, { configuration: CONFIGURATION_GROUP })
       .then((treeJson) => {
         expect(treeJson).to.be.ok;
