@@ -45,7 +45,7 @@ const VALUE_VALIDATOR = {
   month_of_year: (value) => _.isInteger(value)  && value >= 1 && value <= 12
 };
 
-function decideRecursion(node, context, configuration, outputType, outputValues) {
+function decideRecursion(node, context, configuration, outputType, outputValues, path = ['0']) {
   // Leaf
   if (!(node.children && node.children.length)) {
     const prediction = node.prediction;
@@ -65,9 +65,10 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
       predicted_value: prediction.value,
       confidence: prediction.confidence || 0,
       decision_rules: [],
-      nb_samples: prediction.nb_samples
+      nb_samples: prediction.nb_samples,
+      decision_path: path.join('-')
     };
-    
+
     if (!_.isUndefined(prediction.distribution.standard_deviation)) {
       leafNode.standard_deviation = prediction.distribution.standard_deviation;
       const min_value = prediction.distribution.min;
@@ -87,7 +88,7 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
   }
 
   // Regular node
-  const matchingChild = _.find(
+  const matchingChildIndex = _.findIndex(
     node.children,
     (child) => {
       const decision_rule = child.decision_rule;
@@ -105,6 +106,7 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
       return OPERATORS[decision_rule.operator](context[property], decision_rule.operand);
     }
   );
+  const matchingChild = node.children[matchingChildIndex];
 
   // matching child property error
   if (matchingChild && matchingChild.error) {
@@ -120,11 +122,11 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
       // then the returned value corresponds to the subtree weighted output values.
       if (outputType === 'enum' || outputType === 'boolean') {
         // Compute the argmax function on the returned distribution:
-        let argmax 
+        let argmax
           = value
             .map((x, i) => [x, i])
             .reduce((r, a) => (a[0] > r[0] ? a : r))[1];
-        
+
         const predicted_value = outputValues[argmax];
         finalResult = {
           predicted_value: predicted_value,
@@ -140,7 +142,8 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
       return _.extend(finalResult, {
         confidence: null,
         decision_rules: [],
-        nb_samples: size 
+        nb_samples: size,
+        decision_path: path.join('-')
       });
     }
     else {
@@ -163,8 +166,11 @@ function decideRecursion(node, context, configuration, outputType, outputValues)
       };
     }
   }
+  // Add the matching child index to the current path:
+  path.push(matchingChildIndex);
+
   // matching child found: recurse !
-  const result = decideRecursion(matchingChild, context, configuration, outputType, outputValues);
+  const result = decideRecursion(matchingChild, context, configuration, outputType, outputValues, path);
 
   let finalResult = _.extend(result, {
     decision_rules: [matchingChild.decision_rule].concat(result.decision_rules)
@@ -236,7 +242,7 @@ export function distribution(node) {
         size: node.prediction.nb_samples
       };
     }
-    // Otherwise it is a regression problem, and we return the mean value 
+    // Otherwise it is a regression problem, and we return the mean value
     // of the leaf, the standard_deviation and the branch size.
     return {
       value: node.prediction.value,
@@ -291,7 +297,7 @@ export function computeMeanValues(values, sizes, stds, mins, maxs) {
   }
   // Otherwise, to compute the weighted standard deviation the following formula is used:
   // https://math.stackexchange.com/questions/2238086/calculate-variance-of-a-subset
-  const { mean, variance, size, min, max } = 
+  const { mean, variance, size, min, max } =
     _.zip(values, stds, sizes, mins, maxs)
       .map(([mean, std, size, min, max]) => {
         return {
@@ -342,7 +348,7 @@ export function computeMeanValues(values, sizes, stds, mins, maxs) {
         min: undefined,
         max: undefined
       });
-  return { 
+  return {
     value: mean,
     standard_deviation: Math.sqrt(variance),
     size: size,
@@ -356,7 +362,7 @@ export function computeMeanDistributions(values, sizes) {
   // Example, for values = [[ 4, 3, 6 ], [1, 2, 3], [3, 4, 5]], sizes = [1, 2, 1]
   // This function computes ([ 4, 3, 6]*1 + [1, 2, 3]*2 + [3, 4, 5]*6) / (1+2+1) = ...
   let totalSize = _.sum(sizes);
-  let multiplyByBranchRatio = 
+  let multiplyByBranchRatio =
   _.zip(values, sizes)
     .map((zipped) => _.map(zipped[0], (val) => val * zipped[1] / totalSize));
   let sumArrays = _sumArrays(multiplyByBranchRatio);
@@ -364,7 +370,7 @@ export function computeMeanDistributions(values, sizes) {
 }
 
 function _sumArrays(arrays) {
-  return _.reduce(arrays, (acc_sum, array) => 
+  return _.reduce(arrays, (acc_sum, array) =>
     _.map(array, (val, i) => (acc_sum[i] || 0.) + val)
   , new Array(arrays[0].length));
 }
