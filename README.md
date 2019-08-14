@@ -66,7 +66,7 @@ const client = craftai('{token}');
 
 An agent is an independent module that stores the history of the **context** of its user or device's context, and learns which **decision** to take based on the evolution of this context in the form of a **decision tree**.
 
-In this example, we will create an agent that learns the **decision model** of a light bulb based on the time of the day and the number of people in the room. In practice, it means the agent's context have 4 properties:
+In this example, we will create an agent that learns the **decision model** of a light bulb based on the time of the day and the number of people in the room. This dataset is treated as continuous context updates. If your data is more like events, please refer to the [Advanced Configuration section](#advanced-configuration) to know how to configure your agent. Here, the agent's context has 4 properties:
 
 - `peopleCount` which is a `continuous` property,
 - `timeOfDay` which is a `time_of_day` property,
@@ -1408,7 +1408,8 @@ A computed `decision` on an `enum` type would look like:
         }
       ],
       nb_samples: 25,
-      distribution: [0.05, 0.95]
+      distribution: [0.05, 0.95],
+      decision_path: '0-1-1'
     }
   }
 }
@@ -1423,7 +1424,8 @@ A `decision` for a numerical output type would look like:
       confidence: ...,
       distribution: [ ... ],
       nb_samples: 25,
-      decision_rules: [ ... ]
+      decision_rules: [ ... ],
+      decision_path: ...
     }
   }
 ```
@@ -1439,8 +1441,8 @@ A `decision` for a categorical output type would look like:
       min: 8.0,
       max: 11,
       nb_samples: 25,
-      decision_rules: [ ... ]
-    }
+      decision_rules: [ ... ],
+      decision_path: ...
   }
 ```
 
@@ -1454,7 +1456,8 @@ A `decision` in a case where the tree cannot make a prediction:
       distribution : [ ... ], // Distribution of the output classes normalized by the number of samples in the reached node.
       confidence: 0, // Zero confidence if the decision is null
       nb_samples: 25,
-      decision_rules: [ ... ]
+      decision_rules: [ ... ],
+      decision_path: ...
     }
   },
 ```
@@ -1502,6 +1505,7 @@ Results for `craftai.interpreter.decideFromContextsArray` would look like:
         distribution: [0.0, 1.0],
         nb_samples: 20,
         confidence: 0.9937745256361138, // The confidence in the decision
+        decision_path: '0-1-1',
         decision_rules: [ // The ordered list of decision_rules that were validated to reach this decision
           {
             property: 'timeOfDay',
@@ -1529,6 +1533,7 @@ Results for `craftai.interpreter.decideFromContextsArray` would look like:
         distribution: [0.0, 1.0],
         nb_samples: 20,
         confidence: 0.9937745256361138,
+        decision_path: '0-1-1',
         decision_rules: [
           {
             property: 'timeOfDay',
@@ -1556,6 +1561,7 @@ Results for `craftai.interpreter.decideFromContextsArray` would look like:
         distribution: [0.95, 0.05],
         nb_samples: 12,
         confidence: 0.9545537233352661,
+        decision_path: '0-0-0',
         decision_rules: [ // The ordered list of decision_rules that were validated to reach this decision
           {
             property: 'timeOfDay',
