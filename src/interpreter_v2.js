@@ -88,8 +88,7 @@ function decideRecursion(node, context, configuration, outputType, outputValues,
   }
 
   // Regular node
-  const matchingChildIndex = _.findIndex(
-    node.children,
+  const matchingChildIndex = node.children.findIndex(
     (child) => {
       const decision_rule = child.decision_rule;
       const property = decision_rule.property;
@@ -122,7 +121,7 @@ function decideRecursion(node, context, configuration, outputType, outputValues,
       // then the returned value corresponds to the subtree weighted output values.
       if (outputType === 'enum' || outputType === 'boolean') {
         // Compute the argmax function on the returned distribution:
-        let argmax
+        const argmax
           = value
             .map((x, i) => [x, i])
             .reduce((r, a) => (a[0] > r[0] ? a : r))[1];
@@ -370,7 +369,7 @@ export function computeMeanDistributions(values, sizes) {
 }
 
 function _sumArrays(arrays) {
-  return _.reduce(arrays, (acc_sum, array) =>
+  return arrays.reduce((acc_sum, array) =>
     _.map(array, (val, i) => (acc_sum[i] || 0.) + val)
   , new Array(arrays[0].length));
 }
@@ -380,10 +379,9 @@ function decide(configuration, trees, context) {
   // Convert timezones as integers to the standard +/-hh:mm format
   // This should only happen when no Time() object is passed to the interpreter
   const timezoneProperty = getTimezoneKey(configuration.context);
-  let decide_context = _.cloneDeep(context);
-  if (!_.isUndefined(timezoneProperty)) {
-    decide_context[timezoneProperty] = tzFromOffset(decide_context[timezoneProperty]);
-  }
+  const decide_context = timezoneProperty == null ? context : Object.assign({}, context, {
+    [timezoneProperty]: tzFromOffset(context[timezoneProperty])
+  });
   return {
     _version: DECISION_FORMAT_VERSION,
     context,
