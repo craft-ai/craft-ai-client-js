@@ -175,14 +175,14 @@ function decide(configuration, trees, context) {
   // Convert timezones as integers to the standard +/-hh:mm format
   // This should only happen when no Time() object is passed to the interpreter
   const timezoneProperty = getTimezoneKey(configuration.context);
-  if (!_.isUndefined(timezoneProperty)) {
-    context[timezoneProperty] = tzFromOffset(context[timezoneProperty]);
-  }
+  const decide_context = timezoneProperty == null ? context : Object.assign({}, context, {
+    [timezoneProperty]: tzFromOffset(context[timezoneProperty])
+  });
   return {
     _version: DECISION_FORMAT_VERSION,
     context,
     output: _.assign(..._.map(configuration.output, (output) => {
-      let decision = decideRecursion(trees[output], context);
+      let decision = decideRecursion(trees[output], decide_context);
       if (decision.error) {
         switch (decision.error.name) {
           case 'CraftAiNullDecisionError':

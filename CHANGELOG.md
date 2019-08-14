@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Default tree version updated to v2.
 
+### Added ###
+
+- `client.decide` now returns the path to the reached node.
+
 ## [1.17.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.16.1...v1.17.0) - 2019-07-10 ##
 
 ## [1.16.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.16.0...v1.16.1) - 2019-07-10 ##
