@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.17.1...HEAD) ##
 
+### Fixed ###
+
+- Property values under 10^-2 uses scientific notation in `interpreter.formatDecisionRules`.
+
 ## [1.17.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.17.0...v1.17.1) - 2019-08-14 ##
 
 ### Changed ###

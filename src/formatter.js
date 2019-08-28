@@ -21,7 +21,10 @@ const MONTH = [
 
 const PROPERTY_FORMATTER = {
   [TYPE_ANY]: (value) => value,
-  [TYPES.continuous]: (number) => `${Math.round(number * 100) / 100}`,
+  [TYPES.continuous]: (number) =>
+    number > 0.01 ? `${Math.round(number * 100) / 100}` :
+      number.toExponential(2)
+  ,
   [TYPES.time_of_day]: (time) => {
     const _time = time instanceof Time ? time.time_of_day : time;
     const hours = Math.floor(_time);
