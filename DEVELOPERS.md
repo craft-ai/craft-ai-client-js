@@ -2,27 +2,34 @@
 
 ## Running the tests locally ##
 
-1. Make sure you have a version of [Node.js](https://nodejs.org) installed (any version >0.12 should work).
-1. Create a test **craft ai** project and retrieve its **write token**.
-2. At the root of your local clone, create a file named `.env` with the following content
+0. Make sure you have a version of [Node.js](https://nodejs.org) installed (any version >0.12 should work).
+1. Clone the JS-client and init + update git submodules:
+   ```
+   git clone git@github...
+   git submodule init
+   git submodule update
+   ```
+
+2. Create a test **craft ai** project and retrieve its **write token**.
+3. At the root of your local clone, create a file named `.env` with the following content
 
   ```
   CRAFT_TOKEN=<retrieved_token>
   ```
 
-3. Install the dependencies.
+4. Install the dependencies.
 
   ```console
   $ npm install
   ```
 
-4. Run the tests!
+5. Run the tests!
 
   ```console
   $ npm run test
   ```
 
-5. Additionaly, you can run a test server to run the test in a browser at <http://localhost:8080/webpack-dev-server/>.
+6. Additionaly, you can run a test server to run the test in a browser at <http://localhost:8080/webpack-dev-server/>.
 
   ```console
   $ npm run dev_browser
