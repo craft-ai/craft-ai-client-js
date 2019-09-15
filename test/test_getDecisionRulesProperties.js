@@ -73,7 +73,6 @@ describe('interpreter.getDecisionRulesProperties(<tree>)', function() {
         'type': 'enum'
       },
       {
-        'is_optional': true,
         'property': 'enum2',
         'type': 'enum'
       },
@@ -107,7 +106,7 @@ describe('interpreter.getDecisionRulesProperties(<tree>)', function() {
   it('can list the properties used in a tree\'s decision rules (boolean operator)', function() {
     expect(interpreter.getDecisionRulesProperties(DECISION_TREE_5_V2)).to.be.deep.equal([
       {
-        'property': 'presence', 
+        'property': 'presence',
         'type': 'boolean'
       },
       {

@@ -1,8 +1,7 @@
 {
     "context": {
       "presence": {
-        "type": "enum",
-        "is_optional": true
+        "type": "enum"
       },
       "lightIntensity": {
         "type": "continuous"

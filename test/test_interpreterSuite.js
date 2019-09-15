@@ -18,10 +18,10 @@ describe('decide', () => {
   describe(`"${firstTreeFile}"`, function() {
     it(firstExpectation.title, function() {
       if (firstExpectation.error) {
-        expect(() => interpreter.decide(firstTree, firstExpectation.context, firstExpectation.time ? new Time(firstExpectation.time.t, firstExpectation.time.tz) : {})).to.throw();
+        expect(() => interpreter.decide(firstTree, firstExpectation.allow_not_matching || false, firstExpectation.context, firstExpectation.time ? new Time(firstExpectation.time.t, firstExpectation.time.tz) : {})).to.throw();
       }
       else {
-        expect(interpreter.decide(firstTree, firstExpectation.context, firstExpectation.time ? new Time(firstExpectation.time.t, firstExpectation.time.tz) : {})).to.be.deep.equal(firstExpectation.output);
+        expect(interpreter.decide(firstTree, firstExpectation.allow_not_matching || false, firstExpectation.context, firstExpectation.time ? new Time(firstExpectation.time.t, firstExpectation.time.tz) : {})).to.be.deep.equal(firstExpectation.output);
       }
     });
   });
@@ -42,7 +42,7 @@ describe('interpreter.decide', () => {
           it(expectation.title, function() {
             if (expectation.error) {
               try {
-                interpreter.decide(json, expectation.context, expectation.time ? new Time(expectation.time.t, expectation.time.tz) : {});
+                interpreter.decide(json, expectation.allow_not_matching || false, expectation.context, expectation.time ? new Time(expectation.time.t, expectation.time.tz) : {});
                 throw new Error('\'interpreter.decide\' should throw a \'CraftAiError\'.');
               }
               catch (e) {
@@ -59,7 +59,7 @@ describe('interpreter.decide', () => {
               if (!_.isUndefined(expectation.configuration)) {
                 json.configuration = _.assign(json.configuration, expectation.configuration);
               }
-              expect(interpreter.decide(json, expectation.context, expectation.time ? new Time(expectation.time.t, expectation.time.tz) : {})).to.be.deep.equal(expectation.output);
+              expect(interpreter.decide(json, expectation.allow_not_matching || false, expectation.context, expectation.time ? new Time(expectation.time.t, expectation.time.tz) : {})).to.be.deep.equal(expectation.output);
             }
           });
         });

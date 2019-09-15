@@ -30,7 +30,7 @@ describe('client.computeAgentDecision(<agentId>, <timestamp>, <context>)', funct
   });
 
   it('should succeed when using valid parameters', function() {
-    return client.computeAgentDecision(agent.id, CONFIGURATION_1_OPERATIONS_1_TO, {
+    return client.computeAgentDecision(agent.id, CONFIGURATION_1_OPERATIONS_1_TO, false, {
       presence: 'none',
       lightIntensity: 0.1
     })
@@ -40,7 +40,7 @@ describe('client.computeAgentDecision(<agentId>, <timestamp>, <context>)', funct
       });
   });
   it('should succeed when using valid parameters (context override)', function() {
-    return client.computeAgentDecision(agent.id, CONFIGURATION_1_OPERATIONS_1_TO, {
+    return client.computeAgentDecision(agent.id, CONFIGURATION_1_OPERATIONS_1_TO, false, {
       presence: 'none',
       lightIntensity: 1
     }, {
