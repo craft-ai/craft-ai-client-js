@@ -36,6 +36,8 @@ const isUnvalidConfiguration = (configuration) =>
   _.isUndefined(configuration) || !_.isObject(configuration);
 const areUnvalidOperations = (operations) =>
   _.isUndefined(operations) || !_.isArray(operations);
+const isInvalidFilter = (filter) => 
+  _.isArray(filter) && filter.reduce((allValid, agentName) => !AGENT_ID_ALLOWED_REGEXP.test(agentName) && allValid, true);
 
 function checkBulkParameters(bulkArray) {
   if (_.isUndefined(bulkArray)) {
@@ -628,8 +630,169 @@ export default function createClient(tokenOrCfg) {
           decision.timestamp = posixTimestamp;
           return decision;
         });
+    },
+    // Generators methods
+    createGenerator: function(configuration, filter, generatorName) {
+      if (isUnvalidConfiguration(configuration)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to create an generator with no or invalid configuration provided.'
+          )
+        );
+      }
+
+      if (isUnvalidId(generatorName)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            `Bad Request, unable to create an generator with invalid agent id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+          )
+        );
+      }
+
+      if (isInvalidFilter(filter)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            `Bad Request, unable to create an generator with invalid filter. It must be a list of string containing characters in 'a-zA-Z0-9_-' and must be between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+          )
+        );
+      }
+      return request({
+        method: 'POST',
+        path: '/generators',
+        body: {
+          id: generatorName,
+          configuration: configuration,
+          filter: filter
+        }
+      })
+        .then(({ body }) => {
+          debug(`Generator '${body.id}' created.`);
+          return body;
+        });
+    },
+    deleteGenerator: function(generatorName) {
+      if (isUnvalidId(generatorName)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            `Bad Request, unable to delete an generator with invalid generator id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+          )
+        );
+      }
+      return request({
+        method: 'DELETE',
+        path: `/generators/${generatorName}`
+      })
+        .then(({ body }) => {
+          debug(`Generator '${generatorName}' deleted`);
+          return body;
+        });
+    },
+    getGeneratorTree: function(
+      generatorName,
+      t = undefined,
+      version = DEFAULT_DECISION_TREE_VERSION
+    ) {
+      if (isUnvalidId(generatorName)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            `Bad Request, unable to get a decision tree with invalid generator id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+          )
+        );
+      }
+      let posixTimestamp = Time(t).timestamp;
+      if (_.isUndefined(posixTimestamp)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to retrieve an agent decision tree with an invalid timestamp provided.'
+          )
+        );
+      }
+
+      const generatorDecisionTreeRequest = () =>
+        request({
+          method: 'GET',
+          path: `/generators/${generatorName}/tree`,
+          query: {
+            t: posixTimestamp
+          },
+          headers: {
+            'x-craft-ai-tree-version': version
+          }
+        })
+          .then(({ body }) => body);
+      if (!cfg.decisionTreeRetrievalTimeout) {
+        // Don't retry
+        return generatorDecisionTreeRequest();
+      }
+      else {
+        const start = Date.now();
+        return Promise.race([
+          generatorDecisionTreeRequest()
+            .catch((error) => {
+              const requestDuration = Date.now() - start;
+              const expectedRetryDuration = requestDuration + 2000; // Let's add some margin
+              const timeoutBeforeRetrying =
+                cfg.decisionTreeRetrievalTimeout -
+                requestDuration -
+                expectedRetryDuration;
+              if (
+                error instanceof CraftAiLongRequestTimeOutError &&
+                timeoutBeforeRetrying > 0
+              ) {
+                // First timeout, let's retry once near the end of the set timeout
+                return resolveAfterTimeout(timeoutBeforeRetrying)
+                  .then(() =>
+                    generatorDecisionTreeRequest()
+                  );
+              } 
+              else {
+                return Promise.reject(error);
+              }
+            }),
+          resolveAfterTimeout(cfg.decisionTreeRetrievalTimeout)
+            .then(() => {
+              throw new CraftAiLongRequestTimeOutError();
+            })
+        ]);
+      }
+    },
+    computeGeneratorDecision: function(generatorName, t, ...contexts) {
+      if (_.isUndefined(generatorName)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to compute an agent decision with no generatorName provided.'
+          )
+        );
+      }
+      let posixTimestamp = Time(t).timestamp;
+      if (_.isUndefined(posixTimestamp)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to compute an agent decision with no or invalid timestamp provided.'
+          )
+        );
+      }
+      if (_.isUndefined(contexts) || _.size(contexts) === 0) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to compute an agent decision with no context provided.'
+          )
+        );
+      }
+
+      return request({
+        method: 'GET',
+        path: `/generators/${generatorName}/tree`,
+        query: {
+          t: posixTimestamp
+        }
+      })
+        .then(({ body }) => {
+          let decision = decide(body, ...contexts);
+          decision.timestamp = posixTimestamp;
+          return decision;
+        });
     }
   };
-
   return instance;
 }
