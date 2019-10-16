@@ -636,7 +636,7 @@ export default function createClient(tokenOrCfg) {
       if (isUnvalidConfiguration(configuration)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            'Bad Request, unable to create an generator with no or invalid configuration provided.'
+            'Bad Request, unable to create a generator with no or invalid configuration provided.'
           )
         );
       }
@@ -644,7 +644,7 @@ export default function createClient(tokenOrCfg) {
       if (isUnvalidId(generatorName)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            `Bad Request, unable to create an generator with invalid agent id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+            `Bad Request, unable to create a generator with invalid agent id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
           )
         );
       }
@@ -652,7 +652,7 @@ export default function createClient(tokenOrCfg) {
       if (isInvalidFilter(filter)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            `Bad Request, unable to create an generator with invalid filter. It must be a list of string containing characters in 'a-zA-Z0-9_-' and must be between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+            `Bad Request, unable to create a generator with invalid filter. It must be a list of string containing characters in 'a-zA-Z0-9_-' and must be between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
           )
         );
       }
@@ -674,7 +674,7 @@ export default function createClient(tokenOrCfg) {
       if (isUnvalidId(generatorName)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            `Bad Request, unable to delete an generator with invalid generator id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+            `Bad Request, unable to delete a generator from an invalid generator id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
           )
         );
       }
@@ -702,7 +702,7 @@ export default function createClient(tokenOrCfg) {
       if (isUnvalidId(generatorName)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            `Bad Request, unable to get a decision tree with invalid generator id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+            `Bad Request, unable to get a decision tree from an invalid generator id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
           )
         );
       }
@@ -710,7 +710,7 @@ export default function createClient(tokenOrCfg) {
       if (_.isUndefined(posixTimestamp)) {
         return Promise.reject(
           new CraftAiBadRequestError(
-            'Bad Request, unable to retrieve an agent decision tree with an invalid timestamp provided.'
+            'Bad Request, unable to retrieve an generator decision tree with an invalid timestamp provided.'
           )
         );
       }

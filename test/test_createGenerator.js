@@ -12,7 +12,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
     expect(client).to.be.ok;
   });
 
-  it('Should works with a configuration and valid generator name provided', () => {
+  it('should work with a configuration and valid generator name provided', () => {
     return client.createGenerator(CONFIGURATION_1, VALID_FILTER, VALID_GENERATOR_NAME)
       .then((generator) => {
         expect(generator).to.be.ok;
@@ -27,7 +27,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
       });
   });
 
-  it('Should not work when asked twice', () => {
+  it('should not work when asked twice', () => {
     return client.createGenerator(CONFIGURATION_1, VALID_FILTER, VALID_GENERATOR_NAME)
       .then((generator) => {
         expect(generator).to.be.ok;
@@ -50,7 +50,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
       });
   });
 
-  it('Should fail when created with an invalid generator name', () => {
+  it('should fail when created with an invalid generator name', () => {
     const INVALID_GENERATOR_NAME = 'generator_1/re';
     return client.createGenerator(CONFIGURATION_1, VALID_FILTER, INVALID_GENERATOR_NAME)
       .then((res) => 
@@ -62,7 +62,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
       });
   });
 
-  it('Should fail when created with an undefined generator name', () => {
+  it('should fail when created with an undefined generator name', () => {
     const UNDEFINED_GENERATOR_NAME = undefined;
     return client.createGenerator(CONFIGURATION_1, CONFIGURATION_1, UNDEFINED_GENERATOR_NAME)
       .then((res) => 
@@ -74,7 +74,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
       });
   });
 
-  it('Should fail when created with an invalid filter ', () => {
+  it('should fail when created with an invalid filter ', () => {
     const INVALID_FILTER = ['agent_/re'];
     return client.createGenerator(CONFIGURATION_1, INVALID_FILTER, VALID_GENERATOR_NAME)
       .then((res) => 
@@ -86,7 +86,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
       });
   });
 
-  it('Should fail when created with an undefined filter', () => {
+  it('should fail when created with an undefined filter', () => {
     const UNDEFINED_FILTER = undefined;
     return client.createGenerator(CONFIGURATION_1, UNDEFINED_FILTER, VALID_GENERATOR_NAME)
       .then((res) => 
@@ -98,7 +98,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
       });
   });
 
-  it('Should fail with an undefined configuration', () => {
+  it('should fail with an undefined configuration', () => {
     const UNDEFINED_CONFIGURATION = undefined;
     return client.createGenerator(UNDEFINED_CONFIGURATION, VALID_FILTER, VALID_GENERATOR_NAME)
       .then((res) => 
@@ -110,7 +110,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
       });
   });
 
-  it('Should fail with an invalid configuration', () => {
+  it('should fail with an invalid configuration', () => {
     return client.createGenerator(INVALID_CONFIGURATION_1, VALID_FILTER, VALID_GENERATOR_NAME)
       .then((res) => 
         Promise.reject(new Error(`Should not be reached but as the result : ${res}`))
