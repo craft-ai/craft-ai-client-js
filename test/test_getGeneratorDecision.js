@@ -18,13 +18,14 @@ describe('client.computeGeneratorDecision(<agentId>, <timestamp>, <context>)', f
 
   beforeEach(function() {
     return client.deleteAgent(AGENT_NAME)
-      .then(() => client.deleteGenerator(GENERATOR_NAME)) // Delete any preexisting agent with this id.
+      .then(() => client.deleteGenerator(GENERATOR_NAME))
       .then(() => client.createAgent(CONFIGURATION_1, AGENT_NAME))
       .then((createdAgent) => {
         expect(createdAgent).to.be.ok;
         return client.addAgentContextOperations(AGENT_NAME, CONFIGURATION_1_OPERATIONS_1);
       })
-      .then(() => client.createGenerator(CONFIGURATION_1_GENERATOR, VALID_FILTER, GENERATOR_NAME));
+      .then(() => client.createGenerator(CONFIGURATION_1_GENERATOR, VALID_FILTER, GENERATOR_NAME))
+      .catch((err) => console.log('What the fuck :', err));
   });
 
   afterEach(function() {

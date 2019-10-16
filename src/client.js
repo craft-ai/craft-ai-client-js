@@ -687,6 +687,13 @@ export default function createClient(tokenOrCfg) {
           return body;
         });
     },
+    listGenerators: function() {
+      return request({
+        method: 'GET',
+        path: '/generators'
+      })
+        .then(({ body }) => body.generatorsList);
+    },
     getGeneratorTree: function(
       generatorName,
       t = undefined,
