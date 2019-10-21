@@ -10,18 +10,18 @@ import { formatDecisionRules, formatProperty } from './formatter';
 
 const DECISION_FORMAT_VERSION = '1.1.0';
 
-export function decide(tree, ...args) {
+export function decide(tree, allow_not_matching = false, ...args) {
   const { _version, configuration, trees } = parse(tree);
   const ctx = configuration ? context(configuration, ...args) : _.extend({}, ...args);
-  return _decide(configuration, trees, ctx, _version);
+  return _decide(configuration, trees, ctx, _version, allow_not_matching);
 }
 
-function _decide(configuration, trees, ctx, _version) {
+function _decide(configuration, trees, ctx, _version, allow_not_matching = false) {
   if (semver.satisfies(_version, '>=1.0.0 <2.0.0')) {
     return decideV1(configuration, trees, ctx);
-  } 
+  }
   if (semver.satisfies(_version, '>=2.0.0 <3.0.0')) {
-    return decideV2(configuration, trees, ctx);
+    return decideV2(configuration, trees, ctx, allow_not_matching);
   }
   throw new CraftAiDecisionError(`Invalid decision tree format, "${_version}" is not a valid version.`);
 }

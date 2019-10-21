@@ -88,7 +88,7 @@ export default function createClient(tokenOrCfg) {
     throw new CraftAiBadRequestError(
       'Bad Request, unable to create a client with no or invalid project provided.'
     );
-  } 
+  }
   else {
     const splittedProject = cfg.project.split('/');
     if (splittedProject.length >= 2) {
@@ -319,7 +319,7 @@ export default function createClient(tokenOrCfg) {
           if (agent.operations.length > cfg.operationsChunksSize) {
             chunkedData.push([agent]);
             currentChunkSize = 0;
-          } 
+          }
           else {
             currentChunkSize += agent.operations.length;
             currentChunk.push(agent);
@@ -340,7 +340,7 @@ export default function createClient(tokenOrCfg) {
               body: chunk
             })
               .then(({ body }) => body);
-          } 
+          }
           else {
             return this.addAgentContextOperations(
               chunk[0].id,
@@ -570,7 +570,7 @@ export default function createClient(tokenOrCfg) {
                   .then(() =>
                     agentDecisionTreeRequest()
                   );
-              } 
+              }
               else {
                 return Promise.reject(error);
               }
@@ -592,7 +592,7 @@ export default function createClient(tokenOrCfg) {
       })
         .then(({ body }) => body);
     },
-    computeAgentDecision: function(agentId, t, ...contexts) {
+    computeAgentDecision: function(agentId, t, allowNotMatching = false, ...contexts) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(
           new CraftAiBadRequestError(
@@ -624,7 +624,7 @@ export default function createClient(tokenOrCfg) {
         }
       })
         .then(({ body }) => {
-          let decision = decide(body, ...contexts);
+          let decision = decide(body, allowNotMatching, ...contexts);
           decision.timestamp = posixTimestamp;
           return decision;
         });

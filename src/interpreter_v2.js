@@ -45,7 +45,7 @@ const VALUE_VALIDATOR = {
   month_of_year: (value) => _.isInteger(value)  && value >= 1 && value <= 12
 };
 
-function decideRecursion(node, context, configuration, outputType, outputValues, path = ['0']) {
+function decideRecursion(node, context, configuration, outputType, outputValues, allow_not_matching, path = ['0']) {
   // Leaf
   if (!(node.children && node.children.length)) {
     const prediction = node.prediction;
@@ -92,16 +92,6 @@ function decideRecursion(node, context, configuration, outputType, outputValues,
     (child) => {
       const decision_rule = child.decision_rule;
       const property = decision_rule.property;
-      if (configuration.deactivate_missing_values && _.isNull(property)) {
-        return {
-          predicted_value: undefined,
-          confidence: undefined,
-          error: {
-            name: 'CraftAiUnknownError',
-            message: `Unable to take decision: property '${property}' is missing from the given context.`
-          }
-        };
-      }
       return OPERATORS[decision_rule.operator](context[property], decision_rule.operand);
     }
   );
@@ -113,7 +103,7 @@ function decideRecursion(node, context, configuration, outputType, outputValues,
   }
 
   if (_.isUndefined(matchingChild)) {
-    if (!configuration.deactivate_missing_values) {
+    if (allow_not_matching) {
       const { value, standard_deviation, size } = distribution(node);
       let finalResult = {};
       // If it is a classification problem we return the class with the highest
@@ -169,7 +159,7 @@ function decideRecursion(node, context, configuration, outputType, outputValues,
   path.push(matchingChildIndex);
 
   // matching child found: recurse !
-  const result = decideRecursion(matchingChild, context, configuration, outputType, outputValues, path);
+  const result = decideRecursion(matchingChild, context, configuration, outputType, outputValues, allow_not_matching, path);
 
   let finalResult = _.extend(result, {
     decision_rules: [matchingChild.decision_rule].concat(result.decision_rules)
@@ -178,7 +168,7 @@ function decideRecursion(node, context, configuration, outputType, outputValues,
   return finalResult;
 }
 
-function checkContext(configuration) {
+function checkContext(configuration, allow_not_matching) {
   // Extract the required properties (i.e. those that are not the output)
   const expectedProperties = _.difference(
     _.keys(configuration.context),
@@ -204,12 +194,11 @@ function checkContext(configuration) {
       validators,
       ({ badProperties, missingProperties }, { property, type, is_optional, validator }) => {
         const value = context[property];
-        const isNullAuthorized = _.isNull(value) && !configuration.deactivate_missing_values;
-        const isOptionalAuthorized = _.isEmpty(value) && is_optional;
+        const isOptionalAuthorized = _.isPlainObject(value) && _.isEmpty(value) && is_optional;
         if (value === undefined) {
           missingProperties.push(property);
         }
-        else if (!validator(value) && !isNullAuthorized && !isOptionalAuthorized) {
+        else if (!validator(value) && !_.isNull(value) && !isOptionalAuthorized) {
           badProperties.push({ property, type, value });
         }
         return { badProperties, missingProperties };
@@ -374,8 +363,8 @@ function _sumArrays(arrays) {
   , new Array(arrays[0].length));
 }
 
-function decide(configuration, trees, context) {
-  checkContext(configuration)(context);
+function decide(configuration, trees, context, allow_not_matching = false) {
+  checkContext(configuration, allow_not_matching)(context);
   // Convert timezones as integers to the standard +/-hh:mm format
   // This should only happen when no Time() object is passed to the interpreter
   const timezoneProperty = getTimezoneKey(configuration.context);
@@ -387,7 +376,7 @@ function decide(configuration, trees, context) {
     context,
     output: _.assign(..._.map(configuration.output, (output) => {
       const outputType = configuration.context[output].type;
-      let decision = decideRecursion(trees[output], decide_context, configuration, outputType, trees[output].output_values);
+      let decision = decideRecursion(trees[output], decide_context, configuration, outputType, trees[output].output_values, allow_not_matching);
       if (decision.error) {
         switch (decision.error.name) {
           case 'CraftAiNullDecisionError':

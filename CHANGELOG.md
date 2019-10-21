@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.17.1...HEAD) ##
 
+### Added ###
+
+- `client.decide` accept `allow_not_matching` boolean argument that, if `true`, allows to compute the distribution from a node where no match has been found with the current context.
+
+### Changed ###
+
+- Delete `deactivate_missing_values` in the agent configuration.
+
 ### Fixed ###
 
 - Property values under 10^-2 uses scientific notation in `interpreter.formatDecisionRules`.
