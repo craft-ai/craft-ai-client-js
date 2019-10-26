@@ -592,7 +592,7 @@ export default function createClient(tokenOrCfg) {
       })
         .then(({ body }) => body);
     },
-    computeAgentDecision: function(agentId, t, allowNotMatching = false, ...contexts) {
+    computeAgentDecision: function(agentId, t, ...contexts) {
       if (_.isUndefined(agentId)) {
         return Promise.reject(
           new CraftAiBadRequestError(
@@ -624,7 +624,7 @@ export default function createClient(tokenOrCfg) {
         }
       })
         .then(({ body }) => {
-          let decision = decide(body, allowNotMatching, ...contexts);
+          let decision = decide(body, ...contexts);
           decision.timestamp = posixTimestamp;
           return decision;
         });
