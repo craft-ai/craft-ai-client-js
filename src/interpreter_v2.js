@@ -45,7 +45,7 @@ const VALUE_VALIDATOR = {
   month_of_year: (value) => _.isInteger(value)  && value >= 1 && value <= 12
 };
 
-function decideRecursion(node, context, configuration, outputType, outputValues, allow_not_matching, path = ['0']) {
+function decideRecursion(node, context, configuration, outputType, outputValues, path = ['0']) {
   // Leaf
   if (!(node.children && node.children.length)) {
     const prediction = node.prediction;
@@ -103,63 +103,42 @@ function decideRecursion(node, context, configuration, outputType, outputValues,
   }
 
   if (_.isUndefined(matchingChild)) {
-    if (allow_not_matching) {
-      const { value, standard_deviation, size } = distribution(node);
-      let finalResult = {};
-      // If it is a classification problem we return the class with the highest
-      // probability. Otherwise, if the current output type is continuous/periodic
-      // then the returned value corresponds to the subtree weighted output values.
-      if (outputType === 'enum' || outputType === 'boolean') {
-        // Compute the argmax function on the returned distribution:
-        const argmax
-          = value
-            .map((x, i) => [x, i])
-            .reduce((r, a) => (a[0] > r[0] ? a : r))[1];
+    const { value, standard_deviation, size } = distribution(node);
+    let finalResult = {};
+    // If it is a classification problem we return the class with the highest
+    // probability. Otherwise, if the current output type is continuous/periodic
+    // then the returned value corresponds to the subtree weighted output values.
+    if (outputType === 'enum' || outputType === 'boolean') {
+      // Compute the argmax function on the returned distribution:
+      const argmax
+        = value
+          .map((x, i) => [x, i])
+          .reduce((r, a) => (a[0] > r[0] ? a : r))[1];
 
-        const predicted_value = outputValues[argmax];
-        finalResult = {
-          predicted_value: predicted_value,
-          distribution: value
-        };
-      }
-      else {
-        finalResult = {
-          predicted_value: value,
-          standard_deviation: standard_deviation
-        };
-      }
-      return _.extend(finalResult, {
-        confidence: null,
-        decision_rules: [],
-        nb_samples: size,
-        decision_path: path.join('-')
-      });
-    }
-    else {
-      // Should only happens when an unexpected value for an enum is encountered
-      const operandList = _.uniq(_.map(_.values(node.children), (child) => child.decision_rule.operand));
-      const property = _.head(node.children).decision_rule.property;
-      return {
-        predicted_value: undefined,
-        confidence: undefined,
-        decision_rules: [],
-        error: {
-          name: 'CraftAiNullDecisionError',
-          message: `Unable to take decision: value '${context[property]}' for property '${property}' doesn't validate any of the decision rules.`,
-          metadata: {
-            property: property,
-            value: context[property],
-            expected_values: operandList
-          }
-        }
+      const predicted_value = outputValues[argmax];
+      finalResult = {
+        predicted_value: predicted_value,
+        distribution: value
       };
     }
+    else {
+      finalResult = {
+        predicted_value: value,
+        standard_deviation: standard_deviation
+      };
+    }
+    return _.extend(finalResult, {
+      confidence: null,
+      decision_rules: [],
+      nb_samples: size,
+      decision_path: path.join('-')
+    });
   }
   // Add the matching child index to the current path:
   path.push(matchingChildIndex);
 
   // matching child found: recurse !
-  const result = decideRecursion(matchingChild, context, configuration, outputType, outputValues, allow_not_matching, path);
+  const result = decideRecursion(matchingChild, context, configuration, outputType, outputValues, path);
 
   let finalResult = _.extend(result, {
     decision_rules: [matchingChild.decision_rule].concat(result.decision_rules)
@@ -168,7 +147,7 @@ function decideRecursion(node, context, configuration, outputType, outputValues,
   return finalResult;
 }
 
-function checkContext(configuration, allow_not_matching) {
+function checkContext(configuration) {
   // Extract the required properties (i.e. those that are not the output)
   const expectedProperties = _.difference(
     _.keys(configuration.context),
@@ -363,8 +342,8 @@ function _sumArrays(arrays) {
   , new Array(arrays[0].length));
 }
 
-function decide(configuration, trees, context, allow_not_matching = false) {
-  checkContext(configuration, allow_not_matching)(context);
+function decide(configuration, trees, context) {
+  checkContext(configuration)(context);
   // Convert timezones as integers to the standard +/-hh:mm format
   // This should only happen when no Time() object is passed to the interpreter
   const timezoneProperty = getTimezoneKey(configuration.context);
@@ -376,7 +355,7 @@ function decide(configuration, trees, context, allow_not_matching = false) {
     context,
     output: _.assign(..._.map(configuration.output, (output) => {
       const outputType = configuration.context[output].type;
-      let decision = decideRecursion(trees[output], decide_context, configuration, outputType, trees[output].output_values, allow_not_matching);
+      let decision = decideRecursion(trees[output], decide_context, configuration, outputType, trees[output].output_values);
       if (decision.error) {
         switch (decision.error.name) {
           case 'CraftAiNullDecisionError':

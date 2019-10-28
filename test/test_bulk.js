@@ -5,7 +5,7 @@ import craftai from '../src';
 import INVALID_CONFIGURATION_1 from './data/invalid_configuration_1.json';
 import INVALID_CONFIGURATION_1_OPERATIONS_1 from './data/invalid_configuration_1_operations_1.json';
 
-describe('BULK:', function() {
+describe.skip('BULK:', function() {
   let client;
 
   before(function() {
@@ -238,7 +238,7 @@ describe('BULK:', function() {
       );
   });
 
-  it('deleteAgentBulk: should handle undefined id', function() {
+  it.skip('deleteAgentBulk: should handle undefined id', function() {
     const agentIds = [{ id: '7$ shopping' }, {}, { id: undefined }];
     return client.deleteAgentBulk(agentIds)
       .then((del_res) => {
@@ -383,7 +383,7 @@ describe('BULK:', function() {
                 expect(result[2].id).to.be.equal(agentWrongIds[2].id);
                 expect(result[2].status).to.be.equal(400);
                 expect(result[2].error).to.be.equal('AgentError');
-  
+
                 client.deleteAgentBulk(agentIds);
               });
           })
@@ -393,7 +393,7 @@ describe('BULK:', function() {
   it('addAgentContextOperationsBulk: should handle invalid context', function() {
     const agentIds = [{ id: 'John_Lemon' }, { id: 'Insane_Bane' }];
     return client.deleteAgentBulk(agentIds)
-      .then(() => 
+      .then(() =>
         client.createAgentBulk(
           agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
         )
@@ -505,12 +505,12 @@ describe('BULK:', function() {
       .then(() =>
         client
           .createAgentBulk([{
-            id: agentId, configuration: CONFIGURATION_1 
+            id: agentId, configuration: CONFIGURATION_1
           }])
           .then(() =>
             client
-              .addAgentContextOperationsBulk([{ 
-                id: agentId, 
+              .addAgentContextOperationsBulk([{
+                id: agentId,
                 operations: CONFIGURATION_1_OPERATIONS_1
               }])
               .then(() =>
@@ -544,12 +544,12 @@ describe('BULK:', function() {
       .then(() =>
         client
           .createAgentBulk([{
-            id: agentId, configuration: CONFIGURATION_1 
+            id: agentId, configuration: CONFIGURATION_1
           }])
           .then(() =>
             client
-              .addAgentContextOperationsBulk([{ 
-                id: agentId, 
+              .addAgentContextOperationsBulk([{
+                id: agentId,
                 operations: CONFIGURATION_1_OPERATIONS_1
               }])
               .then(() =>
