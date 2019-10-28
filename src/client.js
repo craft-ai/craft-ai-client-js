@@ -687,6 +687,20 @@ export default function createClient(tokenOrCfg) {
           return body;
         });
     },
+    getGenerator: function(generatorId) {
+      if (isUnvalidId(generatorId)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to get an generator with invalid generator id. It must only contain characters in \'a-zA-Z0-9_-\' and cannot be the empty string.'
+          )
+        );
+      }
+      return request({
+        method: 'GET',
+        path: `/generators/${generatorId}`
+      })
+        .then(({ body }) => body);
+    },
     listGenerators: function() {
       return request({
         method: 'GET',
