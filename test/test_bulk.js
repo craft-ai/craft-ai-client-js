@@ -5,7 +5,7 @@ import craftai from '../src';
 import INVALID_CONFIGURATION_1 from './data/invalid_configuration_1.json';
 import INVALID_CONFIGURATION_1_OPERATIONS_1 from './data/invalid_configuration_1_operations_1.json';
 
-describe('BULK:', function() {
+describe.skip('BULK:', function() {
   let client;
 
   before(function() {
