@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed ###
 
-- Deletion of `allow_not_matching` from `client.decide` function. `client.decide` always computes the distribution when no matches are found.
+- Fix the retrocompatibility issue introduced in 1.17.2 by the addition of `allow_not_matching` to the `client.decide` function. `client.decide` now always computes the distribution when no matches are found.
 
 ## [1.17.2](https://github.com/craft-ai/craft-ai-client-js/compare/v1.17.1...v1.17.2) - 2019-10-21 ##
 
