@@ -5,7 +5,7 @@ import craftai from '../src';
 
 const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
 
-describe('client.computeGeneratorDecision(<agentId>, <timestamp>, <context>)', function() {
+describe.only('client.computeGeneratorDecision(<agentId>, <timestamp>, <context>)', function() {
   let client;
   const AGENT_NAME = `compute_gen_dec_${RUN_ID}`;
   const GENERATOR_NAME = `compute_gen_dec_gen_${RUN_ID}`;
@@ -18,10 +18,12 @@ describe('client.computeGeneratorDecision(<agentId>, <timestamp>, <context>)', f
   });
 
   beforeEach(function() {
+    console.log(CONFIGURATION);
     return client.deleteAgent(AGENT_NAME)
       .then(() => client.deleteGenerator(GENERATOR_NAME))
       .then(() => client.createAgent(CONFIGURATION_1, AGENT_NAME))
       .then((createdAgent) => {
+        console.log('Agents created', createdAgent);
         expect(createdAgent).to.be.ok;
         return client.addAgentContextOperations(AGENT_NAME, CONFIGURATION_1_OPERATIONS_1);
       })
