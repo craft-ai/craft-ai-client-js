@@ -36,7 +36,7 @@ const isUnvalidConfiguration = (configuration) =>
   _.isUndefined(configuration) || !_.isObject(configuration);
 const areUnvalidOperations = (operations) =>
   _.isUndefined(operations) || !_.isArray(operations);
-const isInvalidFilter = (filter) => 
+const isInvalidFilter = (filter) =>
   _.isArray(filter) && filter.reduce((allValid, agentName) => !AGENT_ID_ALLOWED_REGEXP.test(agentName) && allValid, true);
 
 function checkBulkParameters(bulkArray) {
@@ -632,7 +632,7 @@ export default function createClient(tokenOrCfg) {
         });
     },
     // Generators methods
-    createGenerator: function(configuration, filter, generatorName) {
+    createGenerator: function(configuration, generatorName, filter) {
       if (isUnvalidConfiguration(configuration)) {
         return Promise.reject(
           new CraftAiBadRequestError(
@@ -648,21 +648,25 @@ export default function createClient(tokenOrCfg) {
           )
         );
       }
-
       if (isInvalidFilter(filter)) {
+        configuration.filter = filter;
+      }
+
+      if (isInvalidFilter(configuration.filter)) {
         return Promise.reject(
           new CraftAiBadRequestError(
             `Bad Request, unable to create a generator with invalid filter. It must be a list of string containing characters in 'a-zA-Z0-9_-' and must be between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
           )
         );
       }
+
       return request({
         method: 'POST',
         path: '/generators',
         body: {
           id: generatorName,
           configuration: configuration,
-          filter: filter
+          filter: configuration.filter
         }
       })
         .then(({ body }) => {

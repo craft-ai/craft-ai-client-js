@@ -7,6 +7,8 @@ describe('client.listGenerators()', function() {
   let client;
   const GENERATORS_ID = [`list_generators_${RUN_ID}_1`, `list_generators_${RUN_ID}_2`, `list_generators_${RUN_ID}_3`];
   const AGENT_ID = `testAgentListGenerators${RUN_ID}`;
+  const CONFIGURATION_GET_GENERATOR_LIST = JSON.parse(JSON.stringify(CONFIGURATION_GENERATOR));
+  CONFIGURATION_GET_GENERATOR_LIST.filter = [AGENT_ID];
 
   before(function() {
     client = craftai(CRAFT_CFG);
@@ -16,7 +18,7 @@ describe('client.listGenerators()', function() {
 
   beforeEach(function() {
     return Promise.all(_.map(GENERATORS_ID, (generatorId) => client.deleteGenerator(generatorId))) // Delete any preexisting generator with this id.
-      .then(() => Promise.all(_.map(GENERATORS_ID, (generatorId) => client.createGenerator(CONFIGURATION_GENERATOR, [AGENT_ID], generatorId))));
+      .then(() => Promise.all(_.map(GENERATORS_ID, (generatorId) => client.createGenerator(CONFIGURATION_GENERATOR, generatorId))));
   });
 
   afterEach(function() {

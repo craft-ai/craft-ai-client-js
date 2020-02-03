@@ -9,6 +9,8 @@ describe('client.getGenerator(<generatorId>)', function() {
   const AGENT_NAME = `get_generator_agent_${RUN_ID}`;
   const GENERATOR_NAME = `get_generator_agent_${RUN_ID}`;
   const VALID_FILTER =  [AGENT_NAME];
+  const CONFIGURATION_GENERATOR = JSON.parse(JSON.stringify(CONFIGURATION_1_GENERATOR));
+  CONFIGURATION_GENERATOR.filter = VALID_FILTER;
 
   before(function() {
     client = craftai(CRAFT_CFG);
@@ -22,7 +24,7 @@ describe('client.getGenerator(<generatorId>)', function() {
         expect(createdAgent).to.be.ok;
       })
       .then(() => client.deleteGenerator(GENERATOR_NAME)) // Delete any preexisting generator with this id.
-      .then(() => client.createGenerator(CONFIGURATION_1_GENERATOR, VALID_FILTER, GENERATOR_NAME))
+      .then(() => client.createGenerator(CONFIGURATION_1_GENERATOR, GENERATOR_NAME))
       .then((createdGenerator) => {
         expect(createdGenerator).to.be.ok;
         generator = createdGenerator;
@@ -34,7 +36,7 @@ describe('client.getGenerator(<generatorId>)', function() {
   });
 
   it('should return no first/last timestamps on "empty" generators', function() {
-    return client.getGenerator(generator.generatorId)
+    return client.getGenerator(generator.id)
       .then((retrievedGenerator) => {
         expect(retrievedGenerator.firstTimestamp).to.be.undefined;
         expect(retrievedGenerator.lastTimestamp).to.be.undefined;
@@ -43,7 +45,7 @@ describe('client.getGenerator(<generatorId>)', function() {
 
   it('should fail on non-existing generator', function() {
     return client.deleteGenerator(GENERATOR_NAME)
-      .then(() => client.getGenerator(generator.generatorId))
+      .then(() => client.getGenerator(generator.id))
       .then(
         () => Promise.reject(new Error('Should not be reached')),
         (err) => {

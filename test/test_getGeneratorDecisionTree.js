@@ -9,10 +9,10 @@ describe('client.getGeneratorDecisionTree(<agentId>, <timestamp>)', function() {
   let agent;
   const AGENT_NAME = `get_generator_decision_${RUN_ID}`;
   const GENERATOR_NAME = `generator_${RUN_ID}`;
+  const CONFIGURATION_GET_DECISION_TREE = JSON.parse(JSON.stringify(CONFIGURATION_1_GENERATOR));
+  CONFIGURATION_GET_DECISION_TREE.filter = [AGENT_NAME];
   const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
-  const VALID_FILTER = [AGENT_NAME];
-  let CONFIGURATION_1_GENRATOR_IN_DB = _.cloneDeep(CONFIGURATION_1_GENERATOR);
-  CONFIGURATION_1_GENRATOR_IN_DB.filter = VALID_FILTER;
+  let CONFIGURATION_1_GENRATOR_IN_DB = _.cloneDeep(CONFIGURATION_GET_DECISION_TREE);
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
@@ -27,7 +27,7 @@ describe('client.getGeneratorDecisionTree(<agentId>, <timestamp>)', function() {
 
   beforeEach(function() {
     return client.deleteGenerator(GENERATOR_NAME)
-      .then(() => client.createGenerator(CONFIGURATION_1_GENERATOR, VALID_FILTER, GENERATOR_NAME));
+      .then(() => client.createGenerator(CONFIGURATION_GET_DECISION_TREE, GENERATOR_NAME));
   });
 
   afterEach(() => client.deleteGenerator(GENERATOR_NAME));
