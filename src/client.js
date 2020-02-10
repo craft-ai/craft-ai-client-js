@@ -632,7 +632,7 @@ export default function createClient(tokenOrCfg) {
         });
     },
     // Generators methods
-    createGenerator: function(configuration, generatorName, filter) {
+    createGenerator: function(configuration, generatorName) {
       if (isUnvalidConfiguration(configuration)) {
         return Promise.reject(
           new CraftAiBadRequestError(
@@ -648,9 +648,6 @@ export default function createClient(tokenOrCfg) {
           )
         );
       }
-      if (isInvalidFilter(filter)) {
-        configuration.filter = filter;
-      }
 
       if (isInvalidFilter(configuration.filter)) {
         return Promise.reject(
@@ -665,8 +662,7 @@ export default function createClient(tokenOrCfg) {
         path: '/generators',
         body: {
           id: generatorName,
-          configuration: configuration,
-          filter: configuration.filter
+          configuration: configuration
         }
       })
         .then(({ body }) => {
