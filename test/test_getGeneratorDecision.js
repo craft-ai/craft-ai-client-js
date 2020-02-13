@@ -1,11 +1,11 @@
 import CONFIGURATION_1 from './data/configuration_1.json';
 import CONFIGURATION_1_GENERATOR from './data/configuration_1_generator.json';
-import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
+import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_3.json';
 import craftai from '../src';
 
 const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
 
-describe.only('client.computeGeneratorDecision(<agentId>, <timestamp>, <context>)', function() {
+describe('client.computeGeneratorDecision(<agentId>, <timestamp>, <context>)', function() {
   let client;
   const AGENT_NAME = `compute_generator_decision_${RUN_ID}`;
   const GENERATOR_NAME = `compute_generator_decision_gen_${RUN_ID}`;
@@ -28,13 +28,11 @@ describe.only('client.computeGeneratorDecision(<agentId>, <timestamp>, <context>
         expect(createdAgent).to.be.ok;
         return client.addAgentContextOperations(AGENT_NAME, CONFIGURATION_1_OPERATIONS_1);
       })
-      .then(() => client.createGenerator(CONFIGURATION, GENERATOR_NAME))
-      .then((add) => console.log(add))
-      .catch((err) => console.log('What the fuck :', err));
+      .then(() => client.createGenerator(CONFIGURATION, GENERATOR_NAME));
   });
 
   afterEach(function() {
-    return client.deleteAgent(AGENT_NAME);
+    // return client.deleteAgent(AGENT_NAME);
   });
 
   it('should succeed when using valid parameters', function() {
@@ -52,11 +50,11 @@ describe.only('client.computeGeneratorDecision(<agentId>, <timestamp>, <context>
       presence: 'none',
       lightIntensity: 1
     }, {
-      lightIntensity: 0.1
+      presence: 'robert'
     })
       .then((decision) => {
         expect(decision).to.be.ok;
-        expect(decision.output.lightbulbColor.predicted_value).to.be.equal('black');
+        expect(decision.output.lightbulbColor.predicted_value).to.be.equal('green');
       });
   });
 });
