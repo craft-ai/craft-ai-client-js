@@ -708,6 +708,70 @@ export default function createClient(tokenOrCfg) {
       })
         .then(({ body }) => body.generatorsList);
     },
+    getGeneratorContextOperations: function(
+      generatorUri,
+      start = undefined,
+      end = undefined
+    ) {
+      if (_.isUndefined(generatorUri)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to get generator context operations with no generatorUri provided.'
+          )
+        );
+      }
+      let startTimestamp;
+      if (start) {
+        startTimestamp = Time(start).timestamp;
+        if (_.isUndefined(startTimestamp)) {
+          return Promise.reject(
+            new CraftAiBadRequestError(
+              'Bad Request, unable to get generator context operations with an invalid \'start\' timestamp provided.'
+            )
+          );
+        }
+      }
+      let endTimestamp;
+      if (end) {
+        endTimestamp = Time(end).timestamp;
+        if (_.isUndefined(endTimestamp)) {
+          return Promise.reject(
+            new CraftAiBadRequestError(
+              'Bad Request, unable to get generator context operations with an invalid \'end\' timestamp provided.'
+            )
+          );
+        }
+      }
+
+      const requestFollowingPages = ({ operations, nextPageUrl }) => {
+        if (!nextPageUrl) {
+          return Promise.resolve(operations);
+        }
+        return request({ url: nextPageUrl }, this)
+          .then(
+            ({ body, nextPageUrl }) =>
+              requestFollowingPages({
+                operations: operations.concat(body),
+                nextPageUrl
+              })
+          );
+      };
+
+      return request({
+        method: 'GET',
+        path: `/generators/${generatorUri}/context`,
+        query: {
+          start: startTimestamp,
+          end: endTimestamp
+        }
+      })
+        .then(({ body, nextPageUrl }) =>
+          requestFollowingPages({
+            operations: body,
+            nextPageUrl
+          })
+        );
+    },
     getGeneratorTree: function(
       generatorName,
       t = undefined,
