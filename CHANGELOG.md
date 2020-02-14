@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.17.3...HEAD) ##
 
+### Added ###
+
+- Add support for generators with `client` methods `createGenerator` `deleteGenerator` `getGenerator` `listGenerators` `getGeneratorTree` `computeGeneratorDecision` and `getGeneratorContextOperations`.
+
 ### Fixed ###
 
 - Delete `deactivate_missing_values` key from missing values agent configuration tests.
