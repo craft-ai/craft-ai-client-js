@@ -32,7 +32,8 @@ describe('client.getGenerator(<generatorId>)', function() {
   });
 
   afterEach(function() {
-    return client.deleteAgent(AGENT_NAME);
+    return client.deleteAgent(AGENT_NAME)
+      .then(() => client.deleteGenerator(GENERATOR_NAME));
   });
 
   it('should return no first/last timestamps on "empty" generators', function() {

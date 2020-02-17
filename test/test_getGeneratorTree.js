@@ -6,13 +6,12 @@ import craftai, { errors } from '../src';
 
 describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
   let client;
-  let agent;
-  const AGENT_NAME = `get_generator_decision_${RUN_ID}`;
+  const AGENT_NAME = `get_gen_decision_${RUN_ID}`;
   const GENERATOR_NAME = `generator_${RUN_ID}`;
   const CONFIGURATION_GET_DECISION_TREE = JSON.parse(JSON.stringify(CONFIGURATION_1_GENERATOR));
   CONFIGURATION_GET_DECISION_TREE.filter = [AGENT_NAME];
   const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
-  let CONFIGURATION_1_GENRATOR_IN_DB = _.cloneDeep(CONFIGURATION_GET_DECISION_TREE);
+  let CONFIGURATION_1_GENERATOR_IN_DB = _.cloneDeep(CONFIGURATION_GET_DECISION_TREE);
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
@@ -20,8 +19,7 @@ describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
       .then((res) => client.createAgent(CONFIGURATION_1, AGENT_NAME))
       .then((createdAgent) => {
         expect(createdAgent).to.be.ok;
-        agent = createdAgent;
-        return client.addAgentContextOperations(agent.id, CONFIGURATION_1_OPERATIONS_1);
+        return client.addAgentContextOperations(createdAgent.id, CONFIGURATION_1_OPERATIONS_1);
       }); // Delete any preexisting agent with this id.
   });
 
@@ -30,7 +28,10 @@ describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
       .then(() => client.createGenerator(CONFIGURATION_GET_DECISION_TREE, GENERATOR_NAME));
   });
 
-  afterEach(() => client.deleteGenerator(GENERATOR_NAME));
+  after(function() {
+    return client.deleteAgent(AGENT_NAME)
+      .then(() => client.deleteGenerator(GENERATOR_NAME));
+  });
 
   it('success on valid parameters', () => {
     return client.getGeneratorTree(GENERATOR_NAME, CONFIGURATION_1_OPERATIONS_1_TO)
@@ -39,7 +40,7 @@ describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
         const { _version, configuration, trees } = parse(treeJson);
         expect(trees).to.be.ok;
         expect(_version).to.be.ok;
-        expect(configuration).to.be.deep.equal(CONFIGURATION_1_GENRATOR_IN_DB);
+        expect(configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR_IN_DB);
       });
   });
 
@@ -51,7 +52,7 @@ describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
         const { _version, configuration, trees } = parse(treeJson);
         expect(trees).to.be.ok;
         expect(_version).to.be.ok;
-        expect(configuration).to.be.deep.equal(CONFIGURATION_1_GENRATOR_IN_DB);
+        expect(configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR_IN_DB);
       });
   });
 
@@ -62,7 +63,7 @@ describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
         const { _version, configuration, trees } = parse(treeJson);
         expect(trees).to.be.ok;
         expect(_version).to.be.ok;
-        expect(configuration).to.be.deep.equal(CONFIGURATION_1_GENRATOR_IN_DB);
+        expect(configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR_IN_DB);
       });
   });
 

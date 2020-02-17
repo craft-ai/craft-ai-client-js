@@ -6,9 +6,9 @@ import craftai from '../src';
 
 describe('client.getGeneratorContextOperations(<generatorId>, from, to)', function() {
   let client;
-  const agentId = `getGeneratorContextOpsAgent_${RUN_ID}`;
-  const agentId2 = `getGeneratorContextOpsAgent2_${RUN_ID}`;
-  const generatorId = `getGeneratorContextOpsGen_${RUN_ID}`;
+  const agentId = `getGenCOpsAgent_${RUN_ID}`;
+  const agentId2 = `getGenCOpsAgent2_${RUN_ID}`;
+  const generatorId = `getGenCOpsGen_${RUN_ID}`;
 
   const generatorConfiguration = JSON.parse(JSON.stringify(CONFIGURATION_1_GENERATOR));
   generatorConfiguration.filter = [agentId, agentId2];
