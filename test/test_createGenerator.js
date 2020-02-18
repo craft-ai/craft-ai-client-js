@@ -19,7 +19,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
         return client.deleteGenerator(VALID_GENERATOR_NAME);
       })
       .catch((err) => {
-        client.deleteAgent(VALID_GENERATOR_NAME) // The test might fail due to duplicate id, let's make sure it doesn't fail twice.
+        client.deleteGenerator(VALID_GENERATOR_NAME) // The test might fail due to duplicate id, let's make sure it doesn't fail twice.
           .then(() => {
             throw err;
           });
@@ -42,7 +42,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
         return client.deleteGenerator(VALID_GENERATOR_NAME);
       })
       .catch((err) => {
-        client.deleteAgent(VALID_GENERATOR_NAME) // The test might fail due to duplicate id, let's make sure it doesn't fail twice.
+        client.deleteGenerator(VALID_GENERATOR_NAME) // The test might fail due to duplicate id, let's make sure it doesn't fail twice.
           .then(() => {
             throw err;
           });
