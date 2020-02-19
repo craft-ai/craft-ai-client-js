@@ -37,7 +37,7 @@ const isUnvalidConfiguration = (configuration) =>
 const areUnvalidOperations = (operations) =>
   _.isUndefined(operations) || !_.isArray(operations);
 const isInvalidFilter = (filter) =>
-  _.isArray(filter) && filter.reduce((allValid, agentName) => !AGENT_ID_ALLOWED_REGEXP.test(agentName) && allValid, true);
+  !_.isArray(filter) || filter.some((agentName) => isUnvalidId(agentName));
 
 function checkBulkParameters(bulkArray) {
   if (_.isUndefined(bulkArray)) {

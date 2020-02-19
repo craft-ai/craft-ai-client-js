@@ -77,7 +77,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
     const INVALID_FILTER = ['agent_/re'];
     const CONFIGURATION_WITH_INVALID_FILTER = JSON.parse(JSON.stringify(CONFIGURATION_1));
     CONFIGURATION_WITH_INVALID_FILTER.filter = INVALID_FILTER;
-    return client.createGenerator(CONFIGURATION_1, INVALID_FILTER, VALID_GENERATOR_NAME)
+    return client.createGenerator(CONFIGURATION_WITH_INVALID_FILTER, VALID_GENERATOR_NAME)
       .then((res) =>
         Promise.reject(new Error(`Should not be reached but as the result : ${res}`))
       )
@@ -88,8 +88,9 @@ describe('client.createGenerator(<configuration>, [id])', function() {
   });
 
   it('should fail when created with an undefined filter', () => {
-    const UNDEFINED_FILTER = undefined;
-    return client.createGenerator(CONFIGURATION_1, UNDEFINED_FILTER, VALID_GENERATOR_NAME)
+    const CONFIGURATION_WITH_UNDEFINED_FILTER = JSON.parse(JSON.stringify(CONFIGURATION_1));
+    CONFIGURATION_WITH_UNDEFINED_FILTER.filter = undefined;
+    return client.createGenerator(CONFIGURATION_WITH_UNDEFINED_FILTER, VALID_GENERATOR_NAME)
       .then((res) =>
         Promise.reject(new Error(`Should not be reached but as the result : ${res}`))
       )
