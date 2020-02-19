@@ -34,7 +34,7 @@ describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
   });
 
   it('success on valid parameters', () => {
-    return client.getGeneratorTree(GENERATOR_NAME, CONFIGURATION_1_OPERATIONS_1_TO)
+    return client.getGeneratorDecisionTree(GENERATOR_NAME, CONFIGURATION_1_OPERATIONS_1_TO)
       .then((treeJson) => {
         expect(treeJson).to.be.ok;
         const { _version, configuration, trees } = parse(treeJson);
@@ -46,7 +46,7 @@ describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
 
   it('success when an other version is passed', () => {
     const VERSION = '1';
-    return client.getGeneratorTree(GENERATOR_NAME, CONFIGURATION_1_OPERATIONS_1_TO, VERSION)
+    return client.getGeneratorDecisionTree(GENERATOR_NAME, CONFIGURATION_1_OPERATIONS_1_TO, VERSION)
       .then((treeJson) => {
         expect(treeJson).to.be.ok;
         const { _version, configuration, trees } = parse(treeJson);
@@ -57,7 +57,7 @@ describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
   });
 
   it('should succeed without a timestamp given', () => {
-    return client.getGeneratorTree(GENERATOR_NAME)
+    return client.getGeneratorDecisionTree(GENERATOR_NAME)
       .then((treeJson) => {
         expect(treeJson).to.be.ok;
         const { _version, configuration, trees } = parse(treeJson);
@@ -69,7 +69,7 @@ describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
 
   it('should fail when an invalid timestamp is given', () => {
     const INVALID_TIMESTAMP = -124;
-    return client.getGeneratorTree(GENERATOR_NAME, INVALID_TIMESTAMP)
+    return client.getGeneratorDecisionTree(GENERATOR_NAME, INVALID_TIMESTAMP)
       .then(() => Promise.reject(new Error('Should not be reached')))
       .catch((err) => {
         expect(err).to.be.an.instanceof(errors.CraftAiError);

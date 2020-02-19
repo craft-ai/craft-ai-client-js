@@ -829,7 +829,7 @@ export default function createClient(tokenOrCfg) {
                   .then(() =>
                     generatorDecisionTreeRequest()
                   );
-              } 
+              }
               else {
                 return Promise.reject(error);
               }
