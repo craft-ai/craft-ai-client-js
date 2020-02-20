@@ -772,7 +772,7 @@ export default function createClient(tokenOrCfg) {
           })
         );
     },
-    getGeneratorTree: function(
+    getGeneratorDecisionTree: function(
       generatorName,
       t = undefined,
       version = DEFAULT_DECISION_TREE_VERSION

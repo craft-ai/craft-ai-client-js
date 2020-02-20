@@ -4,7 +4,7 @@ import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.js
 import parse from '../src/parse';
 import craftai, { errors } from '../src';
 
-describe('client.getGeneratorTree(<agentId>, <timestamp>)', function() {
+describe('client.getGeneratorDecisionTree(<generatorId>, <timestamp>)', function() {
   let client;
   const AGENT_NAME = `get_gen_decision_${RUN_ID}`;
   const GENERATOR_NAME = `generator_${RUN_ID}`;
