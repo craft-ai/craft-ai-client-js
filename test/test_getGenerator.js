@@ -15,9 +15,6 @@ describe('client.getGenerator(<generatorId>)', function() {
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
-  });
-
-  beforeEach(function() {
     return client.deleteAgent(AGENT_NAME) // Delete any preexisting agent with this id.
       .then(() => client.createAgent(CONFIGURATION_1, AGENT_NAME))
       .then((createdAgent) => {
@@ -31,7 +28,7 @@ describe('client.getGenerator(<generatorId>)', function() {
       });
   });
 
-  afterEach(function() {
+  after(function() {
     return client.deleteAgent(AGENT_NAME)
       .then(() => client.deleteGenerator(GENERATOR_NAME));
   });

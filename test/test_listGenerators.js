@@ -13,19 +13,15 @@ describe('client.listGenerators()', function() {
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
-    return client.createAgent(CONFIGURATION_AGENT, AGENT_ID);
-  });
-
-  beforeEach(function() {
-    return Promise.all(_.map(GENERATORS_ID, (generatorId) => client.deleteGenerator(generatorId))) // Delete any preexisting generator with this id.
+    return client.deleteAgent(AGENT_ID)
+      .then(() => Promise.all(GENERATORS_ID.map((generatorId) => client.deleteGenerator(generatorId)))) // Delete any preexisting generator with this id.)
+      .then((res) => client.createAgent(CONFIGURATION_AGENT, AGENT_ID))
       .then(() => Promise.all(_.map(GENERATORS_ID, (generatorId) => client.createGenerator(CONFIGURATION_GENERATOR, generatorId))));
   });
 
-  afterEach(function() {
-    return Promise.all(
-      _.map(GENERATORS_ID, (generatorId) => client.deleteGenerator(generatorId)),
-      client.deleteAgent(AGENT_ID)
-    );
+  after(function() {
+    return Promise.all(_.map(GENERATORS_ID, (generatorId) => client.deleteGenerator(generatorId)))
+      .then(() => client.deleteAgent(AGENT_ID));
   });
 
   it('should retrieve the created generators', function() {

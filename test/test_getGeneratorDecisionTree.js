@@ -20,11 +20,8 @@ describe('client.getGeneratorDecisionTree(<generatorId>, <timestamp>)', function
       .then((createdAgent) => {
         expect(createdAgent).to.be.ok;
         return client.addAgentContextOperations(createdAgent.id, CONFIGURATION_1_OPERATIONS_1);
-      }); // Delete any preexisting agent with this id.
-  });
-
-  beforeEach(function() {
-    return client.deleteGenerator(GENERATOR_NAME)
+      })
+      .then(() => client.deleteGenerator(GENERATOR_NAME))
       .then(() => client.createGenerator(CONFIGURATION_GET_DECISION_TREE, GENERATOR_NAME));
   });
 

@@ -15,9 +15,6 @@ describe('client.computeGeneratorDecision(<generatorId>, <timestamp>, <context>)
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
-  });
-
-  beforeEach(function() {
     return client.deleteAgent(AGENT_NAME)
       .then(() => client.deleteGenerator(GENERATOR_NAME))
       .then(() => client.createAgent(CONFIGURATION_1, AGENT_NAME))
@@ -28,7 +25,7 @@ describe('client.computeGeneratorDecision(<generatorId>, <timestamp>, <context>)
       .then(() => client.createGenerator(CONFIGURATION, GENERATOR_NAME));
   });
 
-  afterEach(function() {
+  after(function() {
     return client.deleteAgent(AGENT_NAME)
       .then(() => client.deleteGenerator(GENERATOR_NAME));
   });
