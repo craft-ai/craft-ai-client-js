@@ -102,7 +102,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
     });
   });
 
-  describe.skip('on an agent with data spanning a looong time', function() {
+  (DISABLE_LONG_TESTS ? describe.skip : describe)('on an agent with data spanning a looong time', function() {
     beforeEach(function() {
       return client.createAgent(CONFIGURATION_2, agentId)
         .then((createdAgent) => {
