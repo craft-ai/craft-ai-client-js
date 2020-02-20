@@ -222,13 +222,12 @@ export default function createClient(tokenOrCfg) {
           )
         );
       }
-      let posixTimestamp = Time(t).timestamp;
-      if (_.isUndefined(posixTimestamp)) {
-        return Promise.reject(
-          new CraftAiBadRequestError(
-            'Bad Request, unable to get the agent context with an invalid timestamp provided.'
-          )
-        );
+      let posixTimestamp;
+      try {
+        posixTimestamp = Time(t).timestamp;
+      }
+      catch (err) {
+        return Promise.reject(err);
       }
 
       return request({
@@ -610,7 +609,7 @@ export default function createClient(tokenOrCfg) {
           )
         );
       }
-      if (_.isUndefined(contexts) || _.size(contexts) === 0) {
+      if (_.isUndefined(contexts) || _.size(contexts) === 0 || (_.size(contexts) === 1 && !contexts[0])) {
         return Promise.reject(
           new CraftAiBadRequestError(
             'Bad Request, unable to compute an agent decision with no context provided.'
@@ -849,15 +848,14 @@ export default function createClient(tokenOrCfg) {
           )
         );
       }
-      let posixTimestamp = Time(t).timestamp;
-      if (_.isUndefined(posixTimestamp)) {
-        return Promise.reject(
-          new CraftAiBadRequestError(
-            'Bad Request, unable to compute an agent decision with no or invalid timestamp provided.'
-          )
-        );
+      let posixTimestamp;
+      try {
+        posixTimestamp = Time(t).timestamp;
       }
-      if (_.isUndefined(contexts) || _.size(contexts) === 0) {
+      catch (err) {
+        return Promise.reject(err);
+      }
+      if (_.isUndefined(contexts) || _.size(contexts) === 0 || (_.size(contexts) === 1 && !contexts[0])) {
         return Promise.reject(
           new CraftAiBadRequestError(
             'Bad Request, unable to compute an agent decision with no context provided.'
