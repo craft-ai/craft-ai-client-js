@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.18.0...HEAD) ##
 
+### Fixed ###
+
+- Attempt to fix Travis deployment failure with "missing api_key".
+
 ## [1.18.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.17.3...v1.18.0) - 2020-02-21 ##
 
 ### Added ###
