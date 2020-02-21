@@ -350,63 +350,11 @@ Each agent has a configuration defining:
 
 > :warning: the absolute value of a `continuous` property must be less than 10<sup>20</sup>.
 
-#### Missing Values
+A base type property can be defined as *optional* if its value is likely to be unknown at some point in time and that it is to be considered as a normal behavior, and not as a missing property. You can achieve that by adding `is_optional: true` to the property definition in your configuration.
 
-If one of these properties value is **missing**, this latter can be handled if the key *deactivate_missing_values: false* is added to the agent configuration. In this configuration, you can send a `null` value for a context attribute value to tell **craft ai** that the value is missing. **craft ai** will take into account as much as possible from this incomplete context.
+> :warning: An optional property cannot be set as being an output of the agent.
 
-A context with a missing value looks like:
-```json
-{
-  "timestamp": 1469415720,
-  "context": {
-    "timezone": "+02:00",
-    "temperature": null,
-    "lightbulbState": "OFF"
-  }
-}
-```
-
-And its associated configuration would be:
-```json
-{
-  "context": {
-    "timezone": {
-      "type": "enum"
-    },
-    "temperature": {
-      "type": "continuous"
-    },
-    "lightbulbState": {
-      "type": "enum"
-    }
-  },
-  "output": ["lightbulbState"],
-  "time_quantum": 100,
-  "learning_period": 108000,
-  "deactivate_missing_values": false
-}
-```
-
-#### Optional Values
-
-An `enum`, `continuous` or `boolean` property is defined as *optional* if this latter is explicitely known as being non applicable. For instance, a sensor measuring the ambient temperature can sometimes be *offline* on purpose, and this behavior must be considered as normal and not as a missing property. To tackle this kind of problem, we introduce *optional* values. A property is be defined as optional by adding `is_optional: true` to the types properties in your configuration. Then, in a context, an **optional** value is defined as `{}`, the empty JSON Object:
-
-A context with an optional value looks like:
-```json
-{
-  {
-      "timestamp": 1469415720,
-      "context": {
-        "timezone": "+02:00",
-        "temperature": {},
-        "lightbulbState": "OFF"
-      }
-  },
-  ...
-}
-```
-
-And its associated configuration would be:
+Here is a simple example of configuration :
 ```json
 {
   "context": {
@@ -423,8 +371,7 @@ And its associated configuration would be:
   },
   "output": ["lightbulbState"],
   "time_quantum": 100,
-  "learning_period": 108000,
-  "deactivate_missing_values": false
+  "learning_period": 108000
 }
 ```
 
@@ -667,7 +614,7 @@ These advanced configuration parameters are optional, and will appear in the age
 
 #### Create
 
-Create a new agent, and create its [configuration](#configuration).
+Create a new agent, and define its [configuration](#configuration).
 
 > The agent's identifier is a case sensitive string between 1 and 36 characters long. It only accepts letters, digits, hyphen-minuses and underscores (i.e. the regular expression `/[a-zA-Z0-9_-]{1,36}/`).
 
@@ -802,6 +749,303 @@ client.deleteSharedAgentInspectorUrl(
 
 
 
+### Generator
+
+The craft ai API lets you generate decision trees built on data from one or several agents by creating a generator. It is useful to:
+  - test several hyper-parameters and features sets without reloading all the data for each try
+  - gather data from different agents to make new models on top of them, enhancing the possible data combinations and allowing you to inspect the global behavior across your agents
+
+We define the data stream(s) used by a generator by specifying a list of agents as a filter in its configuration. Other than the filter, the configuration of a generator is similar to an agent's configuration. It has to verify some additional properties:
+
+- Every feature defined in the context configuration of the generator must be present in **all** the agent that match the filter, with the same context types.
+- The parameters `operations_as_events` must be set to true.
+- It follows that the parameters `tree_max_operations` and `learning_period` must be set with valid integers.
+- The agent names provided in the list must be valid agent identifiers.
+
+#### Create
+
+Create a new generator, and define its [configuration](#configuration).
+
+> The generator's identifier is a case sensitive string between 1 and 36 characters long. It only accepts letters, digits, hyphen-minuses and underscores (i.e. the regular expression `/[a-zA-Z0-9_-]{1,36}/`).
+
+```js
+
+const GENERATOR_FILTER = ['smarthome'];
+const GENERATOR_NAME = 'smarthome_gen';
+
+const GENERATOR_CONFIGURATION = {
+  "context": {
+      "light": {
+          "type": "enum"
+      },
+      "tz": {
+          "type": "timezone"
+      },
+      "movement": {
+          "type": "continuous"
+      },
+      "time": {
+          "type": "time_of_day",
+          "is_generated": true
+      }
+  },
+  "output": [
+      "light"
+  ],
+  "learning_period": 1500000,
+  "tree_max_operations": 15000,
+  "operations_as_events": true,
+  "filter": GENERATOR_FILTER
+};
+
+client.createGenerator(GENERATOR_CONFIGURATION, GENERATOR_FILTER, GENERATOR_NAME)
+  .then(function(generator) {
+    console.log('Generator ' + generator.generatorId + ' successfully created!');
+  })
+  .catch(function(error) {
+    console.error('Error!', error);
+  });
+```
+
+#### Delete
+
+```js
+const GENERATOR_NAME = 'smarthome_gen'
+
+client.deleteGenerator(GENERATOR_NAME)
+  .then(function() {
+  // The generator was successfully deleted
+  })
+  .catch(function(error) {
+    // Catch errors here
+  })
+```
+
+#### Retrieve
+
+```js
+const GENERATOR_NAME = 'smarthome_gen'
+
+client.getGenerator(GENERATOR_NAME)
+  .then(function(generator) {
+    // Generator's details
+  })
+  .catch(function(error) {
+    // Catch errors here
+  })
+```
+
+#### Retrieve generators list
+
+```js
+client.getGeneratorContextOperations(
+  'smarthome_gen', // The generator id
+  1478894153, // Optional, the **start** timestamp from which the
+              // operations are retrieved (inclusive bound)
+  1478895266, // Optional, the **end** timestamp up to which the
+              /// operations are retrieved (inclusive bound)
+)
+.then(function(operations) {
+  // Work on operations
+})
+.catch(function(error) {
+  // Catch errors here
+})
+```
+
+```js
+const GENERATOR_NAME = 'smarthome_gen'
+
+client.listGenerators()
+  .then(function(generatorsList) {
+    // The list of generators in the project
+  })
+  .catch(function(error) {
+    // Catch errors here
+  })
+```
+
+#### List operations in the generator
+
+Retrieve the context operations of agents matching the generator's filter. Each operation also contains the identifier of the agent for which it was added, in the `agent_id` property.
+
+```js
+client.getGeneratorContextOperations(
+  'smarthome_gen', // The generator id
+  1478894153, // Optional, the **start** timestamp from which the
+              // operations are retrieved (inclusive bound)
+  1478895266, // Optional, the **end** timestamp up to which the
+              /// operations are retrieved (inclusive bound)
+)
+.then(function(operations) {
+  // Work on operations
+})
+.catch(function(error) {
+  // Catch errors here
+})
+```
+
+#### Get decision tree
+
+```js
+const DECISION_TREE_TIMESTAMP = 1469473600;
+const GENERATOR_NAME = 'smarthome_gen';
+client.getGeneratorDecisionTree(
+  GENERATOR_NAME, // The generator id
+  DECISION_TREE_TIMESTAMP // The timestamp at which the decision tree is retrieved
+)
+  .then(function(tree) {
+    // Works with the given tree
+    console.log(tree);
+    /* Outputted tree is the following
+     {
+    "_version": "2.0.0",
+    "trees": {
+        "light": {
+            "children": [
+                {
+                    "predicted_value": "OFF",
+                    "confidence": 0.9966583847999572,
+                    "decision_rule": {
+                        "operand": [
+                            7.25,
+                            22.65
+                        ],
+                        "operator": "[in[",
+                        "property": "time"
+                    }
+                },
+                {
+                    "predicted_value": "ON",
+                    "confidence": 0.9266583847999572,
+                    "decision_rule": {
+                        "operand": [
+                            22.65,
+                            7.25
+                        ],
+                        "operator": "[in[",
+                        "property": "time"
+                    }
+                }
+            ]
+        }
+    },
+    "configuration": {
+        "operations_as_events": true,
+        "learning_period": 1500000,
+        "tree_max_operations": 15000,
+        "context": {
+            "light": {
+                "type": "enum"
+            },
+            "tz": {
+                "type": "timezone"
+            },
+            "movement": {
+                "type": "continuous"
+            },
+            "time": {
+                "type": "time_of_day",
+                "is_generated": true
+            }
+        },
+        "output": [
+            "light"
+        ],
+        "filter": [
+            "smarthome"
+        ]
+    }
+  }
+    */
+  })
+  .catch(function(error) {
+    if (error instanceof craftai.errors.CraftAiLongRequestTimeOutError) {
+     // Handle timeout errors here
+   }
+    else {
+      // Handle other errors here
+    }
+  })
+```
+
+#### Get decision
+
+```js
+const CONTEXT_OPS = {
+  "tz": "+02:00",
+  "movement": 2,
+  "time": 7.5
+};
+const DECISION_TREE_TIMESTAMP = 1469473600;
+const GENERATOR_NAME = 'smarthome_gen';
+
+client.computeGeneratorDecision(
+  GENERATOR_NAME, // The name of the generator
+  DECISION_TREE_TIMESTAMP, //The timestamp at which the decision tree is retrieved
+  CONTEXT_OPS // A valid context operation according to the generator configuration
+)
+  .then(function(decision) => {
+    console.log(decision) // The decision taken by the decision tree
+    /*
+      {
+      "_version": "2.0.0",
+      "context": {
+          "tz": "+02:00",
+          "movement": 2,
+          "time": 7.5
+      },
+      "output": {
+          "light": {
+              "predicted_value": "OFF",
+              "confidence": 0.8386044502258301,
+              "decision_rules": [
+                  {
+                      "operand": [
+                          2.1166666,
+                          10.333333
+                      ],
+                      "operator": "[in[",
+                      "property": "time"
+                  },
+                  {
+                      "operand": [
+                          2.1166666,
+                          9.3
+                      ],
+                      "operator": "[in[",
+                      "property": "time"
+                  },
+                  {
+                      "operand": [
+                          2.1166666,
+                          8.883333
+                      ],
+                      "operator": "[in[",
+                      "property": "time"
+                  },
+                  {
+                      "operand": [
+                          3.5333333,
+                          8.883333
+                      ],
+                      "operator": "[in[",
+                      "property": "time"
+                  }
+              ],
+              "nb_samples": 442,
+              "decision_path": "0-0-0-0-1",
+              "distribution": [
+                  0.85067874,
+                  0.14932127
+              ]
+          }
+        }
+      }
+    */
+  })
+```
+
 ### Context
 
 #### Add operations
@@ -869,6 +1113,43 @@ client.addAgentContextOperations(
 .catch(function(error) {
   // Catch errors here
 })
+```
+
+##### Missing Values
+
+If the value of a base type property is **missing**, you can send a `null` value. **craft ai** will take into account as much information as possible from this incomplete context.
+
+A context operation with a missing value looks like:
+```json
+[
+  {
+    "timestamp": 1469415720,
+    "context": {
+      "peopleCount": "OFF",
+      "lightbulbState": null
+    }
+  },
+  ...
+]
+```
+
+##### Optional Values
+
+If the value of an **optional** property is not filled at some point—as should be expected from an optional value—send the empty JSON Object `{}` to **craft ai**:
+
+A context with an optional value looks like:
+```json
+[
+  {
+    "timestamp": 1469415720,
+    "context": {
+      "timezone": "+02:00",
+      "temperature": {},
+      "lightbulbState": "OFF"
+    }
+  },
+  ...
+]
 ```
 
 #### List operations
@@ -1636,4 +1917,3 @@ Results for `craftai.interpreter.getDecisionRulesProperties` would look like:
 ## Logging ##
 
 The **craft ai** client is using [visionmedia/debug](https://www.npmjs.com/package/debug) under the namespace `'craft-ai:client:*'`, please refer to their documentation for further information.
-
