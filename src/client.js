@@ -36,6 +36,8 @@ const isUnvalidConfiguration = (configuration) =>
   _.isUndefined(configuration) || !_.isObject(configuration);
 const areUnvalidOperations = (operations) =>
   _.isUndefined(operations) || !_.isArray(operations);
+const isInvalidFilter = (filter) =>
+  !_.isArray(filter) || filter.some((agentName) => isUnvalidId(agentName));
 
 function checkBulkParameters(bulkArray) {
   if (_.isUndefined(bulkArray)) {
@@ -220,13 +222,12 @@ export default function createClient(tokenOrCfg) {
           )
         );
       }
-      let posixTimestamp = Time(t).timestamp;
-      if (_.isUndefined(posixTimestamp)) {
-        return Promise.reject(
-          new CraftAiBadRequestError(
-            'Bad Request, unable to get the agent context with an invalid timestamp provided.'
-          )
-        );
+      let posixTimestamp;
+      try {
+        posixTimestamp = Time(t).timestamp;
+      }
+      catch (err) {
+        return Promise.reject(err);
       }
 
       return request({
@@ -608,7 +609,7 @@ export default function createClient(tokenOrCfg) {
           )
         );
       }
-      if (_.isUndefined(contexts) || _.size(contexts) === 0) {
+      if (_.isUndefined(contexts) || _.size(contexts) === 0 || (_.size(contexts) === 1 && !contexts[0])) {
         return Promise.reject(
           new CraftAiBadRequestError(
             'Bad Request, unable to compute an agent decision with no context provided.'
@@ -628,8 +629,253 @@ export default function createClient(tokenOrCfg) {
           decision.timestamp = posixTimestamp;
           return decision;
         });
+    },
+    // Generators methods
+    createGenerator: function(configuration, generatorName) {
+      if (isUnvalidConfiguration(configuration)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to create a generator with no or invalid configuration provided.'
+          )
+        );
+      }
+
+      if (isUnvalidId(generatorName)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            `Bad Request, unable to create a generator with invalid agent id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+          )
+        );
+      }
+
+      if (isInvalidFilter(configuration.filter)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            `Bad Request, unable to create a generator with invalid filter. It must be a list of string containing characters in 'a-zA-Z0-9_-' and must be between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+          )
+        );
+      }
+
+      return request({
+        method: 'POST',
+        path: '/generators',
+        body: {
+          id: generatorName,
+          configuration: configuration
+        }
+      })
+        .then(({ body }) => {
+          debug(`Generator '${body.id}' created.`);
+          return body;
+        });
+    },
+    deleteGenerator: function(generatorName) {
+      if (isUnvalidId(generatorName)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            `Bad Request, unable to delete a generator from an invalid generator id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+          )
+        );
+      }
+      return request({
+        method: 'DELETE',
+        path: `/generators/${generatorName}`
+      })
+        .then(({ body }) => {
+          debug(`Generator '${generatorName}' deleted`);
+          return body;
+        });
+    },
+    getGenerator: function(generatorId) {
+      if (isUnvalidId(generatorId)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to get an generator with invalid generator id. It must only contain characters in \'a-zA-Z0-9_-\' and cannot be the empty string.'
+          )
+        );
+      }
+      return request({
+        method: 'GET',
+        path: `/generators/${generatorId}`
+      })
+        .then(({ body }) => body);
+    },
+    listGenerators: function() {
+      return request({
+        method: 'GET',
+        path: '/generators'
+      })
+        .then(({ body }) => body.generatorsList);
+    },
+    getGeneratorContextOperations: function(
+      generatorUri,
+      start = undefined,
+      end = undefined
+    ) {
+      if (_.isUndefined(generatorUri)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to get generator context operations with no generatorUri provided.'
+          )
+        );
+      }
+      let startTimestamp;
+      if (start) {
+        startTimestamp = Time(start).timestamp;
+        if (_.isUndefined(startTimestamp)) {
+          return Promise.reject(
+            new CraftAiBadRequestError(
+              'Bad Request, unable to get generator context operations with an invalid \'start\' timestamp provided.'
+            )
+          );
+        }
+      }
+      let endTimestamp;
+      if (end) {
+        endTimestamp = Time(end).timestamp;
+        if (_.isUndefined(endTimestamp)) {
+          return Promise.reject(
+            new CraftAiBadRequestError(
+              'Bad Request, unable to get generator context operations with an invalid \'end\' timestamp provided.'
+            )
+          );
+        }
+      }
+
+      const requestFollowingPages = ({ operations, nextPageUrl }) => {
+        if (!nextPageUrl) {
+          return Promise.resolve(operations);
+        }
+        return request({ url: nextPageUrl }, this)
+          .then(
+            ({ body, nextPageUrl }) =>
+              requestFollowingPages({
+                operations: operations.concat(body),
+                nextPageUrl
+              })
+          );
+      };
+
+      return request({
+        method: 'GET',
+        path: `/generators/${generatorUri}/context`,
+        query: {
+          start: startTimestamp,
+          end: endTimestamp
+        }
+      })
+        .then(({ body, nextPageUrl }) =>
+          requestFollowingPages({
+            operations: body,
+            nextPageUrl
+          })
+        );
+    },
+    getGeneratorDecisionTree: function(
+      generatorName,
+      t = undefined,
+      version = DEFAULT_DECISION_TREE_VERSION
+    ) {
+      if (isUnvalidId(generatorName)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            `Bad Request, unable to get a decision tree from an invalid generator id. It must only contain characters in 'a-zA-Z0-9_-' and must be a string between 1 and ${AGENT_ID_MAX_LENGTH} characters.`
+          )
+        );
+      }
+      let posixTimestamp = Time(t).timestamp;
+      if (_.isUndefined(posixTimestamp)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to retrieve an generator decision tree with an invalid timestamp provided.'
+          )
+        );
+      }
+
+      const generatorDecisionTreeRequest = () =>
+        request({
+          method: 'GET',
+          path: `/generators/${generatorName}/tree`,
+          query: {
+            t: posixTimestamp
+          },
+          headers: {
+            'x-craft-ai-tree-version': version
+          }
+        })
+          .then(({ body }) => body);
+      if (!cfg.decisionTreeRetrievalTimeout) {
+        // Don't retry
+        return generatorDecisionTreeRequest();
+      }
+      else {
+        const start = Date.now();
+        return Promise.race([
+          generatorDecisionTreeRequest()
+            .catch((error) => {
+              const requestDuration = Date.now() - start;
+              const expectedRetryDuration = requestDuration + 2000; // Let's add some margin
+              const timeoutBeforeRetrying =
+                cfg.decisionTreeRetrievalTimeout -
+                requestDuration -
+                expectedRetryDuration;
+              if (
+                error instanceof CraftAiLongRequestTimeOutError &&
+                timeoutBeforeRetrying > 0
+              ) {
+                // First timeout, let's retry once near the end of the set timeout
+                return resolveAfterTimeout(timeoutBeforeRetrying)
+                  .then(() =>
+                    generatorDecisionTreeRequest()
+                  );
+              }
+              else {
+                return Promise.reject(error);
+              }
+            }),
+          resolveAfterTimeout(cfg.decisionTreeRetrievalTimeout)
+            .then(() => {
+              throw new CraftAiLongRequestTimeOutError();
+            })
+        ]);
+      }
+    },
+    computeGeneratorDecision: function(generatorName, t, ...contexts) {
+      if (_.isUndefined(generatorName)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to compute an agent decision with no generatorName provided.'
+          )
+        );
+      }
+      let posixTimestamp;
+      try {
+        posixTimestamp = Time(t).timestamp;
+      }
+      catch (err) {
+        return Promise.reject(err);
+      }
+      if (_.isUndefined(contexts) || _.size(contexts) === 0 || (_.size(contexts) === 1 && !contexts[0])) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to compute an agent decision with no context provided.'
+          )
+        );
+      }
+
+      return request({
+        method: 'GET',
+        path: `/generators/${generatorName}/tree`,
+        query: {
+          t: posixTimestamp
+        }
+      })
+        .then(({ body }) => {
+          let decision = decide(body, ...contexts);
+          decision.timestamp = posixTimestamp;
+          return decision;
+        });
     }
   };
-
   return instance;
 }

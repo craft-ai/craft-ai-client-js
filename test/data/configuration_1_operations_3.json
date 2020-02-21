@@ -1,0 +1,738 @@
+[
+  {
+    "timestamp": 1464600000,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600001,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600002,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600003,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600004,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600005,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600006,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600007,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600008,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600009,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600010,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600011,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600012,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600013,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600014,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600015,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600016,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600017,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600018,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600019,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600020,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600021,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600022,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600023,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600024,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600025,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600026,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600027,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600028,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600029,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600030,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600031,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600032,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600033,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600034,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600035,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600036,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600037,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600038,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600039,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600040,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600041,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600042,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600043,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600044,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600045,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600046,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600047,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600048,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600049,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600050,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600051,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600052,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600053,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600054,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600055,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600056,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600057,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600058,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600059,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600060,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600061,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600062,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600063,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600064,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600065,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600066,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600067,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600068,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600069,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600070,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600071,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600072,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600073,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600074,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600075,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600076,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600077,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600078,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600079,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600080,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600081,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600082,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600083,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600084,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600085,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600086,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600087,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600088,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "green"
+    }
+  },
+  {
+    "timestamp": 1464600089,
+    "context": {
+      "presence": "none",
+      "lightIntensity": 0,
+      "lightbulbColor": "black"
+    }
+  },
+  {
+    "timestamp": 1464600090,
+    "context": {
+      "presence": "gisele",
+      "lightIntensity": 0.4,
+      "lightbulbColor": "blue"
+    }
+  },
+  {
+    "timestamp": 1464600091,
+    "context": {
+      "presence": "robert",
+      "lightIntensity": 0.6,
+      "lightbulbColor": "green"
+    }
+  }
+]

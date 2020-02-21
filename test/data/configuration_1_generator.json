@@ -1,0 +1,21 @@
+{
+  "context": {
+    "presence": {
+      "type": "enum"
+    },
+    "lightIntensity": {
+      "type": "continuous"
+    },
+    "lightbulbColor": {
+      "type": "enum"
+    }
+  },
+  "output": [
+    "lightbulbColor"
+  ],
+  "time_quantum": 100,
+  "learning_period": 1500000,
+  "operations_as_events": true,
+  "tree_max_operations": 10000,
+  "filter": ["agent_1", "agent_2"]
+}
