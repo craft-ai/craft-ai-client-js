@@ -12,6 +12,7 @@ jobs:
   include:
     - stage: npm release
       node_js: '8'
+      script: skip
       deploy:
         provider: npm
         edge: true
