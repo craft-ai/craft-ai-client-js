@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.18.2...HEAD) ##
 
+### Fixed ###
+
+- Only deploy to npm once per build.
+
 ## [1.18.2](https://github.com/craft-ai/craft-ai-client-js/compare/v1.18.1...v1.18.2) - 2020-02-25 ##
 
 ### Fixed ###
