@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.18.1...HEAD) ##
 
+### Fixed ###
+
+- Second attempt to fix Travis deployment failure.
+
 ## [1.18.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.18.0...v1.18.1) - 2020-02-25 ##
 
 ### Fixed ###
