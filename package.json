@@ -1,6 +1,6 @@
 {
   "name": "craft-ai",
-  "version": "1.18.2",
+  "version": "1.18.3",
   "description": "craft ai API isomorphic (compatible with browser and nodejs) javascript client",
   "author": {
     "name": "craft ai",
