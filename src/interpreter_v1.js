@@ -182,6 +182,15 @@ function decide(configuration, trees, context) {
     _version: DECISION_FORMAT_VERSION,
     context,
     output: _.assign(..._.map(configuration.output, (output) => {
+      const root = trees[output];
+      if (!(root.children && root.children.length)) {
+        if (root.predicted_value === undefined) {
+          throw new CraftAiNullDecisionError({
+            message: 'Unable to take decision: the decision tree is not based on any context operations.'
+          });
+        }
+      }
+
       let decision = decideRecursion(trees[output], decide_context);
       if (decision.error) {
         switch (decision.error.name) {
