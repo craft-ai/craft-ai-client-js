@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.18.3...HEAD) ##
 
+### Fixed ###
+
+- A specific error is now raised for a tree based on no context operations.
+
 ## [1.18.3](https://github.com/craft-ai/craft-ai-client-js/compare/v1.18.2...v1.18.3) - 2020-02-26 ##
 
 ### Fixed ###
