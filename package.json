@@ -63,8 +63,8 @@
   },
   "dependencies": {
     "debug": "3.1.0",
-    "http-proxy-agent": "2.1.0",
-    "https-proxy-agent": "2.2.1",
+    "http-proxy-agent": "4.0.1",
+    "https-proxy-agent": "5.0.0",
     "inherits": "2.0.3",
     "jwt-decode": "2.2.0",
     "lodash": "^4.17.15",
