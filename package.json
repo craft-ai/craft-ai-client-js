@@ -59,7 +59,7 @@
     "moment-timezone": "0.5.21",
     "typescript": "2.8.1",
     "webpack": "2.4.1",
-    "webpack-dev-server": "2.4.2"
+    "webpack-dev-server": "3.10.3"
   },
   "dependencies": {
     "debug": "3.1.0",
