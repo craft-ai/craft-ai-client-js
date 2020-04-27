@@ -57,7 +57,7 @@
     "mocha": "^7.1.2",
     "mocha-loader": "^5.0.0",
     "moment-timezone": "0.5.28",
-    "typescript": "2.8.1",
+    "typescript": "3.8.3",
     "webpack": "4.43.0",
     "webpack-cli": "3.3.11",
     "webpack-dev-server": "3.10.3"
