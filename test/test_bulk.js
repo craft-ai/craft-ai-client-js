@@ -536,7 +536,6 @@ describe.skip('BULK:', function() {
       );
   });
 
-
   it('getAgentDecisionTreeBulk: should handle invalid timestamps', function() {
     const agentId = 'tom_walker';
     const timestamps = [TS0, 'INVALID_TIMESTAMP'];

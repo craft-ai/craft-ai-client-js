@@ -12,8 +12,9 @@ export function tzFromOffset(offset) {
     const abs = Math.abs(offset);
     // If the offset belongs to [-15, 15] it is considered to represent hours
     // This reproduces Moment's utcOffset behaviour.
-    if (abs < 16)
+    if (abs < 16) {
       return `${sign}${_.padStart(abs, 2, '0')}:00`;
+    }
     return `${sign}${_.padStart(Math.floor(abs / 60), 2, '0')}:${_.padStart(abs % 60, 2, '0')}`;
   }
   else {

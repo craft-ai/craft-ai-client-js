@@ -103,7 +103,7 @@ describe('client.createGenerator(<configuration>, [id])', function() {
   it('should fail with an undefined configuration', () => {
     const UNDEFINED_CONFIGURATION = undefined;
     return client.createGenerator(UNDEFINED_CONFIGURATION, VALID_GENERATOR_NAME)
-      .then((res) => 
+      .then((res) =>
         Promise.reject(new Error(`Should not be reached but as the result : ${res}`))
       )
       .catch((err) => {

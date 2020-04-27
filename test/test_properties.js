@@ -419,7 +419,6 @@ describe('Properties', () => {
       expect(output.operand).to.be.equal(4);
     });
 
-
     it('Reduce ">=" properties, only one parameter', () => {
       const decisionRules = [
         { operator: '>=', operand: 2 }
