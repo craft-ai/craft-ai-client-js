@@ -42,12 +42,6 @@ const configuration = {
 if (process.env.NODE_ENV === 'production') {
   configuration.entry.unshift(require.resolve('babel-polyfill'), require.resolve('whatwg-fetch'));
   configuration.output.filename = 'craft-ai.min.js';
-  configuration.plugins.push(new webpack.optimize.UglifyJsPlugin({
-    compress: {
-      warnings: false
-    },
-    comments: false
-  }));
 }
 
 module.exports = configuration;

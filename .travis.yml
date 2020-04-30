@@ -1,7 +1,8 @@
 language: node_js
 node_js:
 - '8'
-- '6'
+- '10'
+- '12'
 before_install:
 - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
 - git submodule update --init --recursive

@@ -2,7 +2,7 @@
 
 ## Running the tests locally ##
 
-0. Make sure you have a version of [Node.js](https://nodejs.org) installed (any version >0.12 should work).
+0. Make sure you have a version of [Node.js](https://nodejs.org) installed (any version >=8 should work).
 1. Clone the JS-client and init + update git submodules:
    ```
    git clone git@github...
