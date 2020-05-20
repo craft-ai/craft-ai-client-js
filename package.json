@@ -36,7 +36,7 @@
     "lint": "eslint . && tsc src/index.d.ts",
     "fix_lint": "eslint --fix .",
     "test": "npm run test_node && npm run lint",
-    "test_node": "mocha",
+    "test_node": "mocha --exit",
     "dev_browser": "cd test/browser && webpack-dev-server",
     "prepublish": "npm run build && npm run build_browser"
   },
