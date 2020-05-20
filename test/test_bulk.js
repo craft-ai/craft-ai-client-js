@@ -5,7 +5,7 @@ import craftai from '../src';
 import INVALID_CONFIGURATION_1 from './data/invalid_configuration_1.json';
 import INVALID_CONFIGURATION_1_OPERATIONS_1 from './data/invalid_configuration_1_operations_1.json';
 
-describe.skip('BULK:', function() {
+describe('BULK:', function() {
   let client;
 
   before(function() {
@@ -238,7 +238,7 @@ describe.skip('BULK:', function() {
       );
   });
 
-  it.skip('deleteAgentBulk: should handle undefined id', function() {
+  it('deleteAgentBulk: should handle undefined id', function() {
     const agentIds = [{ id: '7$ shopping' }, {}, { id: undefined }];
     return client.deleteAgentBulk(agentIds)
       .then((del_res) => {
