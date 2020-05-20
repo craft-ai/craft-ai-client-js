@@ -262,7 +262,7 @@ export default function createClient(tokenOrCfg) {
 
         return Promise.resolve({ message });
       }
-
+      let totalNbOperationsAdded = 0;
       return _(operations)
         .map(({ context, timestamp }) => ({
           context: context,
@@ -271,24 +271,31 @@ export default function createClient(tokenOrCfg) {
         .orderBy('timestamp')
         .chunk(cfg.operationsChunksSize)
         .reduce(
-          (p, chunk) =>
-            p.then(() =>
-              request({
-                method: 'POST',
-                path: `/agents/${agentId}/context`,
-                body: chunk
-              })
-            ),
+          (acc, chunk) => acc.then(() =>
+            request({
+              method: 'POST',
+              path: `/agents/${agentId}/context`,
+              body: chunk
+            }))
+            .then((response) => {
+              const { nbOperationsAdded } = response.body;
+              totalNbOperationsAdded += nbOperationsAdded;
+
+              return response;
+            }),
           Promise.resolve()
         )
         .then(() => {
           const message = `Successfully added ${
-            operations.length
+            totalNbOperationsAdded
           } operation(s) to the agent ${cfg.owner}/${
             cfg.project
           }/${agentId} context.`;
           debug(message);
-          return { message };
+          return {
+            message,
+            nbOperationsAdded: totalNbOperationsAdded
+          };
         });
     },
     addAgentContextOperationsBulk: function(agentsOperationsList) {
@@ -332,27 +339,35 @@ export default function createClient(tokenOrCfg) {
         chunkedData.push(currentChunk);
       }
 
-      return Promise.all(
-        chunkedData.map((chunk) => {
-          if (chunk.length > 1) {
-            return request({
-              method: 'POST',
-              path: '/bulk/context',
-              body: chunk
-            })
-              .then(({ body }) => body);
-          }
-          else {
-            return this.addAgentContextOperations(
-              chunk[0].id,
-              chunk[0].operations
-            )
-              .then(({ message }) => [
-                { id: chunk[0].id, status: 201, message }
-              ]);
-          }
-        })
-      )
+      return chunkedData
+        .reduce(
+          (acc, chunk) => acc.then((resultArray) => {
+            if (chunk.length > 1) {
+              return request({
+                method: 'POST',
+                path: '/bulk/context',
+                body: chunk
+              })
+                .then(({ body }) => {
+                  resultArray.push(body);
+                  return resultArray;
+                });
+            }
+            else {
+              return this.addAgentContextOperations(
+                chunk[0].id,
+                chunk[0].operations
+              )
+                .then(({ message, nbOperationsAdded }) => {
+                  const result = [{ id: chunk[0].id, status: 201, message, nbOperationsAdded }];
+                  resultArray.push(result);
+
+                  return resultArray;
+                });
+            }
+          }),
+          Promise.resolve([])
+        )
         .then(_.flattenDeep);
     },
     getAgentContextOperations: function(

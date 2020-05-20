@@ -42,7 +42,8 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
 
   it('should succeed when using valid operations', function() {
     return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1)
-      .then(() => {
+      .then((response) => {
+        expect(response.nbOperationsAdded).to.equal(4);
         return client.getAgentContext(agents[0].id, CONFIGURATION_1_OPERATIONS_1_TO + 100);
       })
       .then((context) => {
@@ -98,7 +99,8 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
         }
       ]
     )
-      .then(() => {
+      .then((response) => {
+        expect(response.nbOperationsAdded).to.equal(4);
         return client.getAgentContextOperations(agents[0].id);
       })
       .then((retrievedOperations) => {
@@ -127,7 +129,8 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
         }
       }
     ])
-      .then(() => {
+      .then((response) => {
+        expect(response.nbOperationsAdded).to.equal(2);
         return client.getAgentContextOperations(agents[0].id);
       })
       .then((operations) => {
@@ -166,7 +169,8 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
         }
       }
     ])
-      .then(() => {
+      .then((response) => {
+        expect(response.nbOperationsAdded).to.equal(2);
         return client.getAgentContextOperations(agents[0].id);
       })
       .then((operations) => {
