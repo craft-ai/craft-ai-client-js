@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add nbOperationsAdded field in response result when contexts operations are added.
 
+### Updated ###
+
+- Re enable bulk tests.
+
 ## [1.19.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.18.3...v1.19.0) - 2020-05-04 ##
 
 ### Updated ###
