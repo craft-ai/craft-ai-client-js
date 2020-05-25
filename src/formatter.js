@@ -21,6 +21,7 @@ const MONTH = [
 
 const PROPERTY_FORMATTER = {
   [TYPE_ANY]: (value) => value,
+  [TYPES.boolean]: (bool) => bool.toString(),
   [TYPES.continuous]: (number) =>
     number > 0.01 ? `${Math.round(number * 100) / 100}` :
       number.toExponential(2)

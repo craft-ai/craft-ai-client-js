@@ -8,6 +8,7 @@ export const AGENT_ID_MAX_LENGTH = 36;
 export const AGENT_ID_ALLOWED_REGEXP = /^([a-z0-9_-]){1,36}$/i;
 
 export const TYPES = {
+  boolean: 'boolean',
   continuous: 'continuous',
   enum: 'enum',
   timezone: 'timezone',
