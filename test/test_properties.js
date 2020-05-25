@@ -34,6 +34,14 @@ describe('Properties', () => {
         expect(formatter(12)).to.be.equal('Dec');
       });
     });
+
+    describe(TYPES.boolean, () => {
+      const formatter = formatProperty(TYPES.boolean);
+      it('Works properly on property values', () => {
+        expect(formatter(false)).to.be.equal('false');
+        expect(formatter(true)).to.be.equal('true');
+      });
+    });
   });
 
   describe('.formatDecisionRule(<decision_rule>)', () => {
