@@ -215,8 +215,8 @@ client.deleteAgent(AGENT_ID)
     ]
   )
   .then(function(response) {
-    console.log(response.message); // display response message.
-    console.log(response.nbOperationsAdded); // display the number of operations added.
+    console.log(response.message);
+    console.log(response.nbOperationsAdded);
     return agent;
   });
 })
