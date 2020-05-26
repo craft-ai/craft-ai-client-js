@@ -71,4 +71,12 @@ describe('interpreter.formatProperty', () => {
       expect(interpreter.formatProperty('time_of_day', date)).to.be.equal('18:23');
     });
   });
+  describe('on boolean values', () => {
+    it('From \'false\'', () => {
+      expect(interpreter.formatProperty('boolean', false)).to.be.equal('false');
+    });
+    it('From \'true\'', () => {
+      expect(interpreter.formatProperty('boolean', true)).to.be.equal('true');
+    });
+  });
 });
