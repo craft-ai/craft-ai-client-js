@@ -214,9 +214,7 @@ client.deleteAgent(AGENT_ID)
       }
     ]
   )
-  .then(function(response) {
-    console.log(response.message);
-    console.log(response.nbOperationsAdded);
+  .then(function() {
     return agent;
   });
 })
@@ -1550,8 +1548,9 @@ The variable `agents` is an **array of responses**. If an agent has successfully
     error: 'errorId',
     message: 'error-message' },
   { id: 'my_second_agent',      // add operations succeed
+    status: 201,
     message: 'Successfully added XX operation(s) to the agent "{owner}/{project}/my_second_agent" context.',
-    status: 201 }
+    nbOperationsAdded: XX }
 ]
 ```
 
