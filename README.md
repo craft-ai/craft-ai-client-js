@@ -214,7 +214,9 @@ client.deleteAgent(AGENT_ID)
       }
     ]
   )
-  .then(function() {
+  .then(function(response) {
+    console.log(response.message);
+    console.log(response.nbOperationsAdded);
     return agent;
   });
 })
