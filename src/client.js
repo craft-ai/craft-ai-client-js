@@ -684,6 +684,15 @@ export default function createClient(tokenOrCfg) {
           return body;
         });
     },
+    createGeneratorBulk: function(generatorsList) {
+      checkBulkParameters(generatorsList);
+      return request({
+        method: 'POST',
+        path: '/bulk/generators',
+        body: generatorsList
+      })
+        .then(({ body }) => body);
+    },
     deleteGenerator: function(generatorName) {
       if (isUnvalidId(generatorName)) {
         return Promise.reject(
@@ -700,6 +709,16 @@ export default function createClient(tokenOrCfg) {
           debug(`Generator '${generatorName}' deleted`);
           return body;
         });
+    },
+    deleteGeneratorBulk: function(generatorsList) {
+      checkBulkParameters(generatorsList);
+
+      return request({
+        method: 'DELETE',
+        path: '/bulk/generators',
+        body: generatorsList
+      })
+        .then(({ body }) => body);
     },
     getGenerator: function(generatorId) {
       if (isUnvalidId(generatorId)) {
@@ -854,6 +873,16 @@ export default function createClient(tokenOrCfg) {
             })
         ]);
       }
+    },
+    getGeneratorDecisionTreeBulk: function(generatorsList) {
+      checkBulkParameters(generatorsList);
+
+      return request({
+        method: 'POST',
+        path: 'bulk/generators/tree',
+        body: generatorsList
+      })
+        .then(({ body }) => body);
     },
     computeGeneratorDecision: function(generatorName, t, ...contexts) {
       if (_.isUndefined(generatorName)) {

@@ -1,11 +1,13 @@
 import CONFIGURATION_1 from './data/configuration_1.json';
+import CONFIGURATION_1_GENERATOR from './data/configuration_1_generator.json';
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
 import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.json';
 import craftai from '../src';
 import INVALID_CONFIGURATION_1 from './data/invalid_configuration_1.json';
 import INVALID_CONFIGURATION_1_OPERATIONS_1 from './data/invalid_configuration_1_operations_1.json';
+import { expect } from 'chai';
 
-describe.skip('BULK:', function() {
+describe('BULK:', function() {
   let client;
 
   before(function() {
@@ -20,6 +22,16 @@ describe.skip('BULK:', function() {
     return client.getAgent(agent.id)
       .then((retrieveAgent) => {
         expect(retrieveAgent.configuration).to.be.deep.equal(configuration);
+      });
+  }
+
+  function testGeneratorIntegrity(generator, generatorId, configuration) {
+    expect(generator).to.be.ok;
+    expect(generator.id).to.be.equal(generatorId);
+    expect(generator.status).to.not.be.equal(400);
+    return client.getGenerator(generator.id)
+      .then((retrieveGenerator) => {
+        expect(retrieveGenerator.configuration).to.be.deep.equal(configuration);
       });
   }
 
@@ -573,5 +585,188 @@ describe.skip('BULK:', function() {
               )
           )
       );
+  });
+
+  //bulk generator
+
+  //createGeneratorBulk
+  it('createGeneratorBulk: should succeed when using valid configurations and a specified id', function() {
+    return client
+      .createGeneratorBulk([
+        { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
+        { id: 'generator_2', configuration: CONFIGURATION_1_GENERATOR }
+      ])
+      .then((generatorsList) => {
+        return generatorsList.map((generator) => {
+          testGeneratorIntegrity(generator, generator.id, CONFIGURATION_1_GENERATOR);
+          return client.deleteGenerator(generator.id);
+        });
+      });
+  });
+
+  it('createGeneratorBulk: should handle invalid configuration', function() {
+    return client
+      .deleteGeneratorBulk([
+        { id: 'generator_1' },
+        { id: 'generator_2' }
+      ])
+      .then(() => {
+        return client
+          .createGeneratorBulk([
+            { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
+            { id: 'generator_2', configuration: CONFIGURATION_1 }
+          ])
+          .then((generatorsList) => {
+            return testGeneratorIntegrity(generatorsList[0], 'generator_1', CONFIGURATION_1_GENERATOR)
+              .then(() => {
+                expect(generatorsList[1].status).to.be.equal(400);
+                expect(generatorsList[1].error).to.be.equal('ContextError');
+                generatorsList.map(({ id }) => client.deleteAgent(id));
+              });
+          });
+      });
+  });
+
+  it('createGeneratorBulk: should handle undefined configuration', function() {
+    return client
+      .deleteGeneratorBulk([
+        { id: 'generator_1' },
+        { id: 'generator_2' }
+      ])
+      .then(() => {
+        return client
+          .createGeneratorBulk([
+            { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
+            { id: 'generator_2' }
+          ])
+          .then((generatorsList) => {
+            return testGeneratorIntegrity(generatorsList[0], 'generator_1', CONFIGURATION_1_GENERATOR)
+              .then(() => {
+                expect(generatorsList[1].status).to.be.equal(400);
+                expect(generatorsList[1].error).to.be.equal('ContextError');
+                generatorsList.map(({ id }) => client.deleteAgent(id));
+              });
+          });
+      });
+  });
+
+  it('createGeneratorBulk: should handle undefined id', function() {
+    return client
+      .deleteGeneratorBulk([
+        { id: 'generator_1' }
+      ])
+      .then(() => {
+        return client
+          .createGeneratorBulk([
+            { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
+            { configuration: CONFIGURATION_1_GENERATOR }
+          ])
+          .then((generatorsList) => {
+            return testGeneratorIntegrity(generatorsList[0], 'generator_1', CONFIGURATION_1_GENERATOR)
+              .then(() => {
+                expect(generatorsList[1].status).to.be.equal(400);
+                expect(generatorsList[1].error).to.be.equal('GeneratorError');
+                client.deleteAgent('generator_1');
+              });
+          });
+      });
+  });
+
+  it('createGeneratorBulk: should 200 then 400 when using the same id twice', function() {
+    return client
+      .deleteGeneratorBulk([
+        { id: 'generator_1' }
+      ])
+      .then(() => {
+        return client
+          .createGeneratorBulk([
+            { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
+            { id: 'generator_1', configuration: CONFIGURATION_1 }
+          ])
+          .then((generatorsList) => {
+            return testGeneratorIntegrity(generatorsList[0], 'generator_1', CONFIGURATION_1_GENERATOR)
+              .then(() => {
+                expect(generatorsList[1].status).to.be.equal(400);
+                expect(generatorsList[1].error).to.be.equal('ContextError');
+                generatorsList.map(({ id }) => client.deleteAgent(id));
+              });
+          });
+      });
+  });
+
+  // deleteGeneratorBulk
+  it('deleteGeneratorBulk: should succeed when using valid ids.', function() {
+    const generatorIds = [
+      { id: 'generator_1' },
+      { id: 'generator_2' },
+      { id: 'generator_3' }
+    ];
+    return client.deleteGeneratorBulk(generatorIds)
+      .then(() =>
+        client
+          .createGeneratorBulk(
+            generatorIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))
+          )
+      )
+      .then((generatorsList_create) => {
+        generatorsList_create.map((generator, i) => {
+          testAgentIntegrity(generator, generatorIds[i].id, CONFIGURATION_1_GENERATOR);
+        });
+        return client.deleteGeneratorBulk(generatorIds);
+      })
+      .then((generatorsList_delete) => {
+        generatorsList_delete.map((generator, i) => {
+          expect(generator.id).to.be.equal(generatorIds[i].id);
+          expect(generator.configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
+        });
+        return client.deleteGeneratorBulk(generatorIds);
+      })
+      .then((generatorsList_redelete) => {
+        generatorsList_redelete.map((generator, i) => {
+          expect(generator.configuration).to.be.equal(undefined);
+        });
+      });
+  });
+
+  it('deleteGeneratorBulk: Error for unvalid id.', function() {
+    const generatorIds = [
+      { id: '' }
+    ];
+    return client.deleteGeneratorBulk(generatorIds)
+      .then((res) => {
+        expect(res[0].name).to.be.equal('GeneratorError');
+        expect(res[0].status).to.be.equal(400);
+      });
+  });
+
+  // getGeneratorDecisionTreeBulk
+  it.skip('getGeneratorDecisionTreeBulk: should work with two valid generators', function() {
+    const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
+    const agentIds = [{ id: 'agent_1' }, { id: 'agent_2' }];
+
+    return client.deleteGeneratorBulk(generatorIds)
+      .then(() => client.deleteAgentBulk(agentIds))
+      .then(() => client.createAgentBulk(
+        agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+      ))
+      .then(() =>
+        client.addAgentContextOperationsBulk(
+          agentIds.map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_1 })))
+      )
+      .then(() =>
+        client.createGeneratorBulk(
+          generatorIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR })))
+      )
+      .then(() =>
+        client.getGeneratorDecisionTreeBulk(
+          agentIds.map(({ id }) => ({ id, timestamp: 1464600500 })))
+      )
+      .then((trees) => {
+        trees.map((tree, i) => {
+          expect(true);
+        });
+        return client.deleteAgentBulk(agentIds)
+          .then(() => client.deleteGeneratorBulk(generatorIds));
+      });
   });
 });
