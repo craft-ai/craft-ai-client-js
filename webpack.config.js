@@ -21,19 +21,13 @@ const configuration = {
     rules: [
       {
         test: /\.js$/,
-        loader: 'babel-loader',
         exclude: /node_modules/,
-        options: {
-          cacheDirectory: true,
-          presets: [
-            ['env', {
-              targets: {
-                browsers: 'last 2 versions, > 5%'
-              },
-              modules: false,
-              useBuiltIns: true
-            }]
-          ]
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+            cacheDirectory: true
+          }
         }
       }
     ]
@@ -41,7 +35,7 @@ const configuration = {
 };
 
 if (process.env.NODE_ENV === 'production') {
-  configuration.entry.unshift(require.resolve('babel-polyfill'), require.resolve('whatwg-fetch'));
+  configuration.entry.unshift(require.resolve('whatwg-fetch'));
   configuration.output.filename = 'craft-ai.min.js';
 }
 
