@@ -1,6 +1,6 @@
 import { CraftAiTimeError } from '../src/errors';
 import { expect } from 'chai';
-import moment from 'moment';
+import moment from 'moment-mini';
 import momentTimezone from 'moment-timezone';
 import Time from '../src/time';
 

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { CraftAiTimeError } from './errors';
-import moment from 'moment';
+import moment from 'moment-mini';
 import isTimezone, { timezones } from './timezones';
 
 // From 'moment/src/lib/parse/regex.js'
@@ -34,7 +34,7 @@ export default function Time(t = undefined, tz = undefined) {
     m = moment.unix(t.timestamp);
     m.utcOffset(t.timezone);
   }
-  else if (t instanceof moment) {
+  else if (moment.isMoment(t)) {
     // t is an instance of moment
     m = t;
   }

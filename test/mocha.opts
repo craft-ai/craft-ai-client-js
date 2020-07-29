@@ -1,4 +1,0 @@
---require babel-core/register
---require ./test/nodejs/helper.js
---check-leaks
---timeout 30000
