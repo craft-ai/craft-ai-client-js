@@ -1,7 +1,7 @@
-import _ from 'lodash';
 import Debug from 'debug';
 import { IN_BROWSER } from './constants';
 import { version } from '../package.json';
+import * as _ from './lodash';
 import {
   CraftAiBadRequestError,
   CraftAiCredentialsError,
@@ -181,8 +181,7 @@ export default function createRequest(cfg) {
 
     req.url = req.url || `${baseUrl}${req.path}`;
 
-    const queryStr = _(req.query)
-      .map((value, key) => ([key, value]))
+    const queryStr = Object.entries(req.query)
       .filter(([key, value]) => !_.isUndefined(value))
       .map((keyVal) => keyVal.join('='))
       .join('&');

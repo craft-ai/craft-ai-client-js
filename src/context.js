@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import Time from './time';
+import * as _ from './lodash';
 
 export default function createContext(configuration, ...args) {
   if (_.isUndefined(configuration) || _.isUndefined(configuration.context)) {

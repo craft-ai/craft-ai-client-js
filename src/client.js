@@ -1,10 +1,10 @@
-import _ from 'lodash';
 import createRequest from './request';
 import Debug from 'debug';
 import { decide } from './interpreter';
 import DEFAULTS from './defaults';
 import jwtDecode from 'jwt-decode';
 import Time from './time';
+import * as _ from './lodash';
 import {
   AGENT_ID_ALLOWED_REGEXP,
   AGENT_ID_MAX_LENGTH,
@@ -263,13 +263,13 @@ export default function createClient(tokenOrCfg) {
         return Promise.resolve({ message });
       }
       let totalNbOperationsAdded = 0;
-      return _(operations)
+      const sortedOperations = operations
         .map(({ context, timestamp }) => ({
           context: context,
           timestamp: Time(timestamp).timestamp
         }))
-        .orderBy('timestamp')
-        .chunk(cfg.operationsChunksSize)
+        .sort((samp1, samp2) => samp1.timestamp - samp2.timestamp);
+      return _.chunk(sortedOperations, cfg.operationsChunksSize)
         .reduce(
           (acc, chunk) => acc.then(() =>
             request({

@@ -1,9 +1,9 @@
-import _ from 'lodash';
 import context from './context';
 import { decide as decideV1 } from './interpreter_v1';
 import parse from './parse';
 import { reduceDecisionRules } from './reducer';
 import semver from 'semver';
+import * as _ from './lodash';
 import { CraftAiDecisionError, CraftAiNullDecisionError } from './errors';
 import { decide as decideV2, distribution } from './interpreter_v2';
 import { formatDecisionRules, formatProperty } from './formatter';
@@ -48,8 +48,7 @@ function reduceNodes(tree, fn, initialAccValue) {
 
 export function getDecisionRulesProperties(tree) {
   const { configuration, trees } = parse(tree);
-  return _(trees)
-    .values()
+  const reducedTrees = Object.values(trees)
     .reduce(
       (properties, tree) => reduceNodes(
         tree,
@@ -60,13 +59,10 @@ export function getDecisionRulesProperties(tree) {
           return properties;
         },
         properties),
-      _([])
-    )
-    .uniq()
-    .map((property) => _.extend(configuration.context[property], {
-      property: property
-    }))
-    .value();
+      []
+    );
+  return _.uniq(reducedTrees)
+    .map((property) => _.extend(configuration.context[property], { property }));
 }
 
 export function decideFromContextsArray(tree, contexts) {

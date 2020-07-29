@@ -19,7 +19,6 @@
     "url": "https://github.com/craft-ai/craft-ai-client-js"
   },
   "browser": {
-    "lodash": "lodash/lodash.min.js",
     "https-proxy-agent": false,
     "http-proxy-agent": false
   },

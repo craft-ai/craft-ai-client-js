@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import * as _ from './lodash';
 
 export const DEFAULT_DECISION_TREE_VERSION = '2';
 

@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import inherits from 'inherits';
+import * as _ from './lodash';
 
 function CraftAiError(message, extraProperties) {
   if (typeof Error.captureStackTrace === 'function') {
