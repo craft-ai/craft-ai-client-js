@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Minor fix on authorized types error message.
 
+### Updated ###
+
+- Update code to take into account last changes on the main project.
+- Bump packages and update code accordingly.
+- Reduce bundle size.
+
 ## [1.19.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.19.0...v1.19.1) - 2020-05-26 ##
 
 ### Added ###
