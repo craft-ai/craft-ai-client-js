@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.19.1...HEAD) ##
 
+### Fixed ###
+
+- Minor fix on authorized types error message.
+
 ## [1.19.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.19.0...v1.19.1) - 2020-05-26 ##
 
 ### Added ###

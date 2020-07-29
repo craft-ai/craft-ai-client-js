@@ -157,7 +157,7 @@ function checkContext(configuration) {
   // Build a context validator
   const validators = _.map(expectedProperties, (property) => {
     const otherValidator = () => {
-      console.warn(`WARNING: "${configuration.context[property].type}" is not a supported type. Please refer to the documention to see what type you can use`);
+      console.warn(`WARNING: "${configuration.context[property].type}" is not a supported type. Please refer to the documentation to see what type you can use`);
       return true;
     };
     return {
