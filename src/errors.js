@@ -1,88 +1,95 @@
-import _ from 'lodash';
-import inherits from 'inherits';
+import * as _ from './lodash';
 
-function CraftAiError(message, extraProperties) {
-  if (typeof Error.captureStackTrace === 'function') {
-    Error.captureStackTrace(this, this.constructor);
-  }
-  else {
-    this.stack = (new Error()).stack || 'Cannot get a stacktrace, browser is too old';
-  }
-
-  this.name = this.constructor.name;
-  this.message = message || 'Unknown error';
-
-  if (extraProperties) {
-    _.forEach(extraProperties, (value, key) => {
-      this[key] = value;
-    });
-  }
-}
-
-inherits(CraftAiError, Error);
-
-function createCustomError(name, message) {
-  function CraftAiCustomError() {
-    const args = Array.prototype.slice.call(arguments, 0);
-
-    // custom message not set, use default
-    if (typeof args[0] !== 'string') {
-      args.unshift(message);
+class CraftAiError extends Error {
+  constructor(message, extraProperties, defaultMessage = 'Unknown error') {
+    if (!_.isString(message)) {
+      extraProperties = message;
+      message = _.get(extraProperties, 'message', defaultMessage);
     }
 
-    CraftAiError.apply(this, args);
-    this.name = name;
+    super(message);
+
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, this.constructor);
+    }
+    else {
+      this.stack = (new Error()).stack || 'Cannot get a stacktrace, browser is too old';
+    }
+
+    this.name = this.constructor.name;
+    this.message = message;
+
+    if (extraProperties) {
+      Object.entries(extraProperties)
+        .forEach(([key, value]) => {
+          this[key] = value;
+        });
+    }
   }
-
-  inherits(CraftAiCustomError, CraftAiError);
-
-  return CraftAiCustomError;
 }
 
-let CraftAiUnknownError = createCustomError(
-  'CraftAiUnknownError',
-  'Unknown error occured'
-);
+class CraftAiUnknownError extends CraftAiError {
+  constructor(message, extraProperties) {
+    super(message, extraProperties, 'Unknown error occured');
+    this.name = this.constructor.name;
+  }
+}
 
-let CraftAiNetworkError = createCustomError(
-  'CraftAiNetworkError',
-  'Network issue, see err.more for details'
-);
+class CraftAiNetworkError extends CraftAiError {
+  constructor(message, extraProperties) {
+    super(message, extraProperties, 'Network issue, see err.more for details');
+    this.name = this.constructor.name;
+  }
+}
 
-let CraftAiCredentialsError = createCustomError(
-  'CraftAiCredentialsError',
-  'Credentials error, make sure the given token is valid'
-);
+class CraftAiCredentialsError extends CraftAiError {
+  constructor(message, extraProperties) {
+    super(message, extraProperties, 'Credentials error, make sure the given token is valid');
+    this.name = this.constructor.name;
+  }
+}
 
-let CraftAiInternalError = createCustomError(
-  'CraftAiInternalError',
-  'Internal Error, see err.more for details'
-);
+class CraftAiInternalError extends CraftAiError {
+  constructor(message, extraProperties) {
+    super(message, extraProperties, 'Internal Error, see err.more for details');
+    this.name = this.constructor.name;
+  }
+}
 
-let CraftAiBadRequestError = createCustomError(
-  'CraftAiBadRequestError',
-  'Bad Request, see err.more for details'
-);
+class CraftAiBadRequestError extends CraftAiError {
+  constructor(message, extraProperties) {
+    super(message, extraProperties, 'Bad Request, see err.more for details');
+    this.name = this.constructor.name;
+  }
+}
 
-let CraftAiDecisionError = createCustomError(
-  'CraftAiDecisionError',
-  'Error while taking a decision, see err.metadata for details'
-);
+class CraftAiDecisionError extends CraftAiError {
+  constructor(message, extraProperties) {
+    super(message, extraProperties, 'Error while taking a decision, see err.metadata for details');
+    this.name = this.constructor.name;
+  }
+}
 
-let CraftAiNullDecisionError = createCustomError(
-  'CraftAiNullDecisionError',
-  'Taken decision is null, see err.metadata for details'
-);
+class CraftAiNullDecisionError extends CraftAiError {
+  constructor(message, extraProperties) {
+    super(message, extraProperties, 'Taken decision is null, see err.metadata for details');
+    this.name = this.constructor.name;
+  }
+}
 
-let CraftAiTimeError = createCustomError(
-  'CraftAiTimeError',
-  'Time error, see err.more for details'
-);
+class CraftAiTimeError extends CraftAiError {
+  constructor(message, extraProperties) {
+    super(message, extraProperties, 'Time error, see err.more for details');
+    this.name = this.constructor.name;
+  }
+}
 
-let CraftAiLongRequestTimeOutError = createCustomError(
-  'CraftAiLongRequestTimeOutError',
-  'Request timed out because the computation is not finished, please try again'
-);
+class CraftAiLongRequestTimeOutError extends CraftAiError {
+  constructor(message, extraProperties) {
+    super(message, extraProperties, 'Request timed out because the computation is not finished, please try again');
+    this.name = this.constructor.name;
+  }
+}
 
 export {
   CraftAiBadRequestError,

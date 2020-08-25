@@ -1,6 +1,6 @@
-import _ from 'lodash';
 import { CraftAiDecisionError } from './errors';
 import semver from 'semver';
+import * as _ from './lodash';
 
 export default function parse(input) {
   const json = _.isObject(input) ? input : JSON.parse(input);

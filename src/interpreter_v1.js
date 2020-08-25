@@ -1,6 +1,6 @@
-import _ from 'lodash';
 import { reduceDecisionRules } from './reducer';
 import { tzFromOffset } from './time';
+import * as _ from './lodash';
 import { CraftAiDecisionError, CraftAiNullDecisionError, CraftAiUnknownError } from './errors';
 import { formatDecisionRules, formatProperty } from './formatter';
 import isTimezone, { getTimezoneKey } from './timezones';

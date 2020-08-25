@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import Time from './time';
+import * as _ from './lodash';
 import { OPERATORS, TYPE_ANY, TYPES } from './constants';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

@@ -90,7 +90,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
 
     it('should fail with a timeout error when the client side timeout is low', function() {
       const otherClient = craftai(_.assign({}, CRAFT_CFG, {
-        decisionTreeRetrievalTimeout: 50
+        decisionTreeRetrievalTimeout: 5
       }));
       return otherClient.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO)
         .then(

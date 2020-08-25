@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import * as _ from './lodash';
 
 const TIMEZONE_REGEX = /^([+-](2[0-3]|[01][0-9])(:?[0-5][0-9])?|Z)$/; // +/-00:00 -/+00 Z +/-0000
 

@@ -1,6 +1,6 @@
-import _ from 'lodash';
 import { formatDecisionRules } from './formatter';
 import { OPERATORS } from './constants';
+import * as _ from './lodash';
 
 const REDUCER_FROM_DECISION_RULE = {
   [OPERATORS.IS]: {
@@ -181,7 +181,8 @@ function decisionRuleReducer(decisionRule1, decisionRule2) {
 
 export function reduceDecisionRules(decisionRules) {
   const properties = _.uniq(_.map(decisionRules, ({ property }) => property));
-  return _.map(properties, ((currentPropery) => _(decisionRules)
-    .filter(({ property }) => property == currentPropery)
-    .reduce(decisionRuleReducer, undefined)));
+  return _
+    .map(properties, ((currentPropery) => decisionRules
+      .filter(({ property }) => property == currentPropery)
+      .reduce(decisionRuleReducer, undefined)));
 }
