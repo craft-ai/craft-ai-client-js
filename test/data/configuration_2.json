@@ -40,5 +40,7 @@
     "c4"
   ],
   "time_quantum": 10,
-  "learning_period": 3600
+  "learning_period": 3600,
+  "operations_as_events": true,
+  "tree_max_operations": 55000
 }

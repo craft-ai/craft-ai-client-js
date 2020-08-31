@@ -50,10 +50,6 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
     return client.deleteAgent(agentId); // Delete any preexisting agent with this id.
   });
 
-  afterEach(function() {
-    return client.deleteAgent(agentId);
-  });
-
   describe('on an agent with few data', function() {
     beforeEach(function() {
       return client.createAgent(CONFIGURATION_1, agentId)
@@ -62,6 +58,10 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
           agent = createdAgent;
           return client.addAgentContextOperations(agent.id, CONFIGURATION_1_OPERATIONS_1);
         });
+    });
+
+    afterEach(function() {
+      return client.deleteAgent(agentId);
     });
 
     it('should succeed when using valid parameters', function() {
@@ -109,7 +109,9 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
           expect(createdAgent).to.be.ok;
           agent = createdAgent;
           return _.reduce(CONFIGURATION_2_OPERATIONS, (p, operations) => {
-            return p.then(() => client.addAgentContextOperations(agent.id, operations));
+            return p.then(() => {
+              return client.addAgentContextOperations(agent.id, operations);
+            });
           }, Promise.resolve());
         });
     });
@@ -122,11 +124,16 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
       const lastOperation = _.last(_.last(CONFIGURATION_2_OPERATIONS));
       return otherClient.getAgentDecisionTree(agent.id, lastOperation.timestamp)
         .then(
-          () => Promise.reject(new Error('Should not be reached')),
+          () => {
+            return Promise.reject(new Error('Should not be reached'));
+          },
           (err) => {
             expect(err).to.be.an.instanceof(errors.CraftAiLongRequestTimeOutError);
           }
-        );
+        )
+        .then(() => {
+          return client.deleteAgent(agentId);
+        });
     });
 
     it('should work with the standard timeout', function() {
@@ -139,6 +146,9 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
           expect(trees).to.be.ok;
           expect(_version).to.be.ok;
           expect(configuration).to.be.deep.equal(CONFIGURATION_2);
+        })
+        .then(() => {
+          return client.deleteAgent(agentId);
         });
     });
   });
