@@ -1,6 +1,7 @@
 import CONFIGURATION_1 from './data/configuration_1.json';
 import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.json';
 import craftai from '../src';
+import EXPECTED_CONFIGURATION_1_OPERATIONS_2 from './data/expected/configuration_1_operations_2.json';
 
 describe('client.getAgentContextOperations(<agentId>)', function() {
   let client;
@@ -24,16 +25,14 @@ describe('client.getAgentContextOperations(<agentId>)', function() {
   it('should retrieve all context operations', function() {
     return client.getAgentContextOperations(agentId)
       .then((operations) => {
-        expect(_.first(operations)).to.be.deep.equal(_.first(CONFIGURATION_1_OPERATIONS_2));
-        expect(_.last(operations)).to.be.deep.equal(_.last(CONFIGURATION_1_OPERATIONS_2));
-        expect(operations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_2);
+        expect(operations).to.be.deep.equal(EXPECTED_CONFIGURATION_1_OPERATIONS_2);
       });
   });
   it('should only retrieve the operations after the given lower bound', function() {
     const lowerBound = 1464356844;
     return client.getAgentContextOperations(agentId, lowerBound)
       .then((operations) => {
-        const expectedOperations = _.filter(CONFIGURATION_1_OPERATIONS_2, ({ timestamp }) => timestamp >= lowerBound);
+        const expectedOperations = _.filter(EXPECTED_CONFIGURATION_1_OPERATIONS_2, ({ timestamp }) => timestamp >= lowerBound);
         expect(operations).to.be.deep.equal(expectedOperations);
       });
   });
@@ -42,7 +41,7 @@ describe('client.getAgentContextOperations(<agentId>)', function() {
     const upperBound = 1462824549;
     return client.getAgentContextOperations(agentId, undefined, upperBound)
       .then((operations) => {
-        const expectedOperations = _.filter(CONFIGURATION_1_OPERATIONS_2, ({ timestamp }) => timestamp <= upperBound);
+        const expectedOperations = _.filter(EXPECTED_CONFIGURATION_1_OPERATIONS_2, ({ timestamp }) => timestamp <= upperBound);
         expect(operations).to.be.deep.equal(expectedOperations);
       });
   });
@@ -52,7 +51,7 @@ describe('client.getAgentContextOperations(<agentId>)', function() {
     const upperBound = 1462824549;
     return client.getAgentContextOperations(agentId, lowerBound, upperBound)
       .then((operations) => {
-        const expectedOperations = _.filter(CONFIGURATION_1_OPERATIONS_2, ({ timestamp }) => timestamp >= lowerBound && timestamp <= upperBound);
+        const expectedOperations = _.filter(EXPECTED_CONFIGURATION_1_OPERATIONS_2, ({ timestamp }) => timestamp >= lowerBound && timestamp <= upperBound);
         expect(operations).to.be.deep.equal(expectedOperations);
       });
   });
@@ -62,7 +61,7 @@ describe('client.getAgentContextOperations(<agentId>)', function() {
     const upperBound = 1464356844;
     return client.getAgentContextOperations(agentId, lowerBound, upperBound)
       .then((operations) => {
-        const expectedOperations = _.filter(CONFIGURATION_1_OPERATIONS_2, ({ timestamp }) => timestamp >= lowerBound && timestamp <= upperBound);
+        const expectedOperations = _.filter(EXPECTED_CONFIGURATION_1_OPERATIONS_2, ({ timestamp }) => timestamp >= lowerBound && timestamp <= upperBound);
         expect(operations).to.be.deep.equal(expectedOperations);
       });
   });
