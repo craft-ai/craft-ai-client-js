@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed ###
 
 - Minor fix on authorized types error message.
+- Fix tests according to new contextOps.
 
 ### Updated ###
 
