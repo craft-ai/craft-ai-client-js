@@ -686,6 +686,7 @@ export default function createClient(tokenOrCfg) {
     },
     createGeneratorBulk: function(generatorsList) {
       checkBulkParameters(generatorsList);
+
       return request({
         method: 'POST',
         path: '/bulk/generators',
@@ -879,7 +880,7 @@ export default function createClient(tokenOrCfg) {
 
       return request({
         method: 'POST',
-        path: 'bulk/generators/tree',
+        path: '/bulk/generators/tree',
         body: generatorsList
       })
         .then(({ body }) => body);
