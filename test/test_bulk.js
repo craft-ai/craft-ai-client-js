@@ -304,33 +304,20 @@ describe('BULK:', function() {
 
   it('addAgentContextOperationsBulk: should work with 10 agents with large number of operations', function() {
     const agentIds = Array.apply(null, Array(10))
-      .map((x, i) => ({
-        id: `agent${i}`
-      }));
+      .map((x, i) => ({ id: `agent${i}` }));
     return client
       .deleteAgentBulk(agentIds)
-      .then(() =>
-        client
-          .createAgentBulk(
-            agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
-          )
-          .then(() =>
-            client
-              .addAgentContextOperationsBulk(
-                agentIds.map(({ id }) => ({
-                  id,
-                  operations: CONFIGURATION_1_OPERATIONS_2
-                }))
-              )
-              .then((result) => {
-                agentIds.map((agent, idx) => {
-                  expect(result[idx].id).to.be.equal(agent.id);
-                  expect(result[idx].status).to.be.equal(201);
-                });
-                client.deleteAgentBulk(agentIds);
-              })
-          )
-      )
+      .then(() => client.createAgentBulk(agentIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
+      .then(() => client.addAgentContextOperationsBulk(agentIds
+        .map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_2 }))))
+      .then((result) => {
+        agentIds.map((agent, idx) => {
+          expect(result[idx].id).to.be.equal(agent.id);
+          expect(result[idx].status).to.be.equal(201);
+        });
+        client.deleteAgentBulk(agentIds);
+      })
       .catch((err) => {
         if (err.response) {
           throw new Error(err.response.body.message);
@@ -716,6 +703,17 @@ describe('BULK:', function() {
       });
   });
 
+  it('deleteGeneratorBulk: should fail with non existing id.', function() {
+    const generatorIds = [
+      { id: 'toto_non_existing' }
+    ];
+    return client.deleteGeneratorBulk(generatorIds)
+      .then((res) => {
+        expect(res[0].name).to.be.equal('NotFound');
+        expect(res[0].status).to.be.equal(404);
+      });
+  });
+
   // getGeneratorDecisionTreeBulk
   it('getGeneratorDecisionTreeBulk: should work with two valid generators', function() {
     const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
@@ -723,25 +721,129 @@ describe('BULK:', function() {
 
     return client.deleteGeneratorBulk(generatorIds)
       .then(() => client.deleteAgentBulk(agentIds))
-      .then(() => client.createAgentBulk(
-        agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
-      ))
-      .then(() =>
-        client.addAgentContextOperationsBulk(
-          agentIds.map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_1 })))
-      )
-      .then(() =>
-        client.createGeneratorBulk(
-          generatorIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR })))
-      )
-      .then(() =>
-        client.getGeneratorDecisionTreeBulk(
-          agentIds.map(({ id }) => ({ id, timestamp: 1464600500 })))
-      )
+      .then(() => client.createAgentBulk(agentIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
+      .then(() => client.addAgentContextOperationsBulk(agentIds
+        .map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_1 }))))
+      .then(() => client.createGeneratorBulk(generatorIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))))
+      .then(() => client.getGeneratorDecisionTreeBulk(generatorIds
+        .map(({ id }) => ({ id, timestamp: 1464600500 }))))
       .then((trees) => {
-        trees.map((tree, i) => {
-          expect(true);
+        trees.map((metatree) => {
+          const { tree, timestamp } = metatree;
+          expect(timestamp).to.be.equal(1464600500);
+          expect(tree.tree._version).to.be.equal('1.1.0');
+          expect(tree.tree.trees).to.be.ok;
         });
+        return client.deleteAgentBulk(agentIds)
+          .then(() => client.deleteGeneratorBulk(generatorIds));
+      });
+  });
+
+  it('getGeneratorDecisionTreeBulk: with non-existing generators', function() {
+    const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
+    const agentIds = [{ id: 'agent_1' }, { id: 'agent_2' }];
+
+    return client.deleteGeneratorBulk(generatorIds)
+      .then(() => client.deleteAgentBulk(agentIds))
+      .then(() => client.createAgentBulk(agentIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
+      .then(() => client.addAgentContextOperationsBulk(agentIds
+        .map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_1 }))))
+      .then(() => client.createGeneratorBulk(generatorIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))))
+      .then(() => client.getGeneratorDecisionTreeBulk(generatorIds
+        .map(() => ({ id: 'non-existing', timestamp: 1464600500 }))))
+      .then((results) => {
+        results.map((result) => {
+          expect(result.name).to.be.equal('NotFound');
+          expect(result.status).to.be.equal(404);
+        });
+        return client.deleteAgentBulk(agentIds)
+          .then(() => client.deleteGeneratorBulk(generatorIds));
+      });
+  });
+
+  it('getGeneratorDecisionTreeBulk: mixed results with one existing and one non-exsiting generators', function() {
+    const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
+    const agentIds = [{ id: 'agent_1' }, { id: 'agent_2' }];
+
+    return client.deleteGeneratorBulk(generatorIds)
+      .then(() => client.deleteAgentBulk(agentIds))
+      .then(() => client.createAgentBulk(agentIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
+      .then(() => client.addAgentContextOperationsBulk(agentIds
+        .map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_1 }))))
+      .then(() => client.createGeneratorBulk(generatorIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))))
+      .then(() => client.getGeneratorDecisionTreeBulk([
+        { id: 'generator_1', timestamp: 1464600500 },
+        { id: 'non-existing', timestamp: 1464600500 }
+      ]))
+      .then(([metatree, result]) => {
+        expect(metatree.timestamp).to.be.equal(1464600500);
+        expect(metatree.tree.tree._version).to.be.equal('1.1.0');
+        expect(metatree.tree.tree.trees).to.be.ok;
+        expect(result.name).to.be.equal('NotFound');
+        expect(result.status).to.be.equal(404);
+        return client.deleteAgentBulk(agentIds)
+          .then(() => client.deleteGeneratorBulk(generatorIds));
+      });
+  });
+
+  it('getGeneratorDecisionTreeBulk: mixed results with one without contextops', function() {
+    const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
+    const agentIds = [{ id: 'agent_1' }, { id: 'agent_2' }];
+    const configuration_custom_1 = JSON.parse(JSON.stringify(CONFIGURATION_1_GENERATOR));
+    configuration_custom_1.filter = ['agent_1'];
+    const configuration_custom_2 = JSON.parse(JSON.stringify(CONFIGURATION_1_GENERATOR));
+    configuration_custom_2.filter = ['agent_2'];
+
+    return client.deleteGeneratorBulk(generatorIds)
+      .then(() => client.deleteAgentBulk(agentIds))
+      .then(() => client.createAgentBulk(agentIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
+      .then(() => client.addAgentContextOperationsBulk([
+        { id: 'agent_1', operations: CONFIGURATION_1_OPERATIONS_1 }
+      ]))
+      .then(() => client.createGeneratorBulk([
+        { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
+        { id: 'generator_2', configuration: configuration_custom_2 }
+      ]))
+      .then(() => client.getGeneratorDecisionTreeBulk([
+        { id: 'generator_1', timestamp: 1464600500 },
+        { id: 'generator_2', timestamp: 1464600500 }
+      ]))
+      .then(([res1, res2]) => {
+        expect(res1.id).to.be.equal('generator_1');
+        expect(res1.tree.tree.trees).to.be.ok;
+        expect(res2.status).to.be.equal(500);
+        expect(res2.name).to.be.equal('InternalError');
+        return client.deleteAgentBulk(agentIds)
+          .then(() => client.deleteGeneratorBulk(generatorIds));
+      });
+  });
+
+  it('getGeneratorDecisionTreeBulk: should fail without contextops', function() {
+    const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
+    const agentIds = [{ id: 'agent_1' }, { id: 'agent_2' }];
+
+    return client.deleteGeneratorBulk(generatorIds)
+      .then(() => client.deleteAgentBulk(agentIds))
+      .then(() => client.createAgentBulk(agentIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
+      .then(() => client.createGeneratorBulk(generatorIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))))
+      .then(() => client.getGeneratorDecisionTreeBulk(generatorIds
+        .map(({ id }) => ({ id, timestamp: 1464600500 }))))
+      .then(([res1, res2]) => {
+        expect(res1.id).to.be.equal('generator_1');
+        expect(res1.name).to.be.equal('InternalError');
+        expect(res1.status).to.be.equal(500);
+        expect(res2.id).to.be.equal('generator_2');
+        expect(res2.name).to.be.equal('InternalError');
+        expect(res2.status).to.be.equal(500);
         return client.deleteAgentBulk(agentIds)
           .then(() => client.deleteGeneratorBulk(generatorIds));
       });
