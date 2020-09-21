@@ -2,6 +2,8 @@ import CONFIGURATION_1 from './data/configuration_1.json';
 
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
 import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.json';
+import EXPECTED_CONFIGURATION_1_OPERATIONS_1 from './data/expected/configuration_1_operations_1.json';
+import EXPECTED_CONFIGURATION_1_OPERATIONS_2 from './data/expected/configuration_1_operations_2.json';
 
 const CONFIGURATION_1_OPERATIONS_1_FROM = _.first(CONFIGURATION_1_OPERATIONS_1).timestamp;
 const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
@@ -115,7 +117,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
   it('should succeed when using operations with ISO 8601 timestamps', function() {
     return client.addAgentContextOperations(agents[0].id, [
       {
-        timestamp: '1998-04-23T04:30:00-05:00',
+        timestamp: '2020-04-23T04:30:00-05:00',
         context: {
           presence: 'robert',
           lightIntensity: 0.4,
@@ -123,7 +125,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
         }
       },
       {
-        timestamp: '1998-04-23T04:32:25-05:00',
+        timestamp: '2020-04-23T04:32:25-05:00',
         context: {
           presence: 'none'
         }
@@ -136,7 +138,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       .then((operations) => {
         expect(operations).to.be.deep.equal([
           {
-            timestamp: 893323800,
+            timestamp: 1587634200,
             context: {
               presence: 'robert',
               lightIntensity: 0.4,
@@ -144,9 +146,11 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
             }
           },
           {
-            timestamp: 893323945,
+            timestamp: 1587634345,
             context: {
-              presence: 'none'
+              presence: 'none',
+              lightIntensity: 0.4,
+              lightbulbColor: 'green'
             }
           }
         ]);
@@ -186,7 +190,9 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
           {
             timestamp: 893323945,
             context: {
-              presence: 'none'
+              presence: 'none',
+              lightIntensity: 0.4,
+              lightbulbColor: 'green'
             }
           }
         ]);
@@ -228,7 +234,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       })
       .then((retrievedOperations) => {
         expect(retrievedOperations.length).to.be.equal(CONFIGURATION_1_OPERATIONS_2.length);
-        expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_2);
+        expect(retrievedOperations).to.be.deep.equal(EXPECTED_CONFIGURATION_1_OPERATIONS_2);
       });
   });
   it('should not fail when deleting the agent to which operations where added', function() {
@@ -247,11 +253,11 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       .then(() => client.getAgentContextOperations(agents[0].id))
       .then((retrievedOperations) => {
         expect(retrievedOperations.length).to.be.equal(CONFIGURATION_1_OPERATIONS_2.length);
-        expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_2);
+        expect(retrievedOperations).to.be.deep.equal(EXPECTED_CONFIGURATION_1_OPERATIONS_2);
       })
       .then(() => client.getAgentContextOperations(agents[1].id))
       .then((retrievedOperations) => {
-        expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
+        expect(retrievedOperations).to.be.deep.equal(EXPECTED_CONFIGURATION_1_OPERATIONS_1);
       });
   });
 });

@@ -108,9 +108,9 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
         .then((createdAgent) => {
           expect(createdAgent).to.be.ok;
           agent = createdAgent;
-          return _.reduce(CONFIGURATION_2_OPERATIONS, (p, operations) => {
-            return p.then(() => client.addAgentContextOperations(agent.id, operations));
-          }, Promise.resolve());
+          return _.reduce(CONFIGURATION_2_OPERATIONS, (p, operations) =>
+            p.then(() => client.addAgentContextOperations(agent.id, operations))
+          , Promise.resolve());
         });
     });
 
