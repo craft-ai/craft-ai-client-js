@@ -5,5 +5,5 @@ module.exports = {
   ],
   timeout: 30000, // milli-seconds
   'check-leaks': true,
-  exit: true
+  bail: true
 };
