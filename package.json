@@ -32,6 +32,7 @@
     "build_browser": "npm run build_browser:production && npm run build_browser:dev",
     "build_browser:production": "cross-env NODE_ENV=production webpack",
     "build_browser:dev": "cross-env NODE_ENV=development webpack",
+    "clean_up": "babel-node scripts/clean_up.js",
     "lint": "eslint . && tsc src/index.d.ts",
     "fix_lint": "eslint --fix .",
     "test": "npm run lint && npm run test_node",
