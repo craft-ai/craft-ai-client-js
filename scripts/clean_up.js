@@ -3,7 +3,8 @@ import craftai from '../src';
 const craftToken = { token: process.env.CRAFT_TOKEN };
 const JOB_ID = process.env.TRAVIS_JOB_ID || 'local';
 const client = craftai(craftToken);
-console.log(client);
+
+console.log('Clearning up dangling agents and generators from tests')
 client.listAgents()
   .then((agentNames) => {
     console.log('got', agentNames.length);
@@ -18,6 +19,21 @@ client.listAgents()
   })
   .then((nAgentDeleted) => {
     console.log(`${nAgentDeleted} agent(s) were deleted.`);
+    return client.listGenerators
+      .then((generatorsName) => {
+        console.log('got', agentNames.length);
+        generatorsName.filter((agentName) => agentName.includes(JOB_ID));
+        return generatorsName.reduce((acc, agentName) =>
+          acc.then((count) => client.deleteGenerator(agentName)
+            .then(() => {
+              console.log('Deleted generators', agentName);
+              return count += 1;
+            })),
+        Promise.resolve(0));
+      })
+    })
+  .then((nGeneratorDeleted) => {
+    console.log(`${nGeneratorDeleted} generator(s) were deleted.`);
     process.exit(0);
   })
   .catch(function(error) {
