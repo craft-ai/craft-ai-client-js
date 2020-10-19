@@ -222,6 +222,17 @@ describe('BULK:', function() {
       { id: 'way_to_rome' },
       { id: 'postcards' }
     ];
+    const expectedResult = [
+      {
+        message: 'Agent "wild_horses" doesn\'t exist (or was already deleted).'
+      },
+      {
+        message: 'Agent "way_to_rome" doesn\'t exist (or was already deleted).'
+      },
+      {
+        message: 'Agent "postcards" doesn\'t exist (or was already deleted).'
+      }
+    ];
     return client.deleteAgentBulk(agentIds)
       .then(() =>
         client
@@ -240,10 +251,7 @@ describe('BULK:', function() {
                 });
                 return client.deleteAgentBulk(agentIds)
                   .then((agentsList2) => {
-                    agentsList2.map((agent, idx) => {
-                      expect(agent.id).to.be.equal(agentIds[idx].id);
-                      expect(agent.configuration).to.be.equal(undefined);
-                    });
+                    expect(agentsList2).to.be.deep.equals(expectedResult);
                   });
               });
           })
@@ -254,13 +262,12 @@ describe('BULK:', function() {
     const agentIds = [{ id: '7$ shopping' }, {}, { id: undefined }];
     return client.deleteAgentBulk(agentIds)
       .then((del_res) => {
-        expect(del_res[0].id).to.be.equal(agentIds[0].id);
         expect(del_res[0].status).to.be.equal(400);
         expect(del_res[0].name).to.be.equal('AgentError');
         expect(del_res[1].status).to.be.equal(400);
-        expect(del_res[1].name).to.be.equal('ContextError');
+        expect(del_res[1].name).to.be.equal('AgentError');
         expect(del_res[2].status).to.be.equal(400);
-        expect(del_res[2].name).to.be.equal('ContextError');
+        expect(del_res[2].name).to.be.equal('AgentError');
       });
   });
 
@@ -709,8 +716,7 @@ describe('BULK:', function() {
     ];
     return client.deleteGeneratorBulk(generatorIds)
       .then((res) => {
-        expect(res[0].name).to.be.equal('NotFound');
-        expect(res[0].status).to.be.equal(404);
+        expect(res[0].message).to.be.equal('Generator "toto_non_existing" doesn\'t exist (or was already deleted).');
       });
   });
 
@@ -733,8 +739,8 @@ describe('BULK:', function() {
         trees.map((metatree) => {
           const { tree, timestamp } = metatree;
           expect(timestamp).to.be.equal(1464600500);
-          expect(tree.tree._version).to.be.equal('1.1.0');
-          expect(tree.tree.trees).to.be.ok;
+          expect(tree._version).to.be.equal('1.1.0');
+          expect(tree.trees).to.be.ok;
         });
         return client.deleteAgentBulk(agentIds)
           .then(() => client.deleteGeneratorBulk(generatorIds));
@@ -783,8 +789,8 @@ describe('BULK:', function() {
       ]))
       .then(([metatree, result]) => {
         expect(metatree.timestamp).to.be.equal(1464600500);
-        expect(metatree.tree.tree._version).to.be.equal('1.1.0');
-        expect(metatree.tree.tree.trees).to.be.ok;
+        expect(metatree.tree._version).to.be.equal('1.1.0');
+        expect(metatree.tree.trees).to.be.ok;
         expect(result.name).to.be.equal('NotFound');
         expect(result.status).to.be.equal(404);
         return client.deleteAgentBulk(agentIds)
@@ -817,7 +823,7 @@ describe('BULK:', function() {
       ]))
       .then(([res1, res2]) => {
         expect(res1.id).to.be.equal('generator_1');
-        expect(res1.tree.tree.trees).to.be.ok;
+        expect(res1.tree.trees).to.be.ok;
         expect(res2.status).to.be.equal(500);
         expect(res2.name).to.be.equal('InternalError');
         return client.deleteAgentBulk(agentIds)
