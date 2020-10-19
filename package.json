@@ -66,9 +66,9 @@
     "http-proxy-agent": "4.0.1",
     "https-proxy-agent": "5.0.0",
     "jwt-decode": "2.2.0",
-    "lodash": "4.17.19",
+    "lodash": "4.17.20",
     "moment-mini": "2.24.0",
-    "node-fetch": "2.6.0",
+    "node-fetch": "2.6.1",
     "semver": "7.3.2",
     "whatwg-fetch": "3.0.0"
   },
