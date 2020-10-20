@@ -26,7 +26,8 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
   });
 
   beforeEach(function() {
-    return Promise.all(_.map(agentsId, (agentId) => client.deleteAgent(agentId) // Delete any preexisting agent with this id.
+    // Delete any preexisting agent with this id.
+    return Promise.all(_.map(agentsId, (agentId) => client.deleteAgent(agentId)
       .then(() => client.createAgent(CONFIGURATION_1, agentId))
       .then((createdAgent) => {
         expect(createdAgent).to.be.ok;
@@ -39,7 +40,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
   });
 
   afterEach(function() {
-    return Promise.all(_.map(agents, (agent) => client.deleteAgent(agent.id)));
+    return Promise.allSettled(agents.map((agent) => client.deleteAgent(agent.id)));
   });
 
   it('should succeed when using valid operations', function() {
@@ -114,7 +115,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
         expect(retrievedAgent.lastTimestamp).to.be.equal(CONFIGURATION_1_OPERATIONS_1_TO);
       });
   });
-  it('should succeed when using operations with ISO 8601 timestamps', function() {
+  it.only('should succeed when using operations with ISO 8601 timestamps', function() {
     return client.addAgentContextOperations(agents[0].id, [
       {
         timestamp: '2020-04-23T04:30:00-05:00',
