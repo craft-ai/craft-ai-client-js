@@ -163,7 +163,6 @@ function checkContext(configuration) {
     return {
       property,
       type: configuration.context[property].type,
-      is_optional: configuration.context[property].is_optional,
       validator: VALUE_VALIDATOR[configuration.context[property].type] || otherValidator
     };
   });
@@ -171,13 +170,12 @@ function checkContext(configuration) {
   return (context) => {
     const { badProperties, missingProperties } = _.reduce(
       validators,
-      ({ badProperties, missingProperties }, { property, type, is_optional, validator }) => {
+      ({ badProperties, missingProperties }, { property, type, validator }) => {
         const value = context[property];
-        const isOptionalAuthorized = _.isPlainObject(value) && _.isEmpty(value) && is_optional;
         if (value === undefined) {
           missingProperties.push(property);
         }
-        else if (!validator(value) && !_.isNull(value) && !isOptionalAuthorized) {
+        else if (!validator(value) && !_.isNull(value)) {
           badProperties.push({ property, type, value });
         }
         return { badProperties, missingProperties };
