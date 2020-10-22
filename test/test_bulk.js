@@ -27,16 +27,6 @@ describe('BULK:', function() {
       });
   }
 
-  function testGeneratorIntegrity(generator, generatorId, configuration) {
-    expect(generator).to.be.ok;
-    expect(generator.id).to.be.equal(generatorId);
-    expect(generator.status).to.not.be.equal(400);
-    return client.getGenerator(generator.id)
-      .then((retrieveGenerator) => {
-        expect(retrieveGenerator.configuration).to.be.deep.equal(configuration);
-      });
-  }
-
   const TS0 = CONFIGURATION_1_OPERATIONS_1[CONFIGURATION_1_OPERATIONS_1.length - 1].timestamp;
 
   // createAgentBulk
@@ -210,9 +200,9 @@ describe('BULK:', function() {
       .then(() => client.createAgentBulk(
         agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
       ))
-      .then((agentsList0) => Promise.all(agentsList0.map((agent, idx) => {
-        testAgentIntegrity(agent, agentIds[idx].id, CONFIGURATION_1);
-      })))
+      .then((agentsList0) => Promise.all(agentsList0.map((agent, idx) =>
+        testAgentIntegrity(agent, agentIds[idx].id, CONFIGURATION_1)
+      )))
       .then(() => client.deleteAgentBulk(agentIds))
       .then((deletions) => Promise.all(deletions))
       .then((agentsList1) => agentsList1.map((agent, idx) => {
@@ -267,6 +257,7 @@ describe('BULK:', function() {
   });
 
   // TODO: unskip this.
+  // timeout is more than 100s
   it.skip('addAgentContextOperationsBulk: should work with 10 agents with large number of operations', function() {
     const agentIds = Array.apply(null, Array(10))
       .map((x, i) => ({ id: `agent${i}` }));
@@ -499,10 +490,20 @@ describe('BULK:', function() {
         { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
         { id: 'generator_2', configuration: CONFIGURATION_1_GENERATOR }
       ])
-      .then((generatorsList) => Promise.all(generatorsList.map((generator) =>
-        testGeneratorIntegrity(generator, generator.id, CONFIGURATION_1_GENERATOR)
-          .then(() => client.deleteGenerator(generator.id))
-      )));
+      .then(() => Promise.all([
+        client.getGenerator('generator_1'),
+        client.getGenerator('generator_2')
+      ]))
+      .then((generators) => {
+        expect(generators[0].id).to.be.equal('generator_1');
+        expect(generators[1].id).to.be.equal('generator_2');
+        expect(generators[0].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
+        expect(generators[1].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
+      })
+      .then(() => Promise.all([
+        client.deleteGenerator('generator_1'),
+        client.deleteGenerator('generator_2')
+      ]));
   });
 
   it('createGeneratorBulk: should handle invalid configuration', function() {
@@ -515,17 +516,16 @@ describe('BULK:', function() {
         { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
         { id: 'generator_2', configuration: CONFIGURATION_1 }
       ]))
-      .then((generatorsList) => testGeneratorIntegrity(
-        generatorsList[0],
-        'generator_1',
-        CONFIGURATION_1_GENERATOR
-      )
-        .then(() => {
-          expect(generatorsList[1].status).to.be.equal(400);
-          expect(generatorsList[1].name).to.be.equal('ContextError');
-          return Promise.all(generatorsList.map(({ id }) => client.deleteAgent(id)));
-        })
-      );
+      .then(() => client.getGenerator('generator_1'))
+      .then((generator) => {
+        expect(generator.id).to.be.equal('generator_1');
+        expect(generator.configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
+      })
+      .then(() => client.getGenerator('generator_2'))
+      .catch((err) => {
+        expect(err.name).to.be.equal('CraftAiBadRequestError');
+      })
+      .then(() => client.deleteGenerator('generator_1'));
   });
 
   it('createGeneratorBulk: should handle undefined configuration', function() {
@@ -538,14 +538,16 @@ describe('BULK:', function() {
         { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
         { id: 'generator_2' }
       ]))
-      .then((generatorsList) => {
-        return testGeneratorIntegrity(generatorsList[0], 'generator_1', CONFIGURATION_1_GENERATOR)
-          .then(() => {
-            expect(generatorsList[1].status).to.be.equal(400);
-            expect(generatorsList[1].name).to.be.equal('ContextError');
-            return Promise.all(generatorsList.map(({ id }) => client.deleteAgent(id)));
-          });
-      });
+      .then(() => client.getGenerator('generator_1'))
+      .then((generator) => {
+        expect(generator.id).to.be.equal('generator_1');
+        expect(generator.configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
+      })
+      .then(() => client.getGenerator('generator_2'))
+      .catch((err) => {
+        expect(err.name).to.be.equal('CraftAiBadRequestError');
+      })
+      .then(() => client.deleteGenerator('generator_1'));
   });
 
   it('createGeneratorBulk: should handle undefined id', function() {
@@ -555,14 +557,13 @@ describe('BULK:', function() {
         { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
         { configuration: CONFIGURATION_1_GENERATOR }
       ]))
-      .then((generatorsList) => {
-        return testGeneratorIntegrity(generatorsList[0], 'generator_1', CONFIGURATION_1_GENERATOR)
-          .then(() => {
-            expect(generatorsList[1].status).to.be.equal(400);
-            expect(generatorsList[1].name).to.be.equal('GeneratorError');
-            return client.deleteAgent('generator_1');
-          });
-      });
+      .then((generators) => {
+        expect(generators[0].id).to.be.equal('generator_1');
+        expect(generators[0].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
+        expect(generators[1].status).to.be.equal(400);
+        expect(generators[1].name).to.be.equal('GeneratorError');
+      })
+      .then(() => client.deleteGenerator('generator_1'));
   });
 
   it('createGeneratorBulk: should 200 then 400 when using the same id twice', function() {
@@ -572,14 +573,13 @@ describe('BULK:', function() {
         { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
         { id: 'generator_1', configuration: CONFIGURATION_1 }
       ]))
-      .then((generatorsList) => {
-        return testGeneratorIntegrity(generatorsList[0], 'generator_1', CONFIGURATION_1_GENERATOR)
-          .then(() => {
-            expect(generatorsList[1].status).to.be.equal(400);
-            expect(generatorsList[1].name).to.be.equal('ContextError');
-            return Promise.all(generatorsList.map(({ id }) => client.deleteAgent(id)));
-          });
-      });
+      .then((generators) => {
+        expect(generators[0].id).to.be.equal('generator_1');
+        expect(generators[0].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
+        expect(generators[1].status).to.be.equal(400);
+        expect(generators[1].name).to.be.equal('ContextError');
+      })
+      .then(() => client.deleteGenerator('generator_1'));
   });
 
   // deleteGeneratorBulk
@@ -599,16 +599,27 @@ describe('BULK:', function() {
       .then(() => client.createGeneratorBulk(
         generatorIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))
       ))
-      .then((generatorsList_create) => Promise.all(generatorsList_create.map((generator, i) =>
-        testGeneratorIntegrity(generator, generatorIds[i].id, CONFIGURATION_1_GENERATOR))))
+      .then(() => Promise.all([
+        client.getGenerator('generator_1'),
+        client.getGenerator('generator_2'),
+        client.getGenerator('generator_3')
+      ]))
+      .then((generators) => {
+        expect(generators[0].id).to.be.equal('generator_1');
+        expect(generators[0].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
+        expect(generators[1].id).to.be.equal('generator_2');
+        expect(generators[1].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
+        expect(generators[2].id).to.be.equal('generator_3');
+        expect(generators[2].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
+      })
       .then(() => client.deleteGeneratorBulk(generatorIds))
-      .then((generatorsList_delete) => {
-        generatorsList_delete.map((generator, i) => {
+      .then((deletions) => deletions
+        .map((generator, i) => {
           expect(generator.id).to.be.equal(generatorIds[i].id);
           expect(generator.configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
-        });
-        return client.deleteGeneratorBulk(generatorIds);
-      })
+        })
+      )
+      .then(() => client.deleteGeneratorBulk(generatorIds))
       .then((generatorsList_redelete) => {
         expect(generatorsList_redelete).to.be.deep.equal(expectedResults);
       });
