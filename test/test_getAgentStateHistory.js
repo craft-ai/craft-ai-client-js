@@ -22,6 +22,7 @@ describe('client.getAgentStateHistory(<agentId>)', function() {
   });
 
   it('should retrieve all state history', function() {
+    this.timeout(100000); // TODO: To be removed.
     return client.getAgentStateHistory(agentId)
       .then((stateHistory) => {
         expect(stateHistory.length).to.be.equal(16);
@@ -158,6 +159,7 @@ describe('client.getAgentStateHistory(<agentId>)', function() {
   });
 
   it('should only retrieve the state after the given lower bound', function() {
+    this.timeout(100000); // TODO: To be removed.
     const lowerBound = 1464600867;
     return client.getAgentStateHistory(agentId, lowerBound)
       .then((stateHistory) => {
@@ -223,6 +225,7 @@ describe('client.getAgentStateHistory(<agentId>)', function() {
   });
 
   it('should only retrieve the state before the given upper bound', function() {
+    this.timeout(100000); // TODO: To be removed.
     const upperBound = 1464601439;
     return client.getAgentStateHistory(agentId, undefined, upperBound)
       .then((stateHistory) => {
@@ -351,6 +354,7 @@ describe('client.getAgentStateHistory(<agentId>)', function() {
   });
 
   it('should only retrieve the state between the desired bounds', function() {
+    this.timeout(100000); // TODO: To be removed.
     const lowerBound = 1464600449;
     const upperBound = 1464601124;
     return client.getAgentStateHistory(agentId, lowerBound, upperBound)

@@ -6,7 +6,7 @@ import craftai from '../src';
 import EXPECTED_CONFIGURATION_1_OPERATIONS_1 from './data/expected/configuration_1_operations_1.json';
 import EXPECTED_CONFIGURATION_1_OPERATIONS_2 from './data/expected/configuration_1_operations_2.json';
 
-describe('client.getGeneratorContextOperations(<generatorId>, from, to)', function() {
+describe.skip('client.getGeneratorContextOperations(<generatorId>, from, to)', function() {
   let client;
   const agentId = `getGenCOpsAgent_${RUN_ID}`;
   const agentId2 = `getGenCOpsAgent2_${RUN_ID}`;
