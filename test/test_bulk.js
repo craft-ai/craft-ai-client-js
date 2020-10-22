@@ -7,6 +7,8 @@ import { expect } from 'chai';
 import INVALID_CONFIGURATION_1 from './data/invalid_configuration_1.json';
 import INVALID_CONFIGURATION_1_OPERATIONS_1 from './data/invalid_configuration_1_operations_1.json';
 
+import '../src/polyfill';
+
 describe('BULK:', function() {
   let client;
 

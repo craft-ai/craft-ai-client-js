@@ -14,6 +14,8 @@ const CONFIGURATION_1_OPERATIONS_1_LAST = _.reduce(
 
 import craftai, { errors, Time } from '../src';
 
+import '../src/polyfill';
+
 describe('client.addAgentContextOperations(<agentId>, <operations>)', function() {
   let client;
   let agents;
