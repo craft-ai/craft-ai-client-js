@@ -7,7 +7,7 @@ before_install:
 - git submodule update --init --recursive
 before_cache: npm prune
 install: npm install --ignore-scripts
-script: DISABLE_LONG_TESTS=1 npm test
+script: DISABLE_LONG_TESTS=1 npm test --exit
 jobs:
   include:
     - stage: npm release

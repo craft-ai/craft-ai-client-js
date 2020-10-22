@@ -107,6 +107,7 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
 
   (DISABLE_LONG_TESTS ? describe.skip : describe)('on an agent with data spanning a looong time', function() {
     beforeEach(function() {
+      this.timeout(100000);
       return client.createAgent(CONFIGURATION_2, agentId)
         .then((createdAgent) => {
           expect(createdAgent).to.be.ok;

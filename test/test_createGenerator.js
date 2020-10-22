@@ -5,7 +5,8 @@ import craftai, { errors } from '../src';
 describe('client.createGenerator(<configuration>, [id])', function() {
   let client;
 
-  const VALID_GENERATOR_NAME = 'generator_1';
+  const VALID_GENERATOR_NAME = `generator_1_${RUN_ID}`;
+
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
