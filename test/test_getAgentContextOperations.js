@@ -3,7 +3,7 @@ import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.js
 import craftai from '../src';
 import EXPECTED_CONFIGURATION_1_OPERATIONS_2 from './data/expected/configuration_1_operations_2.json';
 
-describe('client.getAgentContextOperations(<agentId>)', function() {
+describe.skip('client.getAgentContextOperations(<agentId>)', function() {
   let client;
   const agentId = `getAgentContextOps_${RUN_ID}`;
 

@@ -39,6 +39,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>) with missing
   });
 
   it('should succeed when using operations', function() {
+    this.timeout(100000); // TODO: To be removed.
     return client.addAgentContextOperations(agents[0].id, CONFIGURATION_MV_OPERATIONS)
       .then(() => client.getAgentDecisionTree(agents[0].id, CONFIGURATION_MV_OPERATIONS_TO, '2'))
       .then((treeJson) => {
