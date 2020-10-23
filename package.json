@@ -34,8 +34,8 @@
     "build_browser:dev": "cross-env NODE_ENV=development webpack",
     "lint": "eslint . && tsc src/index.d.ts",
     "fix_lint": "eslint --fix .",
-    "test": "npm run test_node && npm run lint",
-    "test_node": "mocha --config test/.mocharc.js",
+    "test": "npm run lint && npm run test_node",
+    "test_node": "mocha --config test/.mocharc.js --exit",
     "dev_browser": "cd test/browser && webpack-dev-server",
     "prepublish": "npm run build && npm run build_browser"
   },

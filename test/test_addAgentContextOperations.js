@@ -214,15 +214,9 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
   });
   it('should fail when using out-of-order operations', function() {
     return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1)
-      .then(() => {
-        return client.getAgentContextOperations(agents[0].id);
-      })
-      .then((retrievedOperations) => {
-        expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1);
-      })
-      .then(() => {
-        return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1[0]);
-      })
+      .then(() => client.getAgentContextOperations(agents[0].id))
+      .then((retrievedOperations) => expect(retrievedOperations).to.be.deep.equal(CONFIGURATION_1_OPERATIONS_1))
+      .then(() => client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_1[0]))
       .then(
         () => Promise.reject(new Error('Should not be reached')),
         (err) => {
@@ -234,9 +228,7 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
   it('should succeed with a very large payload', function() {
     this.timeout(100000); // TODO: To be removed.
     return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_2)
-      .then(() => {
-        return client.getAgentContextOperations(agents[0].id);
-      })
+      .then(() => client.getAgentContextOperations(agents[0].id))
       .then((retrievedOperations) => {
         expect(retrievedOperations.length).to.be.equal(CONFIGURATION_1_OPERATIONS_2.length);
         expect(retrievedOperations).to.be.deep.equal(EXPECTED_CONFIGURATION_1_OPERATIONS_2);

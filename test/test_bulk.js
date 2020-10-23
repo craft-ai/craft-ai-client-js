@@ -1,5 +1,4 @@
 import CONFIGURATION_1 from './data/configuration_1.json';
-import CONFIGURATION_1_GENERATOR from './data/configuration_1_generator.json';
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_1.json';
 import CONFIGURATION_1_OPERATIONS_2 from './data/configuration_1_operations_2.json';
 import craftai from '../src';
@@ -11,10 +10,39 @@ import '../src/polyfill';
 
 describe('BULK:', function() {
   let client;
+  const agentIds = Array.apply(null, Array(10))
+    .map((x, i) => `agent_bulk_${i}_${RUN_ID}`);
+  const generatorIds = Array.apply(null, Array(3))
+    .map((x, i) => `generator_bulk_${i}_${RUN_ID}`);
+  const CONFIGURATION_1_GENERATOR = {
+    context: {
+      presence: {
+        type: 'enum'
+      },
+      lightIntensity: {
+        type: 'continuous'
+      },
+      lightbulbColor: {
+        type: 'enum'
+      }
+    },
+    output: ['lightbulbColor'],
+    time_quantum: 100,
+    learning_period: 1500000,
+    operations_as_events: true,
+    tree_max_operations: 10000,
+    filter: [agentIds[0], agentIds[1]]
+  };
 
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
+  });
+
+  afterEach(function() {
+    return client.deleteAgentBulk(agentIds.map((id) => ({ id })))
+      .then((deletions) => Promise.allSettled(deletions))
+      .then(() => client.deleteGeneratorBulk(generatorIds.map((id) => ({ id }))));
   });
 
   function testAgentIntegrity(agent, agentName, configuration) {
@@ -38,86 +66,63 @@ describe('BULK:', function() {
       ])
       .then((agentsList) => Promise.all(agentsList.map((agent) =>
         testAgentIntegrity(agent, agent.id, CONFIGURATION_1)
-          .then(() => client.deleteAgent(agent.id))
-      )))
-      .then((deletions) => Promise.allSettled(deletions));
+      )));
   });
 
   it('createAgentBulk: should succeed when using valid configurations and a specified id', function() {
     return client
-      .deleteAgentBulk([{ id: 'press_f' }])
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk([
-        { id: 'press_f', configuration: CONFIGURATION_1 },
+      .createAgentBulk([
+        { id: agentIds[0], configuration: CONFIGURATION_1 },
         { configuration: CONFIGURATION_1 }
-      ]))
+      ])
       .then((agentsList) => Promise.all(agentsList.map((agent) =>
         testAgentIntegrity(agent, agent.id, CONFIGURATION_1)
-          .then(() => client.deleteAgent(agent.id))
-      )))
-      .then((deletions) => Promise.allSettled(deletions));
+      )));
   });
 
   it('createAgentBulk: should succeed when using valid configurations and specified ids', function() {
     return client
-      .deleteAgentBulk([{ id: 'press_f' }, { id: 't0' }, { id: 'pay_respects' }])
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk([
-        { id: 'press_f', configuration: CONFIGURATION_1 },
-        { id: 't0', configuration: CONFIGURATION_1 },
-        { id: 'pay_respects', configuration: CONFIGURATION_1 }
-      ]))
+      .createAgentBulk([
+        { id: agentIds[0], configuration: CONFIGURATION_1 },
+        { id: agentIds[1], configuration: CONFIGURATION_1 },
+        { id: agentIds[2], configuration: CONFIGURATION_1 }
+      ])
       .then((agentsList) => Promise.all(agentsList.map((agent) =>
         testAgentIntegrity(agent, agent.id, CONFIGURATION_1)
-          .then(() => client.deleteAgent(agent.id))
-      )))
-      .then((deletions) => Promise.allSettled(deletions));
+      )));
   });
 
   it('createAgentBulk: should handle invalid configuration', function() {
     return client
-      .deleteAgentBulk([
-        { id: 'le_monde_est_sourd' },
-        { id: 'partis_pour_rester' }
+      .createAgentBulk([
+        { id: agentIds[0], configuration: CONFIGURATION_1 },
+        { id: agentIds[1], configuration: INVALID_CONFIGURATION_1 }
       ])
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk([
-        { id: 'le_monde_est_sourd', configuration: CONFIGURATION_1 },
-        { id: 'partis_pour_rester', configuration: INVALID_CONFIGURATION_1 }
-      ]))
       .then((agentsList) => {
         const badAgent = agentsList[0].status ? agentsList[0] : agentsList[1];
         const correctAgent = agentsList[0].status ? agentsList[1] : agentsList[0];
 
-        return testAgentIntegrity(correctAgent, 'le_monde_est_sourd', CONFIGURATION_1)
+        return testAgentIntegrity(correctAgent, agentIds[0], CONFIGURATION_1)
           .then(() => {
             expect(badAgent.status).to.be.equal(400);
             expect(badAgent.name).to.be.equal('ContextError');
-            return Promise.all(agentsList.map(({ id }) => client.deleteAgent(id)));
           });
       });
   });
 
   it('createAgentBulk: should handle undefined configuration', function() {
     return client
-      .deleteAgentBulk([
-        { id: 'leila_et_les_chasseurs' },
-        { id: 'la_robe_et_lechelle' }
+      .createAgentBulk([
+        { id: agentIds[0], configuration: CONFIGURATION_1 },
+        { id: agentIds[1], configuration: undefined }
       ])
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk([
-        { id: 'leila_et_les_chasseurs', configuration: CONFIGURATION_1 },
-        { id: 'la_robe_et_lechelle', configuration: undefined }
-      ]))
       .then((agentsList) => {
         const agent0 = agentsList[0];
-        return testAgentIntegrity(agent0, 'leila_et_les_chasseurs', CONFIGURATION_1)
+        return testAgentIntegrity(agent0, agentIds[0], CONFIGURATION_1)
           .then(() => {
             const agent1 = agentsList[1];
             expect(agent1.status).to.be.equal(400);
             expect(agent1.name).to.be.equal('ContextError');
-
-            return Promise.all(agentsList.map(({ id }) => client.deleteAgent(id)));
           });
       });
   });
@@ -136,80 +141,70 @@ describe('BULK:', function() {
             expect(agent1.id).to.be.equal('francis?cabrel');
             expect(agent1.status).to.be.equal(400);
             expect(agent1.name).to.be.equal('AgentError');
-
-            return client.deleteAgent(agent0.id);
           });
       });
   });
 
   it('createAgentBulk: should 200 then 400 when using the same id twice', function() {
-    const agentId = 'francis_cabrel';
-    return client.deleteAgentBulk([{ id: agentId }])
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk([{ id: agentId, configuration: CONFIGURATION_1 }]))
+    return client
+      .createAgentBulk([{ id: agentIds[0], configuration: CONFIGURATION_1 }])
       .then((agentsList0) => Promise.all(agentsList0.map((agent) =>
-        testAgentIntegrity(agent, agentId, CONFIGURATION_1)
+        testAgentIntegrity(agent, agentIds[0], CONFIGURATION_1)
       )))
-      .then(() => client.createAgentBulk([{ id: agentId, configuration: CONFIGURATION_1 }]))
+      .then(() => client.createAgentBulk([{ id: agentIds[0], configuration: CONFIGURATION_1 }]))
       .then((agentsList1) => agentsList1.map((agent) => {
         expect(agent).to.be.ok;
-        expect(agent.id).to.be.equal(agentId);
+        expect(agent.id).to.be.equal(agentIds[0]);
         expect(agent.status).to.be.equal(400);
-      }))
-      .then(() => client.deleteAgent(agentId));
+      }));
   });
 
   it('createAgentBulk: should return array of 200 and 400 if has mixed results', function() {
     return client
-      .deleteAgentBulk([{ id: 'encore_et_encore' }, { id: 'petite_marie' }])
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk([{ id: 'encore_et_encore', configuration: CONFIGURATION_1 }]))
+      .createAgentBulk([{ id: agentIds[0], configuration: CONFIGURATION_1 }])
       .then((agentsList0) => Promise.all(agentsList0.map((agent) =>
         testAgentIntegrity(agent, agent.id, CONFIGURATION_1)
       )))
       .then(() => client.createAgentBulk([
-        { id: 'encore_et_encore', configuration: CONFIGURATION_1 },
-        { id: 'petite_marie', configuration: CONFIGURATION_1 }
+        { id: agentIds[0], configuration: CONFIGURATION_1 },
+        { id: agentIds[1], configuration: CONFIGURATION_1 }
       ]))
       .then((agentsList1) => {
         const agent0 = agentsList1[0];
         const agent1 = agentsList1[1];
-        expect(agent0.id).to.be.equal('encore_et_encore');
-        expect(agent1.id).to.be.equal('petite_marie');
+        expect(agent0.id).to.be.equal(agentIds[0]);
+        expect(agent1.id).to.be.equal(agentIds[1]);
         expect(agent0.status).to.be.equal(400);
         expect(agent0.name).to.be.equal('ContextError');
-
-        return Promise.all(agentsList1.map(({ id }) => client.deleteAgent(id)));
       });
   });
 
   // deleteAgentBulk
   it('deleteAgentBulk: should succeed when using valid ids.', function() {
-    const agentIds = [
-      { id: 'wild_horses' },
-      { id: 'way_to_rome' },
-      { id: 'postcards' }
+    const agentIdsToTest = [
+      { id: agentIds[0] },
+      { id: agentIds[1] },
+      { id: agentIds[2] }
     ];
     const expectedResult = [
-      { message: 'Agent "wild_horses" doesn\'t exist (or was already deleted).' },
-      { message: 'Agent "way_to_rome" doesn\'t exist (or was already deleted).' },
-      { message: 'Agent "postcards" doesn\'t exist (or was already deleted).' }
+      { message: `Agent "${agentIds[0]}" doesn't exist (or was already deleted).` },
+      { message: `Agent "${agentIds[1]}" doesn't exist (or was already deleted).` },
+      { message: `Agent "${agentIds[2]}" doesn't exist (or was already deleted).` }
     ];
-    return client.deleteAgentBulk(agentIds)
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(
-        agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
-      ))
+    return client
+      .createAgentBulk(
+        agentIdsToTest.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+      )
       .then((agentsList0) => Promise.all(agentsList0.map((agent, idx) =>
-        testAgentIntegrity(agent, agentIds[idx].id, CONFIGURATION_1)
+        testAgentIntegrity(agent, agentIdsToTest[idx].id, CONFIGURATION_1)
       )))
-      .then(() => client.deleteAgentBulk(agentIds))
+      .then(() => client.deleteAgentBulk(agentIdsToTest))
       .then((deletions) => Promise.all(deletions))
       .then((agentsList1) => agentsList1.map((agent, idx) => {
-        expect(agent.id).to.be.equal(agentIds[idx].id);
+        expect(agent.id).to.be.equal(agentIdsToTest[idx].id);
         expect(agent.configuration).to.be.deep.equal(CONFIGURATION_1);
       }))
-      .then(() => client.deleteAgentBulk(agentIds))
+      .then(() => client.deleteAgentBulk(agentIdsToTest))
       .then((deletions) => Promise.all(deletions))
       .then((agentsList2) => {
         expect(agentsList2).to.be.deep.equals(expectedResult);
@@ -233,85 +228,68 @@ describe('BULK:', function() {
   // addAgentContextOperationsBulk
   it('addAgentContextOperationsBulk: should work with 10 agents with small number of operations', function() {
     this.timeout(100000); // TODO: To be removed.
-    const agentIds = Array.apply(null, Array(10))
-      .map((x, i) => ({
-        id: `agent${i}`
-      }));
 
     return client
-      .deleteAgentBulk(agentIds)
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(
-        agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
-      ))
-      .then(() => client.addAgentContextOperationsBulk(agentIds.map(({ id }) => ({
+      .createAgentBulk(
+        agentIds.map((id) => ({ id, configuration: CONFIGURATION_1 }))
+      )
+      .then(() => client.addAgentContextOperationsBulk(agentIds.map((id) => ({
         id,
         operations: CONFIGURATION_1_OPERATIONS_1
       }))))
       .then((result) => agentIds.map((agent, idx) => {
-        expect(result[idx].id).to.be.equal(agent.id);
+        expect(result[idx].id).to.be.equal(agent);
         expect(result[idx].status).to.be.equal(201);
-        return client.deleteAgentBulk(agentIds);
-      }))
-      .then((deletions) => Promise.allSettled(deletions));
+      }));
   });
 
   // TODO: unskip this.
   // timeout is more than 100s
   it.skip('addAgentContextOperationsBulk: should work with 10 agents with large number of operations', function() {
     const agentIds = Array.apply(null, Array(10))
-      .map((x, i) => ({ id: `agent${i}` }));
+      .map((x, i) => ({ id: `agent${i}_${RUN_ID}` }));
     return client
-      .deleteAgentBulk(agentIds)
-      .then((deletions) => Promise.allSettled(deletions))
-      .catch(() => {})
-      .then(() => client.createAgentBulk(agentIds
-        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
+      .createAgentBulk(agentIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 })))
       .then(() => client.addAgentContextOperationsBulk(agentIds
         .map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_2 }))))
       .then((result) => agentIds.map((agent, idx) => {
         expect(result[idx].id).to.be.equal(agent.id);
         expect(result[idx].status).to.be.equal(201);
-      }))
-      .then(() => client.deleteAgentBulk(agentIds))
-      .then((deletions) => Promise.allSettled(deletions));
+      }));
   });
 
   it('addAgentContextOperationsBulk: should succeed with agents with different number of operations', function() {
     this.timeout(100000); // TODO: To be removed.
-    const agentIds = [{ id: 'agent0' }, { id: 'agent1' }, { id: 'agent2' }];
-    return client.deleteAgentBulk(agentIds)
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(
-        agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
-      ))
+    const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }, { id: agentIds[2] }];
+    return client
+      .createAgentBulk(
+        agentIdsToTest.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+      )
       .then(() => client.addAgentContextOperationsBulk([
-        { id: 'agent0', operations: CONFIGURATION_1_OPERATIONS_1 }, // S
-        { id: 'agent1', operations: CONFIGURATION_1_OPERATIONS_2 }, // large
-        { id: 'agent2', operations: CONFIGURATION_1_OPERATIONS_1 } // S
+        { id: agentIds[0], operations: CONFIGURATION_1_OPERATIONS_1 }, // S
+        { id: agentIds[1], operations: CONFIGURATION_1_OPERATIONS_2 }, // large
+        { id: agentIds[2], operations: CONFIGURATION_1_OPERATIONS_1 } // S
       ]))
       .then((result) => {
-        expect(result[0].id).to.be.equal('agent1');
-        expect(result[1].id).to.be.equal('agent0');
-        expect(result[2].id).to.be.equal('agent2');
+        expect(result[0].id).to.be.equal(agentIds[1]);
+        expect(result[1].id).to.be.equal(agentIds[0]);
+        expect(result[2].id).to.be.equal(agentIds[2]);
         result.map(({ status }) => expect(status).to.be.equal(201));
-        return client.deleteAgentBulk(agentIds);
-      })
-      .then((deletions) => Promise.allSettled(deletions));
+      });
   });
 
   it('addAgentContextOperationsBulk: should handle invalid agents', function() {
-    const agentIds = [{ id: 'john_doe' }];
+    const agentIdsToTest = [{ id: agentIds[0] }];
     const agentWrongIds = [
-      ...agentIds,
+      ...agentIdsToTest,
       { id: 'john_doe_not_found' },
       { id: 'john?doe' }
     ];
-    return client.deleteAgentBulk(agentWrongIds)
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(
-        agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
-      ))
+    return client
+      .createAgentBulk(
+        agentIdsToTest.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+      )
       .then(() => client.addAgentContextOperationsBulk(
         agentWrongIds.map(({ id }) => ({
           id,
@@ -327,56 +305,49 @@ describe('BULK:', function() {
         expect(result[2].id).to.be.equal(agentWrongIds[2].id);
         expect(result[2].status).to.be.equal(400);
         expect(result[2].name).to.be.equal('AgentError');
-
-        return client.deleteAgentBulk(agentIds);
-      })
-      .then((deletions) => Promise.allSettled(deletions));
+      });
   });
 
   it('addAgentContextOperationsBulk: should handle invalid context', function() {
-    const agentIds = [{ id: 'John_Lemon' }, { id: 'Insane_Bane' }];
-    return client.deleteAgentBulk(agentIds)
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(
-        agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
-      ))
+    const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }];
+    return client
+      .createAgentBulk(
+        agentIdsToTest.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+      )
       .then(() => client.addAgentContextOperationsBulk(
-        agentIds.map(({ id }) => ({
+        agentIdsToTest.map(({ id }) => ({
           id,
           operations: INVALID_CONFIGURATION_1_OPERATIONS_1
         })))
       )
       .then((results) => {
         results.map((agent_res, idx) => {
-          expect(agent_res.id).to.be.equal(agentIds[idx].id);
+          expect(agent_res.id).to.be.equal(agentIdsToTest[idx].id);
           expect(agent_res.status).to.be.equal(400);
           expect(agent_res.name).to.be.equal('InvalidPropertyValue');
         });
-      })
-      .then(() => client.deleteAgentBulk(agentIds))
-      .then((deletions) => Promise.allSettled(deletions));
+      });
   });
 
   // getAgentDecisionTreeBulk
   it('getAgentDecisionTreeBulk: should work with two valid agents', function() {
-    const agentIds = [{ id: 'charlotte_cardin' }, { id: 'ben_harper' }];
-    return client.deleteAgentBulk(agentIds)
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(
-        agentIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
-      ))
+    const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }];
+    return client
+      .createAgentBulk(
+        agentIdsToTest.map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))
+      )
       .then(() => client.addAgentContextOperationsBulk(
-        agentIds.map(({ id }) => ({
+        agentIdsToTest.map(({ id }) => ({
           id,
           operations: CONFIGURATION_1_OPERATIONS_1
         })))
       )
       .then(() => client.getAgentDecisionTreeBulk(
-        agentIds.map(({ id }) => ({ id, timestamp: TS0 }))
+        agentIdsToTest.map(({ id }) => ({ id, timestamp: TS0 }))
       ))
       .then((agentTrees) => {
         agentTrees.map((agent, idx) => {
-          expect(agent.id).to.be.equal(agentIds[idx].id);
+          expect(agent.id).to.be.equal(agentIdsToTest[idx].id);
           expect(agent.timestamp).to.be.equal(TS0);
           expect(agent).to.be.ok;
           const { _version, configuration, trees } = agent.tree;
@@ -384,20 +355,17 @@ describe('BULK:', function() {
           expect(_version).to.be.equal('1.1.0');
           expect(configuration).to.be.deep.equal(CONFIGURATION_1);
         });
-        return client.deleteAgentBulk(agentIds);
-      })
-      .then((deletions) => Promise.allSettled(deletions));
+      });
   });
 
   it('getAgentDecisionTreeBulk: should handle unvalid agents ids', function() {
-    const agentIds = [{ id: 'twenty_one' }, { id: 'pilots' }];
-    const agentWrongIds = [...agentIds, { id: 'w3!rD_[D' }];
-    return client.deleteAgentBulk(agentIds)
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(agentIds.map(({ id }) =>
-        ({ id, configuration: CONFIGURATION_1 })))
+    const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[2] }];
+    const agentWrongIds = [...agentIdsToTest, { id: 'w3!rD_[D' }];
+    return client
+      .createAgentBulk(agentIdsToTest.map(({ id }) =>
+        ({ id, configuration: CONFIGURATION_1 }))
       )
-      .then(() => client.addAgentContextOperationsBulk(agentIds.map(({ id }) => ({
+      .then(() => client.addAgentContextOperationsBulk(agentIdsToTest.map(({ id }) => ({
         id,
         operations: CONFIGURATION_1_OPERATIONS_1
       }))))
@@ -408,7 +376,7 @@ describe('BULK:', function() {
           expect(agent.id).to.be.equal(agentWrongIds[idx].id);
           expect(agent.timestamp).to.be.equal(TS0);
         });
-        agentIds.map((agent, idx) => {
+        agentIdsToTest.map((agent, idx) => {
           expect(agentTrees[idx]).to.be.ok;
           const { _version, configuration, trees } = agentTrees[idx].tree;
           expect(trees).to.be.ok;
@@ -417,29 +385,25 @@ describe('BULK:', function() {
         });
         expect(agentTrees[2].status).to.be.equal(400);
         expect(agentTrees[2].name).to.be.equal('AgentError');
-
-        return client.deleteAgentBulk(agentIds);
-      })
-      .then((deletions) => Promise.allSettled(deletions));
+      });
   });
 
   it('getAgentDecisionTreeBulk: should handle several timestamps', function() {
-    const agentId = 'tom_walker';
     const timestamps = [TS0, TS0 + 1000, TS0 + 2000];
-    return client.deleteAgent(agentId)
-      .then(() => client.createAgentBulk([{
-        id: agentId, configuration: CONFIGURATION_1
-      }]))
+    return client
+      .createAgentBulk([{
+        id: agentIds[0], configuration: CONFIGURATION_1
+      }])
       .then(() => client.addAgentContextOperationsBulk([{
-        id: agentId,
+        id: agentIds[0],
         operations: CONFIGURATION_1_OPERATIONS_1
       }]))
       .then(() => client.getAgentDecisionTreeBulk(
-        timestamps.map((timestamp) => ({ id: agentId, timestamp }))
+        timestamps.map((timestamp) => ({ id: agentIds[0], timestamp }))
       ))
       .then((agentTrees) => {
         agentTrees.map((agent, idx) => {
-          expect(agent.id).to.be.equal(agentId);
+          expect(agent.id).to.be.equal(agentIds[0]);
           expect(agent.timestamp).to.be.equal(timestamps[idx]);
           expect(agent).to.be.ok;
           const { _version, configuration, trees } = agent.tree;
@@ -447,27 +411,24 @@ describe('BULK:', function() {
           expect(_version).to.be.equal('1.1.0');
           expect(configuration).to.be.deep.equal(CONFIGURATION_1);
         });
-
-        return client.deleteAgent(agentId);
       });
   });
 
   it('getAgentDecisionTreeBulk: should handle invalid timestamps', function() {
-    const agentId = 'tom_walker';
     const timestamps = [TS0, 'INVALID_TIMESTAMP'];
-    return client.deleteAgent(agentId)
-      .then(() => client.createAgentBulk([{
-        id: agentId, configuration: CONFIGURATION_1
-      }]))
+    return client
+      .createAgentBulk([{
+        id: agentIds[0], configuration: CONFIGURATION_1
+      }])
       .then(() => client.addAgentContextOperationsBulk([{
-        id: agentId,
+        id: agentIds[0],
         operations: CONFIGURATION_1_OPERATIONS_1
       }]))
       .then(() => client.getAgentDecisionTreeBulk(timestamps
-        .map((timestamp) => ({ id: agentId, timestamp }))))
+        .map((timestamp) => ({ id: agentIds[0], timestamp }))))
       .then((agentTrees) => {
         agentTrees.map((agent, idx) => {
-          expect(agent.id).to.be.equal(agentId);
+          expect(agent.id).to.be.equal(agentIds[0]);
           expect(agent.timestamp).to.be.equal(timestamps[idx]);
         });
         const { _version, configuration, trees } = agentTrees[0].tree;
@@ -476,8 +437,6 @@ describe('BULK:', function() {
         expect(configuration).to.be.deep.equal(CONFIGURATION_1);
         expect(agentTrees[1].status).to.be.equal(400);
         expect(agentTrees[1].name).to.be.equal('ContextError');
-
-        return client.deleteAgent(agentId);
       });
   });
 
@@ -487,147 +446,126 @@ describe('BULK:', function() {
   it('createGeneratorBulk: should succeed when using valid configurations and a specified id', function() {
     return client
       .createGeneratorBulk([
-        { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
-        { id: 'generator_2', configuration: CONFIGURATION_1_GENERATOR }
+        { id: generatorIds[0], configuration: CONFIGURATION_1_GENERATOR },
+        { id: generatorIds[1], configuration: CONFIGURATION_1_GENERATOR }
       ])
       .then(() => Promise.all([
-        client.getGenerator('generator_1'),
-        client.getGenerator('generator_2')
+        client.getGenerator(generatorIds[0]),
+        client.getGenerator(generatorIds[1])
       ]))
       .then((generators) => {
-        expect(generators[0].id).to.be.equal('generator_1');
-        expect(generators[1].id).to.be.equal('generator_2');
+        expect(generators[0].id).to.be.equal(generatorIds[0]);
+        expect(generators[1].id).to.be.equal(generatorIds[1]);
         expect(generators[0].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
         expect(generators[1].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
-      })
-      .then(() => Promise.all([
-        client.deleteGenerator('generator_1'),
-        client.deleteGenerator('generator_2')
-      ]));
+      });
   });
 
   it('createGeneratorBulk: should handle invalid configuration', function() {
     return client
-      .deleteGeneratorBulk([
-        { id: 'generator_1' },
-        { id: 'generator_2' }
+      .createGeneratorBulk([
+        { id: generatorIds[0], configuration: CONFIGURATION_1_GENERATOR },
+        { id: generatorIds[1], configuration: CONFIGURATION_1 }
       ])
-      .then(() => client.createGeneratorBulk([
-        { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
-        { id: 'generator_2', configuration: CONFIGURATION_1 }
-      ]))
-      .then(() => client.getGenerator('generator_1'))
+      .then(() => client.getGenerator(generatorIds[0]))
       .then((generator) => {
-        expect(generator.id).to.be.equal('generator_1');
+        expect(generator.id).to.be.equal(generatorIds[0]);
         expect(generator.configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
       })
-      .then(() => client.getGenerator('generator_2'))
+      .then(() => client.getGenerator(generatorIds[1]))
       .catch((err) => {
         expect(err.name).to.be.equal('CraftAiBadRequestError');
-      })
-      .then(() => client.deleteGenerator('generator_1'));
+      });
   });
 
   it('createGeneratorBulk: should handle undefined configuration', function() {
     return client
-      .deleteGeneratorBulk([
-        { id: 'generator_1' },
-        { id: 'generator_2' }
+      .createGeneratorBulk([
+        { id: generatorIds[0], configuration: CONFIGURATION_1_GENERATOR },
+        { id: generatorIds[1] }
       ])
-      .then(() => client.createGeneratorBulk([
-        { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
-        { id: 'generator_2' }
-      ]))
-      .then(() => client.getGenerator('generator_1'))
+      .then(() => client.getGenerator(generatorIds[0]))
       .then((generator) => {
-        expect(generator.id).to.be.equal('generator_1');
+        expect(generator.id).to.be.equal(generatorIds[0]);
         expect(generator.configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
       })
-      .then(() => client.getGenerator('generator_2'))
+      .then(() => client.getGenerator(generatorIds[1]))
       .catch((err) => {
         expect(err.name).to.be.equal('CraftAiBadRequestError');
-      })
-      .then(() => client.deleteGenerator('generator_1'));
+      });
   });
 
   it('createGeneratorBulk: should handle undefined id', function() {
     return client
-      .deleteGeneratorBulk([{ id: 'generator_1' }])
-      .then(() => client.createGeneratorBulk([
-        { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
+      .createGeneratorBulk([
+        { id: generatorIds[0], configuration: CONFIGURATION_1_GENERATOR },
         { configuration: CONFIGURATION_1_GENERATOR }
-      ]))
+      ])
       .then((generators) => {
-        expect(generators[0].id).to.be.equal('generator_1');
+        expect(generators[0].id).to.be.equal(generatorIds[0]);
         expect(generators[0].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
         expect(generators[1].status).to.be.equal(400);
         expect(generators[1].name).to.be.equal('GeneratorError');
-      })
-      .then(() => client.deleteGenerator('generator_1'));
+      });
   });
 
   it('createGeneratorBulk: should 200 then 400 when using the same id twice', function() {
     return client
-      .deleteGeneratorBulk([{ id: 'generator_1' }])
-      .then(() => client.createGeneratorBulk([
-        { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
-        { id: 'generator_1', configuration: CONFIGURATION_1 }
-      ]))
+      .createGeneratorBulk([
+        { id: generatorIds[0], configuration: CONFIGURATION_1_GENERATOR },
+        { id: generatorIds[0], configuration: CONFIGURATION_1 }
+      ])
       .then((generators) => {
-        expect(generators[0].id).to.be.equal('generator_1');
+        expect(generators[0].id).to.be.equal(generatorIds[0]);
         expect(generators[0].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
         expect(generators[1].status).to.be.equal(400);
         expect(generators[1].name).to.be.equal('ContextError');
-      })
-      .then(() => client.deleteGenerator('generator_1'));
+      });
   });
 
   // deleteGeneratorBulk
   it('deleteGeneratorBulk: should succeed when using valid ids.', function() {
-    const generatorIds = [
-      { id: 'generator_1' },
-      { id: 'generator_2' },
-      { id: 'generator_3' }
+    const generatorIdsToTests = [
+      { id: generatorIds[0] },
+      { id: generatorIds[1] },
+      { id: generatorIds[2] }
     ];
     const expectedResults = [
-      { message: 'Generator "generator_1" doesn\'t exist (or was already deleted).' },
-      { message: 'Generator "generator_2" doesn\'t exist (or was already deleted).' },
-      { message: 'Generator "generator_3" doesn\'t exist (or was already deleted).' }
+      { message: `Generator "${generatorIds[0]}" doesn't exist (or was already deleted).` },
+      { message: `Generator "${generatorIds[1]}" doesn't exist (or was already deleted).` },
+      { message: `Generator "${generatorIds[2]}" doesn't exist (or was already deleted).` }
     ];
-    return client.deleteGeneratorBulk(generatorIds)
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createGeneratorBulk(
-        generatorIds.map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))
-      ))
+    return client
+      .createGeneratorBulk(
+        generatorIdsToTests.map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))
+      )
       .then(() => Promise.all([
-        client.getGenerator('generator_1'),
-        client.getGenerator('generator_2'),
-        client.getGenerator('generator_3')
+        client.getGenerator(generatorIds[0]),
+        client.getGenerator(generatorIds[1]),
+        client.getGenerator(generatorIds[2])
       ]))
       .then((generators) => {
-        expect(generators[0].id).to.be.equal('generator_1');
+        expect(generators[0].id).to.be.equal(generatorIds[0]);
         expect(generators[0].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
-        expect(generators[1].id).to.be.equal('generator_2');
+        expect(generators[1].id).to.be.equal(generatorIds[1]);
         expect(generators[1].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
-        expect(generators[2].id).to.be.equal('generator_3');
+        expect(generators[2].id).to.be.equal(generatorIds[2]);
         expect(generators[2].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
       })
-      .then(() => client.deleteGeneratorBulk(generatorIds))
+      .then(() => client.deleteGeneratorBulk(generatorIdsToTests))
       .then((deletions) => deletions
         .map((generator, i) => {
-          expect(generator.id).to.be.equal(generatorIds[i].id);
+          expect(generator.id).to.be.equal(generatorIdsToTests[i].id);
           expect(generator.configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
         })
       )
-      .then(() => client.deleteGeneratorBulk(generatorIds))
-      .then((generatorsList_redelete) => {
-        expect(generatorsList_redelete).to.be.deep.equal(expectedResults);
-      });
+      .then(() => client.deleteGeneratorBulk(generatorIdsToTests))
+      .then((generatorsListRedelete) => expect(generatorsListRedelete).to.be.deep.equal(expectedResults));
   });
 
   it('deleteGeneratorBulk: Error for unvalid id.', function() {
-    const generatorIds = [{ id: '' }];
-    return client.deleteGeneratorBulk(generatorIds)
+    const generatorIdsToTest = [{ id: '' }];
+    return client.deleteGeneratorBulk(generatorIdsToTest)
       .then((res) => {
         expect(res[0].name).to.be.equal('GeneratorError');
         expect(res[0].status).to.be.equal(400);
@@ -635,28 +573,24 @@ describe('BULK:', function() {
   });
 
   it('deleteGeneratorBulk: should fail with non existing id.', function() {
-    const generatorIds = [{ id: 'toto_non_existing' }];
-    return client.deleteGeneratorBulk(generatorIds)
-      .then((res) => {
-        expect(res[0].message).to.be.equal('Generator "toto_non_existing" doesn\'t exist (or was already deleted).');
-      });
+    const generatorIdsToTest = [{ id: 'toto_non_existing' }];
+    return client.deleteGeneratorBulk(generatorIdsToTest)
+      .then((res) => expect(res[0].message).to.be.equal('Generator "toto_non_existing" doesn\'t exist (or was already deleted).'));
   });
 
   // getGeneratorDecisionTreeBulk
   it('getGeneratorDecisionTreeBulk: should work with two valid generators', function() {
-    const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
-    const agentIds = [{ id: 'agent_1' }, { id: 'agent_2' }];
+    const generatorIdsToTest = [{ id: generatorIds[0] }, { id: generatorIds[1] }];
+    const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }];
 
-    return client.deleteGeneratorBulk(generatorIds)
-      .then(() => client.deleteAgentBulk(agentIds))
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(agentIds
-        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
-      .then(() => client.addAgentContextOperationsBulk(agentIds
+    return client
+      .createAgentBulk(agentIdsToTest
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 })))
+      .then(() => client.addAgentContextOperationsBulk(agentIdsToTest
         .map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_1 }))))
-      .then(() => client.createGeneratorBulk(generatorIds
+      .then(() => client.createGeneratorBulk(generatorIdsToTest
         .map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))))
-      .then(() => client.getGeneratorDecisionTreeBulk(generatorIds
+      .then(() => client.getGeneratorDecisionTreeBulk(generatorIdsToTest
         .map(({ id }) => ({ id, timestamp: 1464600500 }))))
       .then((trees) => {
         trees.map((metatree) => {
@@ -665,53 +599,43 @@ describe('BULK:', function() {
           expect(tree._version).to.be.equal('1.1.0');
           expect(tree.trees).to.be.ok;
         });
-        return client.deleteAgentBulk(agentIds)
-          .then((deletions) => Promise.allSettled(deletions))
-          .then(() => client.deleteGeneratorBulk(generatorIds));
       });
   });
 
   it('getGeneratorDecisionTreeBulk: with non-existing generators', function() {
-    const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
-    const agentIds = [{ id: 'agent_1' }, { id: 'agent_2' }];
+    const generatorIdsToTest = [{ id: generatorIds[0] }, { id: generatorIds[1] }];
+    const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }];
 
-    return client.deleteGeneratorBulk(generatorIds)
-      .then(() => client.deleteAgentBulk(agentIds))
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(agentIds
-        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
-      .then(() => client.addAgentContextOperationsBulk(agentIds
+    return client
+      .createAgentBulk(agentIdsToTest
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 })))
+      .then(() => client.addAgentContextOperationsBulk(agentIdsToTest
         .map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_1 }))))
-      .then(() => client.createGeneratorBulk(generatorIds
+      .then(() => client.createGeneratorBulk(generatorIdsToTest
         .map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))))
-      .then(() => client.getGeneratorDecisionTreeBulk(generatorIds
+      .then(() => client.getGeneratorDecisionTreeBulk(generatorIdsToTest
         .map(() => ({ id: 'non-existing', timestamp: 1464600500 }))))
       .then((results) => {
         results.map((result) => {
           expect(result.name).to.be.equal('NotFound');
           expect(result.status).to.be.equal(404);
         });
-        return client.deleteAgentBulk(agentIds)
-          .then((deletions) => Promise.allSettled(deletions))
-          .then(() => client.deleteGeneratorBulk(generatorIds));
       });
   });
 
   it('getGeneratorDecisionTreeBulk: mixed results with one existing and one non-exsiting generators', function() {
-    const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
-    const agentIds = [{ id: 'agent_1' }, { id: 'agent_2' }];
+    const generatorIdsToTest = [{ id: generatorIds[0] }, { id: generatorIds[1] }];
+    const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }];
 
-    return client.deleteGeneratorBulk(generatorIds)
-      .then(() => client.deleteAgentBulk(agentIds))
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(agentIds
-        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
-      .then(() => client.addAgentContextOperationsBulk(agentIds
+    return client
+      .createAgentBulk(agentIdsToTest
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 })))
+      .then(() => client.addAgentContextOperationsBulk(agentIdsToTest
         .map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_1 }))))
-      .then(() => client.createGeneratorBulk(generatorIds
+      .then(() => client.createGeneratorBulk(generatorIdsToTest
         .map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))))
       .then(() => client.getGeneratorDecisionTreeBulk([
-        { id: 'generator_1', timestamp: 1464600500 },
+        { id: generatorIds[0], timestamp: 1464600500 },
         { id: 'non-existing', timestamp: 1464600500 }
       ]))
       .then(([metatree, result]) => {
@@ -720,70 +644,55 @@ describe('BULK:', function() {
         expect(metatree.tree.trees).to.be.ok;
         expect(result.name).to.be.equal('NotFound');
         expect(result.status).to.be.equal(404);
-        return client.deleteAgentBulk(agentIds)
-          .then((deletions) => Promise.allSettled(deletions))
-          .then(() => client.deleteGeneratorBulk(generatorIds));
       });
   });
 
   it('getGeneratorDecisionTreeBulk: mixed results with one without contextops', function() {
-    const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
-    const agentIds = [{ id: 'agent_1' }, { id: 'agent_2' }];
+    const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }];
     const configuration_custom_1 = JSON.parse(JSON.stringify(CONFIGURATION_1_GENERATOR));
-    configuration_custom_1.filter = ['agent_1'];
+    configuration_custom_1.filter = [agentIds[0]];
     const configuration_custom_2 = JSON.parse(JSON.stringify(CONFIGURATION_1_GENERATOR));
-    configuration_custom_2.filter = ['agent_2'];
+    configuration_custom_2.filter = [agentIds[1]];
 
-    return client.deleteGeneratorBulk(generatorIds)
-      .then(() => client.deleteAgentBulk(agentIds))
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(agentIds
-        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
+    return client
+      .createAgentBulk(agentIdsToTest
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 })))
       .then(() => client.addAgentContextOperationsBulk([
-        { id: 'agent_1', operations: CONFIGURATION_1_OPERATIONS_1 }
+        { id: agentIds[0], operations: CONFIGURATION_1_OPERATIONS_1 }
       ]))
       .then(() => client.createGeneratorBulk([
-        { id: 'generator_1', configuration: CONFIGURATION_1_GENERATOR },
-        { id: 'generator_2', configuration: configuration_custom_2 }
+        { id: generatorIds[0], configuration: CONFIGURATION_1_GENERATOR },
+        { id: generatorIds[1], configuration: configuration_custom_2 }
       ]))
       .then(() => client.getGeneratorDecisionTreeBulk([
-        { id: 'generator_1', timestamp: 1464600500 },
-        { id: 'generator_2', timestamp: 1464600500 }
+        { id: generatorIds[0], timestamp: 1464600500 },
+        { id: generatorIds[1], timestamp: 1464600500 }
       ]))
       .then(([res1, res2]) => {
-        expect(res1.id).to.be.equal('generator_1');
+        expect(res1.id).to.be.equal(generatorIds[0]);
         expect(res1.tree.trees).to.be.ok;
         expect(res2.status).to.be.equal(500);
         expect(res2.name).to.be.equal('InternalError');
-        return client.deleteAgentBulk(agentIds)
-          .then((deletions) => Promise.allSettled(deletions))
-          .then(() => client.deleteGeneratorBulk(generatorIds));
       });
   });
 
   it('getGeneratorDecisionTreeBulk: should fail without contextops', function() {
-    const generatorIds = [{ id: 'generator_1' }, { id: 'generator_2' }];
-    const agentIds = [{ id: 'agent_1' }, { id: 'agent_2' }];
+    const generatorIdsToTest = [{ id: generatorIds[0] }, { id: generatorIds[1] }];
+    const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }];
 
-    return client.deleteGeneratorBulk(generatorIds)
-      .then(() => client.deleteAgentBulk(agentIds))
-      .then((deletions) => Promise.allSettled(deletions))
-      .then(() => client.createAgentBulk(agentIds
-        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
-      .then(() => client.createGeneratorBulk(generatorIds
+    return client.createAgentBulk(agentIdsToTest
+      .map(({ id }) => ({ id, configuration: CONFIGURATION_1 })))
+      .then(() => client.createGeneratorBulk(generatorIdsToTest
         .map(({ id }) => ({ id, configuration: CONFIGURATION_1_GENERATOR }))))
-      .then(() => client.getGeneratorDecisionTreeBulk(generatorIds
+      .then(() => client.getGeneratorDecisionTreeBulk(generatorIdsToTest
         .map(({ id }) => ({ id, timestamp: 1464600500 }))))
       .then(([res1, res2]) => {
-        expect(res1.id).to.be.equal('generator_1');
+        expect(res1.id).to.be.equal(generatorIds[0]);
         expect(res1.name).to.be.equal('InternalError');
         expect(res1.status).to.be.equal(500);
-        expect(res2.id).to.be.equal('generator_2');
+        expect(res2.id).to.be.equal(generatorIds[1]);
         expect(res2.name).to.be.equal('InternalError');
         expect(res2.status).to.be.equal(500);
-        return client.deleteAgentBulk(agentIds)
-          .then((deletions) => Promise.allSettled(deletions))
-          .then(() => client.deleteGeneratorBulk(generatorIds));
       });
   });
 });
