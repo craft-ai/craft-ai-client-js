@@ -172,10 +172,11 @@ function checkContext(configuration) {
       validators,
       ({ badProperties, missingProperties }, { property, type, validator }) => {
         const value = context[property];
+        const isOptional = _.isPlainObject(value) && _.isEmpty(value);
         if (value === undefined) {
           missingProperties.push(property);
         }
-        else if (!validator(value) && !_.isNull(value)) {
+        else if (!validator(value) && !_.isNull(value) && !isOptional) {
           badProperties.push({ property, type, value });
         }
         return { badProperties, missingProperties };
