@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bump packages and update code accordingly.
 - Reduce bundle size.
 - Remove support of node 8.
+- Remove `is_optional` property because it is now activated on all platform.
 
 ## [1.19.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.19.0...v1.19.1) - 2020-05-26 ##
 

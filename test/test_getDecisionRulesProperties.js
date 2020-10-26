@@ -74,8 +74,7 @@ describe('interpreter.getDecisionRulesProperties(<tree>)', function() {
       },
       {
         'property': 'enum2',
-        'type': 'enum',
-        'is_optional': true
+        'type': 'enum'
       },
       {
         'property': 'enum3',
