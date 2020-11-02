@@ -6,10 +6,10 @@ const client = craftai(craftToken);
 
 console.log('Clearning up dangling agents and generators from tests');
 client.listAgents()
-  .then((agentNames) => {
+  .then(async(agentNames) => {
     console.log('got', agentNames.length);
-    agentNames.filter((agentName) => agentName.includes(JOB_ID));
-    return agentNames.reduce((acc, agentName) =>
+    const agentsToClean = agentNames.filter((agentName) => agentName.includes(JOB_ID));
+    return agentsToClean.reduce((acc, agentName) =>
       acc.then((count) => client.deleteAgent(agentName)
         .then(() => {
           console.log('Deleted agent', agentName);
@@ -19,11 +19,11 @@ client.listAgents()
   })
   .then((nAgentDeleted) => {
     console.log(`${nAgentDeleted} agent(s) were deleted.`);
-    return client.listGenerators
-      .then((generatorNames) => {
+    return client.listGenerators()
+      .then(async(generatorNames) => {
         console.log('got', generatorNames.length);
-        generatorNames.filter((generatorName) => generatorName.includes(JOB_ID));
-        return generatorNames.reduce((acc, generatorName) =>
+        const generatorsToClean = generatorNames.filter((generatorName) => generatorName.includes(JOB_ID));
+        return generatorsToClean.reduce((acc, generatorName) =>
           acc.then((count) => client.deleteGenerator(generatorName)
             .then(() => {
               console.log('Deleted generators', generatorName);
