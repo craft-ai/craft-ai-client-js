@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add some fix in test clean up.
 
+### Updated ###
+
+- Bump packages and remove timeout and fix bug in test.
+
 ## [1.20.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.19.1...v1.20.0) - 2020-10-26 ##
 
 ### Added ###
