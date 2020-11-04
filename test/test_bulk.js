@@ -39,7 +39,13 @@ describe('BULK:', function() {
     expect(client).to.be.ok;
   });
 
-  afterEach(function() {
+  beforeEach(function() {
+    return client.deleteAgentBulk(agentIds.map((id) => ({ id })))
+      .then((deletions) => Promise.allSettled(deletions))
+      .then(() => client.deleteGeneratorBulk(generatorIds.map((id) => ({ id }))));
+  });
+
+  after(function() {
     return client.deleteAgentBulk(agentIds.map((id) => ({ id })))
       .then((deletions) => Promise.allSettled(deletions))
       .then(() => client.deleteGeneratorBulk(generatorIds.map((id) => ({ id }))));
@@ -227,8 +233,6 @@ describe('BULK:', function() {
 
   // addAgentContextOperationsBulk
   it('addAgentContextOperationsBulk: should work with 10 agents with small number of operations', function() {
-    this.timeout(100000); // TODO: To be removed.
-
     return client
       .createAgentBulk(
         agentIds.map((id) => ({ id, configuration: CONFIGURATION_1 }))
@@ -243,24 +247,24 @@ describe('BULK:', function() {
       }));
   });
 
-  // TODO: unskip this.
-  // timeout is more than 100s
-  it.skip('addAgentContextOperationsBulk: should work with 10 agents with large number of operations', function() {
+  it('addAgentContextOperationsBulk: should work with 10 agents with large number of operations', function() {
     const agentIds = Array.apply(null, Array(10))
       .map((x, i) => ({ id: `agent${i}_${RUN_ID}` }));
-    return client
-      .createAgentBulk(agentIds
-        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 })))
+    return client.deleteAgentBulk(agentIds)
+      .then((deletions) => Promise.all(deletions))
+      .then(() => client.createAgentBulk(agentIds
+        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
       .then(() => client.addAgentContextOperationsBulk(agentIds
         .map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_2 }))))
       .then((result) => agentIds.map((agent, idx) => {
         expect(result[idx].id).to.be.equal(agent.id);
         expect(result[idx].status).to.be.equal(201);
-      }));
+      }))
+      .then(() => client.deleteAgentBulk(agentIds))
+      .then((deletions) => Promise.all(deletions));
   });
 
   it('addAgentContextOperationsBulk: should succeed with agents with different number of operations', function() {
-    this.timeout(100000); // TODO: To be removed.
     const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }, { id: agentIds[2] }];
     return client
       .createAgentBulk(
