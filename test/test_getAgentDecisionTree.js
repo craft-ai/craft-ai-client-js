@@ -65,7 +65,6 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
     });
 
     it('should succeed when using valid parameters', function() {
-      this.timeout(100000); // TODO: To be removed.
       return client.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO)
         .then((treeJson) => {
           expect(treeJson).to.be.ok;
@@ -77,7 +76,6 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
     });
 
     it('should succeed when passing a version parameters', function() {
-      this.timeout(100000); // TODO: To be removed.
       let version = '1';
       return client.getAgentDecisionTree(agent.id, CONFIGURATION_1_OPERATIONS_1_TO, version)
         .then((treeJson) => {
@@ -91,7 +89,6 @@ describe('client.getAgentDecisionTree(<agentId>, <timestamp>)', function() {
     });
 
     it('should fail with a timeout error when the client side timeout is low', function() {
-      this.timeout(100000); // TODO: To be removed.
       const otherClient = craftai(_.assign({}, CRAFT_CFG, {
         decisionTreeRetrievalTimeout: 5
       }));

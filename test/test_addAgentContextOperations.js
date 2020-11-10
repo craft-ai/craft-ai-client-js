@@ -118,7 +118,6 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       });
   });
   it('should succeed when using operations with ISO 8601 timestamps', function() {
-    this.timeout(100000); // TODO: To be removed.
     return client.addAgentContextOperations(agents[0].id, [
       {
         timestamp: '2020-04-23T04:30:00-05:00',
@@ -226,7 +225,6 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       );
   });
   it('should succeed with a very large payload', function() {
-    this.timeout(100000); // TODO: To be removed.
     return client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_2)
       .then(() => client.getAgentContextOperations(agents[0].id))
       .then((retrievedOperations) => {
@@ -243,7 +241,6 @@ describe('client.addAgentContextOperations(<agentId>, <operations>)', function()
       });
   });
   it('should work properly when sending operations to more than one agent', function() {
-    this.timeout(100000); // TODO: To be removed.
     return Promise.all([
       client.addAgentContextOperations(agents[0].id, CONFIGURATION_1_OPERATIONS_2),
       client.addAgentContextOperations(agents[1].id, CONFIGURATION_1_OPERATIONS_1)

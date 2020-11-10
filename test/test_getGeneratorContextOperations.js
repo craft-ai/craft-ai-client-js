@@ -6,7 +6,7 @@ import craftai from '../src';
 import EXPECTED_CONFIGURATION_1_OPERATIONS_1 from './data/expected/configuration_1_operations_1.json';
 import EXPECTED_CONFIGURATION_1_OPERATIONS_2 from './data/expected/configuration_1_operations_2.json';
 
-describe.skip('client.getGeneratorContextOperations(<generatorId>, from, to)', function() {
+describe('client.getGeneratorContextOperations(<generatorId>, from, to)', function() {
   let client;
   const agentId = `getGenCOpsAgent_${RUN_ID}`;
   const agentId2 = `getGenCOpsAgent2_${RUN_ID}`;
@@ -35,13 +35,30 @@ describe.skip('client.getGeneratorContextOperations(<generatorId>, from, to)', f
   });
 
   it('should retrieve all context operations', function() {
+    const expectedResultFirst = {
+      agent_id: agentId2,
+      context: _.first(EXPECTED_CONFIGURATION_1_OPERATIONS_2).context,
+      timestamp: _.first(EXPECTED_CONFIGURATION_1_OPERATIONS_2).timestamp
+    };
+    const expectedResultLast = {
+      agent_id: agentId2,
+      context: _.last(EXPECTED_CONFIGURATION_1_OPERATIONS_2).context,
+      timestamp: _.last(EXPECTED_CONFIGURATION_1_OPERATIONS_2).timestamp
+    };
+    const expectedLength = EXPECTED_CONFIGURATION_1_OPERATIONS_2.length
+      + EXPECTED_CONFIGURATION_1_OPERATIONS_1.length;
+    const formattedExpectedResult = EXPECTED_CONFIGURATION_1_OPERATIONS_2.slice(0, 1000)
+      .map((operation) => ({
+        agent_id: agentId2,
+        context: operation.context,
+        timestamp: operation.timestamp
+      }));
     return client.getGeneratorContextOperations(generatorId)
       .then((operations) => {
-        expect(_.first(operations)).to.be.deep.equal({ agent_id: agentId2, context: _.first(EXPECTED_CONFIGURATION_1_OPERATIONS_2).context, timestamp: _.first(EXPECTED_CONFIGURATION_1_OPERATIONS_2).timestamp });
-        expect(_.last(operations)).to.be.deep.equal({ agent_id: agentId2, context: _.last(EXPECTED_CONFIGURATION_1_OPERATIONS_2).context, timestamp: _.last(EXPECTED_CONFIGURATION_1_OPERATIONS_2).timestamp });
-        expect(operations.length).to.be.equal(EXPECTED_CONFIGURATION_1_OPERATIONS_2.length + EXPECTED_CONFIGURATION_1_OPERATIONS_1.length);
-        const formattedExpectedResult = EXPECTED_CONFIGURATION_1_OPERATIONS_2.slice(0, 1000)
-          .map((operation) => ({ agent_id: agentId2, context: operation.context, timestamp: operation.timestamp }));
+        expect(_.first(operations)).to.be.deep.equal(expectedResultFirst);
+        expect(_.last(operations)).to.be.deep.equal(expectedResultLast);
+        expect(operations.length).to.be.equal(expectedLength);
+
         expect(operations.slice(0, 1000)).to.be.deep.equal(formattedExpectedResult);
       });
   });
