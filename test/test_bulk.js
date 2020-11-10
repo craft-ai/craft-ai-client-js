@@ -248,20 +248,26 @@ describe('BULK:', function() {
   });
 
   it('addAgentContextOperationsBulk: should work with 10 agents with large number of operations', function() {
-    const agentIds = Array.apply(null, Array(10))
-      .map((x, i) => ({ id: `agent${i}_${RUN_ID}` }));
-    return client.deleteAgentBulk(agentIds)
-      .then((deletions) => Promise.all(deletions))
-      .then(() => client.createAgentBulk(agentIds
-        .map(({ id }) => ({ id, configuration: CONFIGURATION_1 }))))
-      .then(() => client.addAgentContextOperationsBulk(agentIds
+    const agentIdsToTest = [
+      { id: agentIds[0] },
+      { id: agentIds[1] },
+      { id: agentIds[2] },
+      { id: agentIds[3] },
+      { id: agentIds[4] },
+      { id: agentIds[5] },
+      { id: agentIds[6] },
+      { id: agentIds[7] },
+      { id: agentIds[8] },
+      { id: agentIds[9] }
+    ];
+    return client.createAgentBulk(agentIdsToTest
+      .map(({ id }) => ({ id, configuration: CONFIGURATION_1 })))
+      .then(() => client.addAgentContextOperationsBulk(agentIdsToTest
         .map(({ id }) => ({ id, operations: CONFIGURATION_1_OPERATIONS_2 }))))
-      .then((result) => agentIds.map((agent, idx) => {
+      .then((result) => agentIdsToTest.map((agent, idx) => {
         expect(result[idx].id).to.be.equal(agent.id);
         expect(result[idx].status).to.be.equal(201);
-      }))
-      .then(() => client.deleteAgentBulk(agentIds))
-      .then((deletions) => Promise.all(deletions));
+      }));
   });
 
   it('addAgentContextOperationsBulk: should succeed with agents with different number of operations', function() {
