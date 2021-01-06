@@ -32,7 +32,7 @@ jobs:
         with:
           submodules: true
       - name: Set up Javascript
-        uses: actions/javascript-action@v2
+        uses: actions/javascript-action
         # with:
         #   python-version: ${{ matrix.python-version }}
       # - name: install Poetry
