@@ -9,10 +9,10 @@ jobs:
         include:
         # Define a build_id for each matrix config
           - node-version: "10.x"
-            build_id: ${{ github.run_number }}0
+            build_id: "toto1"
             to_publish: false
           - node-version: "12.x"
-            build_id: ${{ github.run_number }}1
+            build_id: "toto2"
             to_publish: true
     steps:
       # Preparing test/build environment 
@@ -29,7 +29,7 @@ jobs:
       - name: Run test
         env: 
           CRAFT_TOKEN: ${{ secrets.STANLEY_CRAFT_AI_TOKEN }}
-          JOB_ID: ${{ matrix.build_id }}
+          JOB_ID: "test12"
         run: npm test
       - name: Build package
         if: ${{ matrix.to_publish  == true }}
