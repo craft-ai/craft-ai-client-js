@@ -10,7 +10,6 @@ jobs:
         # Define a build_id for each matrix config
           - node-version: "10.x"
             build_id: ${{ github.run_number }}0
-            to_publish: false
           - node-version: "12.x"
             build_id: ${{ github.run_number }}1
             to_publish: true
