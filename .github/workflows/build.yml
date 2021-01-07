@@ -12,7 +12,7 @@ jobs:
             build_id: ${{ github.run_number }}0
           - node-version: "12.x"
             build_id: ${{ github.run_number }}1
-            to_publish: true
+            to_publish: "true"
     steps:
       # Preparing test/build environment 
       - name: Checkout scm
@@ -32,8 +32,9 @@ jobs:
           JOB_ID: ${{ matrix.build_id }}
         run: npm test
       - name: npm release
-        if: ${{ matrix.to_publish  == true }} && github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-        run: echo ${{ matrix.to_publish }}
+        #if: ${{ matrix.to_publish  == true }} && github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        if: matrix.to_publish == "true"
+        run: echo OK
         # uses: JS-DevTools/npm-publish@v1
         # run: npm publish
         # env:
