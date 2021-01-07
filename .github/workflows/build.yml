@@ -33,7 +33,7 @@ jobs:
         run: npm test
       - name: npm release
         if: ${{ matrix.to_publish  == true }} && github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-        run: echo Test
+        run: echo ${{ matrix.to_publish }}
         # uses: JS-DevTools/npm-publish@v1
         # run: npm publish
         # env:
