@@ -47,7 +47,6 @@ jobs:
         - name: Install packages
           run: npm install
         - name: Packaging & release
-          if: ${{ matrix.to_publish == true && github.event_name == 'push' && startsWith(github.ref, 'refs/tags') }}
           uses: JS-DevTools/npm-publish@v1
           with:
             token: ${{ secrets.CRAFT_AI_NPM_TOKEN }}
