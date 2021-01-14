@@ -1,0 +1,52 @@
+name: test js client
+on: [push]
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ["10.x", "12.x"]
+        include:
+        # Define a build_id for each matrix config
+          - node-version: "10.x"
+            build_id: ${{ github.run_number }}0
+          - node-version: "12.x"
+            build_id: ${{ github.run_number }}1
+    steps:
+      # Preparing test/build environment 
+      - name: Checkout scm
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.com'
+      - name: Install packages
+        run: npm install
+      - name: Run test
+        env: 
+          CRAFT_TOKEN: ${{ secrets.STANLEY_CRAFT_AI_TOKEN }}
+          JOB_ID: ${{ matrix.build_id }}
+        run: npm test
+  publish:
+      runs-on: ubuntu-latest
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+      needs: run_tests
+      steps:
+        - name: Checkout scm
+          uses: actions/checkout@v2
+          with:
+            submodules: true
+        - name: Set up Node
+          uses: actions/setup-node@v1
+          with:
+            node-version: "12.x"
+            registry-url: 'https://registry.npmjs.com'
+        - name: Install packages
+          run: npm install
+        - name: Packaging & release
+          uses: JS-DevTools/npm-publish@v1
+          with:
+            token: ${{ secrets.CRAFT_AI_NPM_TOKEN }}

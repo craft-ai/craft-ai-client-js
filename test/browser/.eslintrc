@@ -4,6 +4,6 @@
     "__CRAFT_OWNER__": true,
     "__CRAFT_URL__": true,
     "__DEBUG__": true,
-    "__TRAVIS_BUILD_ID__": true
+    "__JOB_ID__": true
   }
 }

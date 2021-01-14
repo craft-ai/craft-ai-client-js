@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Updated ###
 
 - Bump packages and remove timeout and fix bug in test.
+- Remove TravisCI and now use Github Actions.
 
 ## [1.20.0](https://github.com/craft-ai/craft-ai-client-js/compare/v1.19.1...v1.20.0) - 2020-10-26 ##
 
