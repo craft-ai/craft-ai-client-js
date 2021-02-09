@@ -645,6 +645,34 @@ export default function createClient(tokenOrCfg) {
           return decision;
         });
     },
+    computeAgentBoostingDecision: function(agentName, fromTs, toTs, context) {
+      if (_.isUndefined(agentName)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to compute an agent boosting decision with no agent name provided.'
+          )
+        );
+      }
+      if (_.isUndefined(context)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to compute an agent boosting decision with no context provided.'
+          )
+        );
+      }
+
+      return request({
+        method: 'POST',
+        path: `/agents/${agentName}/boosting/decide`,
+        body: {
+          window: [fromTs, toTs],
+          context
+        }
+      })
+        .then(({ body }) => {
+          return body;
+        });
+    },
     // Generators methods
     createGenerator: function(configuration, generatorName) {
       if (isUnvalidConfiguration(configuration)) {
@@ -919,6 +947,34 @@ export default function createClient(tokenOrCfg) {
           let decision = decide(body, ...contexts);
           decision.timestamp = posixTimestamp;
           return decision;
+        });
+    },
+    computeGeneratorBoostingDecision: function(generatorName, fromTs, toTs, context) {
+      if (_.isUndefined(generatorName)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to compute an generator boosting decision with no generatorName provided.'
+          )
+        );
+      }
+      if (_.isUndefined(context)) {
+        return Promise.reject(
+          new CraftAiBadRequestError(
+            'Bad Request, unable to compute an generator boosting decision with no context provided.'
+          )
+        );
+      }
+
+      return request({
+        method: 'POST',
+        path: `/generators/${generatorName}/boosting/decide`,
+        body: {
+          window: [fromTs, toTs],
+          context
+        }
+      })
+        .then(({ body }) => {
+          return body;
         });
     }
   };

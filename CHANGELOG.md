@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add some fix in test clean up.
 
+### Added ###
+- Add boosting decision functions
+
 ### Updated ###
 
 - Bump packages and remove timeout and fix bug in test.

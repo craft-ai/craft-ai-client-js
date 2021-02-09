@@ -1,0 +1,19 @@
+{
+  "context": {
+    "presence": {
+      "type": "enum"
+    },
+    "lightIntensity": {
+      "type": "continuous"
+    },
+    "lightbulbColor": {
+      "type": "enum"
+    }
+  },
+  "output": [
+    "lightbulbColor"
+  ],
+  "num_iterations": 100,
+  "learning_rate": 0.1,
+  "model_type": "boosting"
+}
