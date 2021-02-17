@@ -13,6 +13,9 @@
   "output": [
     "lightbulbColor"
   ],
+  "tree_max_depth": 4,
+  "operations_as_events": true,
+  "min_samples_per_leaf": 4,
   "num_iterations": 100,
   "learning_rate": 0.1,
   "model_type": "boosting"

@@ -1,4 +1,4 @@
-import CONFIGURATION_1 from './data/configuration_1.json';
+import CONFIGURATION_1 from './data/configuration_1_boosting.json';
 import CONFIGURATION_1_OPERATIONS_1 from './data/configuration_1_operations_3.json';
 import craftai, { errors } from '../src';
 
@@ -32,14 +32,23 @@ describe('client.computeAgentBoostingDecision(<agentId>, <fromTs>, <toTs>, <cont
       .catch((err) => expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError));
   });
 
-  // it('should succeed when using valid parameters', function() {
-  //   return client.computeAgentBoostingDecision(AGENT_NAME, CONFIGURATION_1_OPERATIONS_1_FROM, CONFIGURATION_1_OPERATIONS_1_TO, {
-  //     presence: 'none',
-  //     lightIntensity: 0.1
-  //   })
-  //     .then((decision) => {
-  //       expect(decision).to.be.ok;
-  //       expect(decision.output.lightbulbColor.predicted_value).to.be.equal('black');
-  //     });
-  // });
+  it('should fail when wrong timestamp is given', function() {
+    return client.computeAgentBoostingDecision(AGENT_NAME, -1, CONFIGURATION_1_OPERATIONS_1_TO, {
+      presence: 'none',
+      lightIntensity: 0.1
+    })
+      .catch((err) => expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError));
+  });
+
+  it('should succeed when using valid parameters', function() {
+    return client.computeAgentBoostingDecision(AGENT_NAME, CONFIGURATION_1_OPERATIONS_1_FROM, CONFIGURATION_1_OPERATIONS_1_TO, {
+      presence: 'none',
+      lightIntensity: 0.1,
+      lightbulbColor: 'black'
+    })
+      .then((decision) => {
+        expect(decision).to.be.ok;
+        expect(decision.predictedValue).to.be.equal('black');
+      });
+  });
 });

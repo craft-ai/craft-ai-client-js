@@ -663,13 +663,14 @@ export default function createClient(tokenOrCfg) {
 
       return request({
         method: 'POST',
-        path: `/agents/${agentName}/boosting/decide`,
+        path: `/agents/${agentName}/boosting/decision`,
         body: {
-          window: [fromTs, toTs],
+          timeWindow: [fromTs, toTs],
           context
         }
       })
         .then(({ body }) => {
+          console.log('Body', body);
           return body;
         });
     },
@@ -967,9 +968,9 @@ export default function createClient(tokenOrCfg) {
 
       return request({
         method: 'POST',
-        path: `/generators/${generatorName}/boosting/decide`,
+        path: `/generators/${generatorName}/boosting/decision`,
         body: {
-          window: [fromTs, toTs],
+          timeWindow: [fromTs, toTs],
           context
         }
       })
