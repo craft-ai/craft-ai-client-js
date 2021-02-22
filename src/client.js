@@ -669,10 +669,7 @@ export default function createClient(tokenOrCfg) {
           context
         }
       })
-        .then(({ body }) => {
-          console.log('Body', body);
-          return body;
-        });
+        .then(({ body }) => body);
     },
     // Generators methods
     createGenerator: function(configuration, generatorName) {
@@ -974,9 +971,7 @@ export default function createClient(tokenOrCfg) {
           context
         }
       })
-        .then(({ body }) => {
-          return body;
-        });
+        .then(({ body }) => body);
     }
   };
   return instance;

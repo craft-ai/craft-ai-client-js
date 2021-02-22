@@ -6,7 +6,7 @@ import craftai, { errors } from '../src';
 const CONFIGURATION_1_OPERATIONS_1_FROM = _.first(CONFIGURATION_1_OPERATIONS_1).timestamp;
 const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).timestamp;
 
-describe.only('client.computeGeneratorBoostingDecision(<generatorId>, <fromTs>, <toTs>, <context>)', function() {
+describe('client.computeGeneratorBoostingDecision(<generatorId>, <fromTs>, <toTs>, <context>)', function() {
   let client;
   const AGENT_NAME = `compute_gen_dec_${RUN_ID}`;
   const GENERATOR_NAME = `compute_gen_dec_gen_${RUN_ID}`;
