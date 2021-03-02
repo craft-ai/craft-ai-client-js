@@ -1,7 +1,7 @@
 import craftai from '../src';
 
 const craftToken = { token: process.env.CRAFT_TOKEN };
-const JOB_ID = process.env.TRAVIS_JOB_ID || 'local';
+const JOB_ID = process.env.JOB_ID || 'local';
 const client = craftai(craftToken);
 
 console.log('Clearning up dangling agents and generators from tests');

@@ -39,7 +39,7 @@
 
 1. Make sure the build of the master branch is passing.
 
-  [![Build](https://img.shields.io/travis/craft-ai/craft-ai-client-js/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-client-js)
+  [![Build](https://github.com/craft-ai/craft-ai-client-js/actions/workflows/build.yml/badge.svg)](https://github.com/craft-ai/craft-ai-client-js/actions/)
 
 2. Checkout the master branch locally.
 
@@ -78,4 +78,4 @@
   $ git push --tags
   ```
 
-  > This will trigger the publishing of this new version to [npm](https://www.npmjs.com/package/craft-ai) by [travis](https://travis-ci.org/craft-ai/craft-ai-client-js).
+  > This will trigger the publishing of this new version to [npm](https://www.npmjs.com/package/craft-ai) by [github actions](https://github.com/craft-ai/craft-ai-client-js/actions).
