@@ -7,15 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-client-js/compare/v1.20.1...HEAD) ##
 
+### Added ###
+
+- Add boosting decision functions
+
 ## [1.20.1](https://github.com/craft-ai/craft-ai-client-js/compare/v1.20.0...v1.20.1) - 2021-03-03 ##
 
 ### Fixed
 
 - Add some fix in test clean up.
-
-### Added ###
-
-- Add boosting decision functions
 
 ### Updated ###
 
