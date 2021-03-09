@@ -43,8 +43,7 @@ describe('client.computeGeneratorBoostingDecision(<generatorId>, <fromTs>, <toTs
   it('should fail when wrong timestamp is given', function() {
     return client.computeGeneratorBoostingDecision(GENERATOR_NAME, -1, CONFIGURATION_1_OPERATIONS_1_TO, {
       presence: 'none',
-      lightIntensity: 0.1,
-      lightbulbColor: 'black'
+      lightIntensity: 0.1
     })
       .catch((err) => expect(err).to.be.an.instanceof(errors.CraftAiBadRequestError));
   });
@@ -52,12 +51,11 @@ describe('client.computeGeneratorBoostingDecision(<generatorId>, <fromTs>, <toTs
   it('should succeed when using valid parameters', function() {
     return client.computeGeneratorBoostingDecision(GENERATOR_NAME, CONFIGURATION_1_OPERATIONS_1_FROM, CONFIGURATION_1_OPERATIONS_1_TO, {
       presence: 'none',
-      lightIntensity: 0.1,
-      lightbulbColor: 'black'
+      lightIntensity: 0.1
     })
       .then((decision) => {
         expect(decision).to.be.ok;
-        expect(decision.predictedValue).to.be.equal('black');
+        expect(decision.output.predicted_value).to.be.equal('black');
       });
   });
 });
