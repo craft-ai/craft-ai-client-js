@@ -8,6 +8,7 @@ const CONFIGURATION_1_OPERATIONS_1_TO = _.last(CONFIGURATION_1_OPERATIONS_1).tim
 describe('client.computeAgentBoostingDecision(<agentId>, <fromTs>, <toTs>, <context>)', function() {
   let client;
   const AGENT_NAME = `compute_gen_dec_${RUN_ID}`;
+
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;

@@ -13,6 +13,7 @@ describe('client.computeGeneratorBoostingDecision(<generatorId>, <fromTs>, <toTs
   const VALID_FILTER = [AGENT_NAME];
   const CONFIGURATION = JSON.parse(JSON.stringify(CONFIGURATION_1_GENERATOR));
   CONFIGURATION.filter = VALID_FILTER;
+
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
