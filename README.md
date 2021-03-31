@@ -1,6 +1,6 @@
 # **craft ai** isomorphic javascript client #
 
-[![Version](https://img.shields.io/npm/v/craft-ai.svg?style=flat-square)](https://npmjs.org/package/craft-ai) [![Build](https://github.com/craft-ai/craft-ai-client-js/workflows/test%20js%20client/badge.svg)](https://github.com/craft-ai/craft-ai-client-js/actions?query=workflow%3A%22test+js+client%22) [![License](https://img.shields.io/badge/license-BSD--3--Clause-42358A.svg?style=flat-square)](LICENSE) [![Dependencies](https://img.shields.io/david/craft-ai/craft-ai-client-js.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-client-js) [![Dev Dependencies](https://img.shields.io/david/dev/craft-ai/craft-ai-client-js.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-client-js#info=devDependencies)
+[![Version](https://img.shields.io/npm/v/craft-ai.svg?style=flat-square)](https://npmjs.org/package/craft-ai) [![Build](https://img.shields.io/travis/craft-ai/craft-ai-client-js/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-client-js) [![License](https://img.shields.io/badge/license-BSD--3--Clause-42358A.svg?style=flat-square)](LICENSE) [![Dependencies](https://img.shields.io/david/craft-ai/craft-ai-client-js.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-client-js) [![Dev Dependencies](https://img.shields.io/david/dev/craft-ai/craft-ai-client-js.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-client-js#info=devDependencies)
 
 [**craft ai**'s Explainable AI API](http://craft.ai) enables product & operational teams to quickly deploy and run explainable AIs. craft ai decodes your data streams to deliver self-learning services.
 
@@ -336,17 +336,9 @@ Each agent has a configuration defining:
 
 - the context schema, i.e. the list of property keys and their type (as defined in the following section),
 - the output properties, i.e. the list of property keys on which the agent makes decisions,
+- the model type, the possible values are `decision_tree` or `boosting`.
 
 > :warning: In the current version, only one output property can be provided.
-
-- the `time_quantum`, i.e. the minimum amount of time, in seconds, that is meaningful for an agent; context updates occurring faster than this quantum won't be taken into account. As a rule of thumb, you should always choose the largest value that seems right and reduce it, if necessary, after some tests.
-- the `learning_period`, i.e. the maximum amount of time, in seconds, that matters for an agent; the agent's decision model can ignore context that is older than this duration. You should generally choose the smallest value that fits this description.
-
-> :warning: if no time_quantum is specified, the default value is 600.
-
-> :warning: if no learning_period is specified, the default value is 15000 time quantums.
-
-> :warning: the maximum learning_period value is 55000 \* time_quantum.
 
 #### Context properties types
 
@@ -604,16 +596,26 @@ Retrieve the current time with a given UTC offset:
 const nowP5 = new craftai.Time(undefined, '+05:00');
 ```
 
-### Advanced configuration
+### Configuration parameters
 
-The following **advanced** configuration parameters can be set in specific cases. They are **optional**. Usually you would not need them.
+The following configuration parameters can be set in specific cases.
 
-- **`operations_as_events`** is a boolean, either `true` or `false`. The default value is `false`. If it is set to true, all context operations are treated as events, as opposed to context updates. This is appropriate if the data for an agent is made of events that have no duration, and if many events are more significant than a few. If `operations_as_events` is `true`, `learning_period` and the advanced parameter `tree_max_operations` must be set as well. In that case, `time_quantum` is ignored because events have no duration, as opposed to the evolution of an agent's context over time.
+#### Common parameters
+
+- **`time_quantum`**, i.e. the minimum amount of time, in seconds, that is meaningful for an agent; context updates occurring faster than this quantum won't be taken into account. As a rule of thumb, you should always choose the largest value that seems right and reduce it, if necessary, after some tests. Default value is 600. This parameter is ignored if `operations_as_events` is set to `true`.
+- **`operations_as_events`** is a boolean, either `true` or `false`. The default value is `false`. If you are not sure what to do, set it to `true`. If it is set to false, context operations are treated as state changes, and models are based on the resulting continuous state including between data points, using `time_quantum` as the sampling step. If it is set to true, context operations are treated as observations or events, and models are based on these data points directly, as in most machine learning libraries. If `operations_as_events` is `true`, `tree_max_operations` and generally `learning_period` must be set, and `time_quantum` is ignored because events have no duration.
 - **`tree_max_operations`** is a positive integer. It **can and must** be set only if `operations_as_events` is `true`. It defines the maximum number of events on which a single decision tree can be based. It is complementary to `learning_period`, which limits the maximum age of events on which a decision tree is based.
-- **`tree_max_depth`** is a positive integer. It defines the maximum depth of decision trees, which is the maximum distance between the root node and a leaf (terminal) node. A depth of 0 means that the tree is made of a single root node. By default, `tree_max_depth` is set to 6 if the output is categorical (e.g. `enum`), or to 4 if the output is numerical (e.g. `continuous`).
-- **`min_samples_per_leaf`** is a positive integer. It defines the minimum number of samples that must be in a leaf to allow a split that creates this leaf. It is complementary to `tree_max_depth` in preventing the tree from overgrowing, hence limiting overfitting. By default, `min_samples_per_leaf` is set to 4.
+- **`min_samples_per_leaf`** is a positive integer. It defines the minimum number of samples in a tree leaf. It is complementary to `tree_max_depth` in preventing the tree from overgrowing, hence limiting overfitting. By default, `min_samples_per_leaf` is set to 4.
+- **`tree_max_depth`** is a positive integer. It defines the maximum depth of decision trees, which is the maximum distance between the root node and a leaf (terminal) node. A depth of 0 means that the tree is made of a single root node. By default, `tree_max_depth` is set to 6 if the output is categorical (e.g. `enum`), or to 4 if the output is numerical (e.g. `continuous`) or if it's a boosting configuration.
 
-These advanced configuration parameters are optional, and will appear in the agent information returned by **craft ai** only if you set them to something other than their default value. If you intend to use them in a production environment, please get in touch with us.
+#### Decision tree parameters
+
+- **`learning_period`**, i.e. the maximum amount of time, in seconds, that matters for an agent; the agent's decision model can ignore context that is older than this duration. You should generally choose the smallest value that fits this description. Default value is 15000 time quantums and the maximum learning_period value is 55000 \* time_quantum.
+
+#### Boosting parameters
+
+- **`learning_rate`** is a positive float. It defines the step size shrinkage used between tree updates to prevent overfitting. Its value must be between `]0;1]`.
+- **`num_iterations`** is a positive integer. It describes the number of trees that would be created for the forest.
 
 ### Agent
 
@@ -803,9 +805,9 @@ const GENERATOR_CONFIGURATION = {
   "filter": GENERATOR_FILTER
 };
 
-client.createGenerator(GENERATOR_CONFIGURATION, GENERATOR_FILTER, GENERATOR_NAME)
+client.createGenerator(GENERATOR_CONFIGURATION, GENERATOR_NAME)
   .then(function(generator) {
-    console.log('Generator ' + generator.generatorId + ' successfully created!');
+    console.log('Generator ' + generator.id + ' successfully created!');
   })
   .catch(function(error) {
     console.error('Error!', error);
@@ -991,7 +993,7 @@ client.computeGeneratorDecision(
   CONTEXT_OPS // A valid context operation according to the generator configuration
 )
   .then(function(decision) => {
-    console.log(decision) // The decision made by the decision tree
+    console.log(decision); // The decision made by the decision tree
     /*
       {
       "_version": "2.0.0",
@@ -1221,6 +1223,94 @@ client.getAgentStateHistory(
 .catch(function(error) {
   // Catch errors here
 })
+```
+
+### Boosting
+
+Before using the boosting you need to know that there is some parameter that differ for the one used by default by the LightGBM.
+
+For the classification:
+
+- **`max_bin`** = 255. Max number of bins that feature values will be bucketed in (https://lightgbm.readthedocs.io/en/latest/Parameters.html#max_bin).
+
+For the regression:
+
+- **`metric`** = L2 (alias mse). Metric(s) to be evaluated on the evaluation set(s) (https://lightgbm.readthedocs.io/en/latest/Parameters.html#metric).
+- **`feature_fraction`** = 0.9. Randomly select a subset of features on each iteration (https://lightgbm.readthedocs.io/en/latest/Parameters.html#feature_fraction).
+- **`bagging_freq`** = 5. Perform bagging at every k iteration. Every k-th iteration, LightGBM will randomly select `bagging_fraction` * 100% of the data to use for the next k iterations (https://lightgbm.readthedocs.io/en/latest/Parameters.html#bagging_freq).
+- **`bagging_fraction`** = 0.8. It will randomly select part of data without resampling (https://lightgbm.readthedocs.io/en/latest/Parameters.html#bagging_fraction).
+- **`min_sum_hessian_in_leaf`** = 5.0. It's the minimal sum hessian in one leaf (https://lightgbm.readthedocs.io/en/latest/Parameters.html#min_sum_hessian_in_leaf).
+
+#### Get decision using boosting for agent
+
+```js
+const FROM_TIMESTAMP = 1469473600;
+const TO_TIMESTAMP = 1529473600;
+const CONTEXT_OPS = {
+  "tz": "+02:00",
+  "movement": 2,
+  "time": 7.5
+};
+
+client.computeAgentBoostingDecision(
+  'impervious_kraken', // The generator id
+  FROM_TIMESTAMP, //
+  TO_TIMESTAMP,
+  CONTEXT_OPS
+)
+  .then((decision) => {
+    console.log(decision); // The decision made by the boosting
+    /*
+      {
+      "context": {
+          "tz": "+02:00",
+          "movement": 2,
+          "time": 7.5
+      },
+      "output": {
+          "light": {
+              "predicted_value": "OFF"
+          }
+        }
+      }
+    */
+  })
+```
+
+#### Get decision using boosting for generator
+
+```js
+const FROM_TIMESTAMP = 1469473600;
+const TO_TIMESTAMP = 1529473600;
+const CONTEXT_OPS = {
+  "tz": "+02:00",
+  "movement": 2,
+  "time": 7.5
+};
+
+client.computeGeneratorBoostingDecision(
+  'impervious_kraken', // The generator id
+  FROM_TIMESTAMP, //
+  TO_TIMESTAMP,
+  CONTEXT_OPS
+)
+  .then((decision) => {
+    console.log(decision); // The decision made by the boosting
+    /*
+      {
+      "context": {
+          "tz": "+02:00",
+          "movement": 2,
+          "time": 7.5
+      },
+      "output": {
+          "light": {
+              "predicted_value": "OFF"
+          }
+        }
+      }
+    */
+  })
 ```
 
 ### Decision tree
@@ -1782,6 +1872,7 @@ A `decision` in a case where the tree cannot make a prediction:
 ### Make multiple decisions ###
 
 From the tree previously retrieved, ask for multiple decisions.
+The decideFromContextArray allows to pass craftai `Time` along with context, in this case generated features will be automatically generated.
 
 ```js
 // `tree` is the decision tree as retrieved through the craft ai REST API
@@ -1802,7 +1893,18 @@ const decisions = craftai.interpreter.decideFromContextsArray(tree, [
     timezone: '+02:00',
     peopleCount: 0,
     timeOfDay: 4.5
-  }
+  },
+  [
+    {
+      peopleCount: 0
+    },
+    new craftai.Time('2010-01-01T07:30:30Z')
+    // This is equivalent to {
+    //  timezone: 'UTC',
+    //  peopleCount: 0,
+    //  timeOfDay: 4.5
+    //}
+  ]
 ])
 ```
 
