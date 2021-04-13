@@ -36,6 +36,34 @@ describe('BULK:', function() {
     filter: [agentIds[0], agentIds[1]]
   };
 
+  const CONFIGURATION_BOOSTING_1_OPERATIONS_1_FROM = _.first(CONFIGURATION_BOOSTING_1_OPERATIONS_1).timestamp;
+  const CONFIGURATION_BOOSTING_1_OPERATIONS_1_TO = _.last(CONFIGURATION_BOOSTING_1_OPERATIONS_1).timestamp;
+  const REQUESTED_TIMEWINDOW = [CONFIGURATION_BOOSTING_1_OPERATIONS_1_FROM, CONFIGURATION_BOOSTING_1_OPERATIONS_1_TO];
+  const BOOSTING_CONTEXT = { presence: 'none', lightIntensity: 0.1 };
+  const CONFIGURATION_BOOSTING_1_GENERATOR = {
+    context: {
+      presence: {
+        type: 'enum'
+      },
+      lightIntensity: {
+        type: 'continuous'
+      },
+      lightbulbColor: {
+        type: 'enum'
+      }
+    },
+    output: [
+      'lightbulbColor'
+    ],
+    operations_as_events: true,
+    tree_max_operations: 55000,
+    min_samples_per_leaf: 4,
+    num_iterations: 100,
+    learning_rate: 0.1,
+    model_type: 'boosting',
+    filter: [agentIds[0]]
+  };
+
   before(function() {
     client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
@@ -453,11 +481,6 @@ describe('BULK:', function() {
   });
 
   //computeAgentBoostingDecisionBulk
-  const CONFIGURATION_BOOSTING_1_OPERATIONS_1_FROM = _.first(CONFIGURATION_BOOSTING_1_OPERATIONS_1).timestamp;
-  const CONFIGURATION_BOOSTING_1_OPERATIONS_1_TO = _.last(CONFIGURATION_BOOSTING_1_OPERATIONS_1).timestamp;
-  const REQUESTED_TIMEWINDOW = [CONFIGURATION_BOOSTING_1_OPERATIONS_1_FROM, CONFIGURATION_BOOSTING_1_OPERATIONS_1_TO];
-  const BOOSTING_CONTEXT = { presence: 'none', lightIntensity: 0.1 };
-
   it('computeAgentBoostingDecisionBulk: should work with two valid agents', function() {
     const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }];
     return client
@@ -505,23 +528,27 @@ describe('BULK:', function() {
         agentWrongIds.map(({ id }) => ({ entityName: id, timeWindow: REQUESTED_TIMEWINDOW, context: BOOSTING_CONTEXT }))
       ))
       .then((boostingDecisions) => {
-        boostingDecisions.map((decision, idx) => {
-          const { _version, entityName, context, timeWindow, output } = decision;
-          expect(entityName).to.be.equal(agentWrongIds[idx].id);
-          expect(timeWindow[0]).to.be.equal(REQUESTED_TIMEWINDOW[0]);
-          expect(timeWindow[1]).to.be.equal(REQUESTED_TIMEWINDOW[1]);
-          if (idx === 2) {
-            expect(decision.name).to.be.equal('NotFound');
-            expect(decision.status).to.be.equal(404);
-          }
-          else {
-            expect(_version).to.be.equal('1.0.0');
-            expect(output.predicted_value).to.be.equal('black');
-            const { presence, lightIntensity } = context;
-            expect(presence).to.be.equal(BOOSTING_CONTEXT.presence);
-            expect(lightIntensity).to.be.equal(BOOSTING_CONTEXT.lightIntensity);
-          }
-        });
+        expect(boostingDecisions[0].entityName).to.be.equal(agentWrongIds[0].id);
+        expect(boostingDecisions[0].timeWindow[0]).to.be.equal(REQUESTED_TIMEWINDOW[0]);
+        expect(boostingDecisions[0].timeWindow[1]).to.be.equal(REQUESTED_TIMEWINDOW[1]);
+        expect(boostingDecisions[0]._version).to.be.equal('1.0.0');
+        expect(boostingDecisions[0].output.predicted_value).to.be.equal('black');
+        expect(boostingDecisions[0].context.presence).to.be.equal(BOOSTING_CONTEXT.presence);
+        expect(boostingDecisions[0].context.lightIntensity).to.be.equal(BOOSTING_CONTEXT.lightIntensity);
+
+        expect(boostingDecisions[1].entityName).to.be.equal(agentWrongIds[1].id);
+        expect(boostingDecisions[1].timeWindow[0]).to.be.equal(REQUESTED_TIMEWINDOW[0]);
+        expect(boostingDecisions[1].timeWindow[1]).to.be.equal(REQUESTED_TIMEWINDOW[1]);
+        expect(boostingDecisions[1]._version).to.be.equal('1.0.0');
+        expect(boostingDecisions[1].output.predicted_value).to.be.equal('black');
+        expect(boostingDecisions[1].context.presence).to.be.equal(BOOSTING_CONTEXT.presence);
+        expect(boostingDecisions[1].context.lightIntensity).to.be.equal(BOOSTING_CONTEXT.lightIntensity);
+
+        expect(boostingDecisions[2].entityName).to.be.equal(agentWrongIds[2].id);
+        expect(boostingDecisions[2].timeWindow[0]).to.be.equal(REQUESTED_TIMEWINDOW[0]);
+        expect(boostingDecisions[2].timeWindow[1]).to.be.equal(REQUESTED_TIMEWINDOW[1]);
+        expect(boostingDecisions[2].name).to.be.equal('NotFound');
+        expect(boostingDecisions[2].status).to.be.equal(404);
       });
   });
 
@@ -789,30 +816,6 @@ describe('BULK:', function() {
       });
   });
 
-  const CONFIGURATION_BOOSTING_1_GENERATOR = {
-    context: {
-      presence: {
-        type: 'enum'
-      },
-      lightIntensity: {
-        type: 'continuous'
-      },
-      lightbulbColor: {
-        type: 'enum'
-      }
-    },
-    output: [
-      'lightbulbColor'
-    ],
-    operations_as_events: true,
-    tree_max_operations: 55000,
-    min_samples_per_leaf: 4,
-    num_iterations: 100,
-    learning_rate: 0.1,
-    model_type: 'boosting',
-    filter: [agentIds[0]]
-  };
-
   it('computeGeneratorBoostingDecisionBulk: should work with two valid generators', function() {
     const generatorIdsToTest = [{ id: generatorIds[0] }, { id: generatorIds[1] }];
     const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }];
@@ -868,27 +871,31 @@ describe('BULK:', function() {
         generatorWrongIds.map(({ id }) => ({ entityName: id, timeWindow: REQUESTED_TIMEWINDOW, context: BOOSTING_CONTEXT }))
       ))
       .then((boostingDecisions) => {
-        boostingDecisions.map((decision, idx) => {
-          const { _version, entityName, context, timeWindow, output } = decision;
-          expect(entityName).to.be.equal(generatorWrongIds[idx].id);
-          expect(timeWindow[0]).to.be.equal(REQUESTED_TIMEWINDOW[0]);
-          expect(timeWindow[1]).to.be.equal(REQUESTED_TIMEWINDOW[1]);
-          if (idx === 2) {
-            expect(decision.name).to.be.equal('NotFound');
-            expect(decision.status).to.be.equal(404);
-          }
-          else {
-            expect(_version).to.be.equal('1.0.0');
-            expect(output.predicted_value).to.be.equal('black');
-            const { presence, lightIntensity } = context;
-            expect(presence).to.be.equal(BOOSTING_CONTEXT.presence);
-            expect(lightIntensity).to.be.equal(BOOSTING_CONTEXT.lightIntensity);
-          }
-        });
+        expect(boostingDecisions[0].entityName).to.be.equal(generatorWrongIds[0].id);
+        expect(boostingDecisions[0].timeWindow[0]).to.be.equal(REQUESTED_TIMEWINDOW[0]);
+        expect(boostingDecisions[0].timeWindow[1]).to.be.equal(REQUESTED_TIMEWINDOW[1]);
+        expect(boostingDecisions[0]._version).to.be.equal('1.0.0');
+        expect(boostingDecisions[0].output.predicted_value).to.be.equal('black');
+        expect(boostingDecisions[0].context.presence).to.be.equal(BOOSTING_CONTEXT.presence);
+        expect(boostingDecisions[0].context.lightIntensity).to.be.equal(BOOSTING_CONTEXT.lightIntensity);
+
+        expect(boostingDecisions[1].entityName).to.be.equal(generatorWrongIds[1].id);
+        expect(boostingDecisions[1].timeWindow[0]).to.be.equal(REQUESTED_TIMEWINDOW[0]);
+        expect(boostingDecisions[1].timeWindow[1]).to.be.equal(REQUESTED_TIMEWINDOW[1]);
+        expect(boostingDecisions[1]._version).to.be.equal('1.0.0');
+        expect(boostingDecisions[1].output.predicted_value).to.be.equal('black');
+        expect(boostingDecisions[1].context.presence).to.be.equal(BOOSTING_CONTEXT.presence);
+        expect(boostingDecisions[1].context.lightIntensity).to.be.equal(BOOSTING_CONTEXT.lightIntensity);
+
+        expect(boostingDecisions[2].entityName).to.be.equal(generatorWrongIds[2].id);
+        expect(boostingDecisions[2].timeWindow[0]).to.be.equal(REQUESTED_TIMEWINDOW[0]);
+        expect(boostingDecisions[2].timeWindow[1]).to.be.equal(REQUESTED_TIMEWINDOW[1]);
+        expect(boostingDecisions[2].name).to.be.equal('NotFound');
+        expect(boostingDecisions[2].status).to.be.equal(404);
       });
   });
 
-  it.only('computeGeneratorBoostingDecisionBulk: should fail when empty array', function() {
+  it('computeGeneratorBoostingDecisionBulk: should fail when empty array', function() {
     const generatorIdsToTest = [{ id: generatorIds[0] }, { id: generatorIds[1] }];
 
     return client.computeGeneratorBoostingDecisionBulk(
