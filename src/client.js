@@ -671,6 +671,16 @@ export default function createClient(tokenOrCfg) {
       })
         .then(({ body }) => body);
     },
+    computeAgentBoostingDecisionBulk: function(agentsList) {
+      checkBulkParameters(agentsList);
+
+      return request({
+        method: 'POST',
+        path: '/bulk/boosting/decision',
+        body: agentsList
+      })
+        .then(({ body }) => body);
+    },
     // Generators methods
     createGenerator: function(configuration, generatorName) {
       if (isUnvalidConfiguration(configuration)) {
@@ -970,6 +980,16 @@ export default function createClient(tokenOrCfg) {
           timeWindow: [fromTs, toTs],
           context
         }
+      })
+        .then(({ body }) => body);
+    },
+    computeGeneratorBoostingDecisionBulk: function(generatorsList) {
+      checkBulkParameters(generatorsList);
+
+      return request({
+        method: 'POST',
+        path: '/bulk/generators/boosting/decision',
+        body: generatorsList
       })
         .then(({ body }) => body);
     }
