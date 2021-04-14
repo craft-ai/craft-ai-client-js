@@ -552,7 +552,7 @@ describe('BULK:', function() {
       });
   });
 
-  it('computeAgentBoostingDecisionBulk: should failt when empty array', function() {
+  it('computeAgentBoostingDecisionBulk: should fail when empty array', function() {
     const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[1] }];
     return client.computeAgentBoostingDecisionBulk(
       agentIdsToTest.map(({ id }) => ({ entityName: id, timeWindow: REQUESTED_TIMEWINDOW, context: BOOSTING_CONTEXT }))
