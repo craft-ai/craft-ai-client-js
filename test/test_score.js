@@ -16,7 +16,7 @@ describe('client.computeValidationScoreBulk([SCORE_REQUESTS])', function() {
   const STEP = Math.ceil((TEST_TO - TEST_FROM) / WINDOW_NUMBER);
 
   before(function() {
-    client = craftai('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvd25lciI6Inlhc3NpbmVzYWlkIiwicHJvamVjdCI6InZhbGlkYXRpb25TY29yZUpTIiwicmlnaHQiOiJ3cml0ZSIsInBsYXRmb3JtIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwIiwiaWF0IjoxNjIzMzk5NzQwLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJqdGkiOiIxNjA3MWM0Yi1hM2EwLTQzMTMtODQ4Yi05ZDUwYTMxNDNjOGEifQ.rWY3xiNCBYXkEANdXsWBf9GJfWLKcaUaEBbMQMJzTdQ');
+    client = craftai(CRAFT_CFG);
     expect(client).to.be.ok;
     return client.deleteAgent(AGENT_NAME)
       .then((res) => client.createAgent(CONFIGURATION_1, AGENT_NAME))
