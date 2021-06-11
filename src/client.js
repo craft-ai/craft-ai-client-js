@@ -992,6 +992,16 @@ export default function createClient(tokenOrCfg) {
         body: generatorsList
       })
         .then(({ body }) => body);
+    },
+    computeValidationScoreBulk: function(scoreRequests) {
+      checkBulkParameters(scoreRequests);
+
+      return request({
+        method: 'POST',
+        path: '/bulk/generators/score',
+        body: scoreRequests
+      })
+        .then(({ body }) => body);
     }
   };
   return instance;
