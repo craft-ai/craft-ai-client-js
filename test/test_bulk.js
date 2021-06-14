@@ -32,7 +32,8 @@ describe('BULK:', function() {
     time_quantum: 100,
     learning_period: 1500000,
     operations_as_events: true,
-    tree_max_operations: 10000,
+    max_training_samples: 10000,
+    model_type: 'decisionTree',
     filter: [agentIds[0], agentIds[1]]
   };
 
@@ -163,21 +164,14 @@ describe('BULK:', function() {
       });
   });
 
-  it('createAgentBulk: should handle invalid id', function() {
+  it('createAgentBulk: should fail when invalid id', function() {
     return client
       .createAgentBulk([
         { configuration: CONFIGURATION_1 },
         { id: 'francis?cabrel', configuration: CONFIGURATION_1 }
       ])
-      .then((agentsList) => {
-        const agent0 = agentsList[0];
-        return testAgentIntegrity(agent0, agent0.id, CONFIGURATION_1)
-          .then(() => {
-            const agent1 = agentsList[1];
-            expect(agent1.id).to.be.equal('francis?cabrel');
-            expect(agent1.status).to.be.equal(400);
-            expect(agent1.name).to.be.equal('AgentError');
-          });
+      .catch((err) => {
+        expect(err.name).to.be.equal('CraftAiBadRequestError');
       });
   });
 
@@ -323,8 +317,7 @@ describe('BULK:', function() {
     const agentIdsToTest = [{ id: agentIds[0] }];
     const agentWrongIds = [
       ...agentIdsToTest,
-      { id: 'john_doe_not_found' },
-      { id: 'john?doe' }
+      { id: 'john_doe_not_found' }
     ];
     return client
       .createAgentBulk(
@@ -342,9 +335,6 @@ describe('BULK:', function() {
         expect(result[1].id).to.be.equal(agentWrongIds[1].id);
         expect(result[1].status).to.be.equal(404);
         expect(result[1].name).to.be.equal('NotFound');
-        expect(result[2].id).to.be.equal(agentWrongIds[2].id);
-        expect(result[2].status).to.be.equal(400);
-        expect(result[2].name).to.be.equal('AgentError');
       });
   });
 
@@ -411,20 +401,9 @@ describe('BULK:', function() {
       }))))
       .then(() => client.getAgentDecisionTreeBulk(agentWrongIds
         .map(({ id }) => ({ id, timestamp: TS0 }))))
-      .then((agentTrees) => {
-        agentTrees.map((agent, idx) => {
-          expect(agent.id).to.be.equal(agentWrongIds[idx].id);
-          expect(agent.timestamp).to.be.equal(TS0);
-        });
-        agentIdsToTest.map((agent, idx) => {
-          expect(agentTrees[idx]).to.be.ok;
-          const { _version, configuration, trees } = agentTrees[idx].tree;
-          expect(trees).to.be.ok;
-          expect(_version).to.be.equal('1.1.0');
-          expect(configuration).to.be.deep.equal(CONFIGURATION_1);
-        });
-        expect(agentTrees[2].status).to.be.equal(400);
-        expect(agentTrees[2].name).to.be.equal('AgentError');
+      .catch((err) => {
+        expect(err.message).to.be.contains('- [AgentError] No agent id given at index 2 in the request body.');
+        expect(err.name).to.be.equal('CraftAiBadRequestError');
       });
   });
 
@@ -466,17 +445,8 @@ describe('BULK:', function() {
       }]))
       .then(() => client.getAgentDecisionTreeBulk(timestamps
         .map((timestamp) => ({ id: agentIds[0], timestamp }))))
-      .then((agentTrees) => {
-        agentTrees.map((agent, idx) => {
-          expect(agent.id).to.be.equal(agentIds[0]);
-          expect(agent.timestamp).to.be.equal(timestamps[idx]);
-        });
-        const { _version, configuration, trees } = agentTrees[0].tree;
-        expect(trees).to.be.ok;
-        expect(_version).to.be.equal('1.1.0');
-        expect(configuration).to.be.deep.equal(CONFIGURATION_1);
-        expect(agentTrees[1].status).to.be.equal(400);
-        expect(agentTrees[1].name).to.be.equal('ContextError');
+      .catch((err) => {
+        expect(err.name).to.be.equal('CraftAiBadRequestError');
       });
   });
 
@@ -623,7 +593,6 @@ describe('BULK:', function() {
       ])
       .then((generators) => {
         expect(generators[0].id).to.be.equal(generatorIds[0]);
-        expect(generators[0].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
         expect(generators[1].status).to.be.equal(400);
         expect(generators[1].name).to.be.equal('GeneratorError');
       });
@@ -633,11 +602,10 @@ describe('BULK:', function() {
     return client
       .createGeneratorBulk([
         { id: generatorIds[0], configuration: CONFIGURATION_1_GENERATOR },
-        { id: generatorIds[0], configuration: CONFIGURATION_1 }
+        { id: generatorIds[0], configuration: CONFIGURATION_1_GENERATOR }
       ])
       .then((generators) => {
         expect(generators[0].id).to.be.equal(generatorIds[0]);
-        expect(generators[0].configuration).to.be.deep.equal(CONFIGURATION_1_GENERATOR);
         expect(generators[1].status).to.be.equal(400);
         expect(generators[1].name).to.be.equal('ContextError');
       });
