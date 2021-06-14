@@ -40,5 +40,6 @@
     "c4"
   ],
   "time_quantum": 10,
-  "learning_period": 3600
+  "learning_period": 3600,
+  "model_type": "decisionTree"
 }
