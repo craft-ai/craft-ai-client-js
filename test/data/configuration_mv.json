@@ -14,5 +14,6 @@
       "lightbulbColor"
     ],
     "time_quantum": 100,
+    "model_type": "decisionTree",
     "learning_period": 1500000
   }
