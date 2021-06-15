@@ -993,12 +993,22 @@ export default function createClient(tokenOrCfg) {
       })
         .then(({ body }) => body);
     },
-    computeValidationScoreBulk: function(scoreRequests) {
+    computeSlidingWindowScoresBulk: function(scoreRequests) {
       checkBulkParameters(scoreRequests);
 
       return request({
         method: 'POST',
-        path: '/bulk/generators/score',
+        path: '/bulk/generators/score/sliding',
+        body: scoreRequests
+      })
+        .then(({ body }) => body);
+    },
+    computeSingleWindowScoreBulk: function(scoreRequests) {
+      checkBulkParameters(scoreRequests);
+
+      return request({
+        method: 'POST',
+        path: '/bulk/generators/score/single',
         body: scoreRequests
       })
         .then(({ body }) => body);
