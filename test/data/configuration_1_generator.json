@@ -16,6 +16,7 @@
   "time_quantum": 100,
   "learning_period": 1500000,
   "operations_as_events": true,
-  "tree_max_operations": 10000,
+  "max_training_samples": 10000,
+  "model_type": "decisionTree",
   "filter": ["agent_1", "agent_2"]
 }
