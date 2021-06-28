@@ -993,7 +993,7 @@ export default function createClient(tokenOrCfg) {
       })
         .then(({ body }) => body);
     },
-    computeSlidingWindowScoresBulk: function(scoreRequests) {
+    getSlidingWindowScoresBulk: function(scoreRequests) {
       checkBulkParameters(scoreRequests);
 
       return request({
@@ -1003,7 +1003,7 @@ export default function createClient(tokenOrCfg) {
       })
         .then(({ body }) => body);
     },
-    computeSingleWindowScoreBulk: function(scoreRequests) {
+    getSingleWindowScoreBulk: function(scoreRequests) {
       checkBulkParameters(scoreRequests);
 
       return request({
