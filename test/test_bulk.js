@@ -385,7 +385,7 @@ describe('BULK:', function() {
       .then(() => client.getAgentDecisionTreeBulk(agentWrongIds
         .map(({ id }) => ({ id, timestamp: TS0 }))))
       .catch((err) => {
-        expect(err.message).to.be.contains('No agent id or invalid agent id given at index 2 in the request body.');
+        expect(err.message).to.be.contains('No agent id given at index 2 in the request body.');
         expect(err.name).to.be.equal('CraftAiBadRequestError');
       });
   });
