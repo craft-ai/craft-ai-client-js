@@ -992,6 +992,26 @@ export default function createClient(tokenOrCfg) {
         body: generatorsList
       })
         .then(({ body }) => body);
+    },
+    getSlidingWindowScoresBulk: function(scoreRequests) {
+      checkBulkParameters(scoreRequests);
+
+      return request({
+        method: 'POST',
+        path: '/bulk/generators/score/sliding',
+        body: scoreRequests
+      })
+        .then(({ body }) => body);
+    },
+    getSingleWindowScoreBulk: function(scoreRequests) {
+      checkBulkParameters(scoreRequests);
+
+      return request({
+        method: 'POST',
+        path: '/bulk/generators/score/single',
+        body: scoreRequests
+      })
+        .then(({ body }) => body);
     }
   };
   return instance;
