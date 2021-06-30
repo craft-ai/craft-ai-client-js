@@ -232,13 +232,9 @@ describe('BULK:', function() {
     const agentIds = [{ id: '7$ shopping' }, {}, { id: undefined }];
     return client.deleteAgentBulk(agentIds)
       .then((deletions) => Promise.all(deletions))
-      .then((del_res) => {
-        expect(del_res[0].status).to.be.equal(400);
-        expect(del_res[0].name).to.be.equal('AgentError');
-        expect(del_res[1].status).to.be.equal(400);
-        expect(del_res[1].name).to.be.equal('AgentError');
-        expect(del_res[2].status).to.be.equal(400);
-        expect(del_res[2].name).to.be.equal('AgentError');
+      .catch((err) => {
+        expect(err.message).to.be.contains('[AgentError] No agent id or invalid agent id given at index 0 in the request body.');
+        expect(err.name).to.be.equal('CraftAiBadRequestError');
       });
   });
 
@@ -375,7 +371,7 @@ describe('BULK:', function() {
       });
   });
 
-  it('getAgentDecisionTreeBulk: should handle unvalid agents ids', function() {
+  it('getAgentDecisionTreeBulk: should handle invalid agents ids', function() {
     const agentIdsToTest = [{ id: agentIds[0] }, { id: agentIds[2] }];
     const agentWrongIds = [...agentIdsToTest, { id: 'w3!rD_[D' }];
     return client
@@ -389,7 +385,7 @@ describe('BULK:', function() {
       .then(() => client.getAgentDecisionTreeBulk(agentWrongIds
         .map(({ id }) => ({ id, timestamp: TS0 }))))
       .catch((err) => {
-        expect(err.message).to.be.contains('No agent id given at index 2 in the request body.');
+        expect(err.message).to.be.contains('No agent id or invalid agent id given at index 2 in the request body.');
         expect(err.name).to.be.equal('CraftAiBadRequestError');
       });
   });
