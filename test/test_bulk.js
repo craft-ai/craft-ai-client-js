@@ -135,15 +135,8 @@ describe('BULK:', function() {
         { id: agentIds[0], configuration: CONFIGURATION_1 },
         { id: agentIds[1], configuration: INVALID_CONFIGURATION_1 }
       ])
-      .then((agentsList) => {
-        const badAgent = agentsList[0].status ? agentsList[0] : agentsList[1];
-        const correctAgent = agentsList[0].status ? agentsList[1] : agentsList[0];
-
-        return testAgentIntegrity(correctAgent, agentIds[0], CONFIGURATION_1)
-          .then(() => {
-            expect(badAgent.status).to.be.equal(400);
-            expect(badAgent.name).to.be.equal('ContextError');
-          });
+      .catch((err) => {
+        expect(err.name).to.be.equal('CraftAiBadRequestError');
       });
   });
 
@@ -153,14 +146,8 @@ describe('BULK:', function() {
         { id: agentIds[0], configuration: CONFIGURATION_1 },
         { id: agentIds[1], configuration: undefined }
       ])
-      .then((agentsList) => {
-        const agent0 = agentsList[0];
-        return testAgentIntegrity(agent0, agentIds[0], CONFIGURATION_1)
-          .then(() => {
-            const agent1 = agentsList[1];
-            expect(agent1.status).to.be.equal(400);
-            expect(agent1.name).to.be.equal('ContextError');
-          });
+      .catch((err) => {
+        expect(err.name).to.be.equal('CraftAiBadRequestError');
       });
   });
 
@@ -402,7 +389,7 @@ describe('BULK:', function() {
       .then(() => client.getAgentDecisionTreeBulk(agentWrongIds
         .map(({ id }) => ({ id, timestamp: TS0 }))))
       .catch((err) => {
-        expect(err.message).to.be.contains('- [AgentError] No agent id given at index 2 in the request body.');
+        expect(err.message).to.be.contains('No agent id given at index 2 in the request body.');
         expect(err.name).to.be.equal('CraftAiBadRequestError');
       });
   });
@@ -591,10 +578,8 @@ describe('BULK:', function() {
         { id: generatorIds[0], configuration: CONFIGURATION_1_GENERATOR },
         { configuration: CONFIGURATION_1_GENERATOR }
       ])
-      .then((generators) => {
-        expect(generators[0].id).to.be.equal(generatorIds[0]);
-        expect(generators[1].status).to.be.equal(400);
-        expect(generators[1].name).to.be.equal('GeneratorError');
+      .catch((err) => {
+        expect(err.name).to.be.equal('CraftAiBadRequestError');
       });
   });
 
